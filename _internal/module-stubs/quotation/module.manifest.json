@@ -1,0 +1,10 @@
+{
+  "sku": "quotation",
+  "packageName": "@arcforge/module-quotation",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform",
+    "customers"
+  ],
+  "mfe": "mfe-quotations"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@arcforge/dev-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Express local API — implementation in api/src/dev-server.ts until extracted",
+  "scripts": {
+    "dev": "npm run dev:express --prefix ../../api"
+  }
+}

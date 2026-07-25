@@ -1,0 +1,9 @@
+{
+  "sku": "customers",
+  "packageName": "@arcforge/module-customers",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform"
+  ],
+  "mfe": "mfe-customers"
+}

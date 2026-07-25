@@ -1,0 +1,11 @@
+{
+  "name": "@arcforge/module-pdf-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ArcForge module: pdf-worker",
+  "scripts": {
+    "build": "echo \"TODO: module build\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "echo \"TODO\""
+  }
+}

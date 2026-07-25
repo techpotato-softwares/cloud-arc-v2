@@ -1,0 +1,6 @@
+packages:
+  - 'api'
+  - 'api/modules/*'
+  - 'cdk'
+  - 'apps/**'
+  - 'packages/*'

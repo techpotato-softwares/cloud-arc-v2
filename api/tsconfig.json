@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "rootDir": "./",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@arcforge/shared": ["./layers/shared/nodejs/src"],
+      "@arcforge/shared/*": ["./layers/shared/nodejs/src/*"],
+      "@arcforge/shared": ["./layers/shared/nodejs/src"],
+      "@arcforge/shared/*": ["./layers/shared/nodejs/src/*"],
+      "/opt/nodejs/dist": ["./layers/shared/nodejs/src"],
+      "/opt/nodejs/dist/*": ["./layers/shared/nodejs/src/*"]
+    }
+  },
+  "include": ["src/**/*", "scripts/**/*", "modules/**/*"],
+  "exclude": ["node_modules", "dist", "layers"]
+}

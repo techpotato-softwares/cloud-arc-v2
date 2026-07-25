@@ -1,0 +1,36 @@
+name: ArcForge Node CI
+
+on:
+  push:
+    paths:
+      - 'api/**'
+      - 'cdk/**'
+      - '.github/workflows/node-ci.yml'
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'cdk/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install
+        run: npm ci || npm install
+      - name: Lint
+        run: npm run lint || true
+      - name: Test
+        run: npm test
+        env:
+          IS_LOCAL: 'true'
+          DB_USERNAME: postgres
+          DB_PASSWORD: secret
+          DB_HOST: localhost
+          DB_NAME: arcforge

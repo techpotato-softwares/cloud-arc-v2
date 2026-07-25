@@ -1,0 +1,74 @@
+{
+  "version": "2.0.0",
+  "runtime": "python",
+  "generatedAt": "2026-07-23T00:00:00Z",
+  "lambdas": {
+    "auth": {
+      "handler": "modules.platform.handlers.auth.handler",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/login"
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/refresh"
+        }
+      ]
+    },
+    "demo": {
+      "handler": "modules.demo.handlers.demo.handler",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/demo/items"
+        },
+        {
+          "method": "POST",
+          "path": "/api/demo/items"
+        },
+        {
+          "method": "GET",
+          "path": "/api/demo/items/{id}"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/demo/items/{id}"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/demo/items/{id}"
+        }
+      ]
+    },
+    "ai": {
+      "handler": "modules.ai.handlers.ai.handler",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/ai/chat"
+        }
+      ]
+    }
+  },
+  "modules": {
+    "platform": {
+      "sku": "platform",
+      "lambdas": [
+        "auth"
+      ]
+    },
+    "demo": {
+      "sku": "demo",
+      "lambdas": [
+        "demo"
+      ]
+    },
+    "ai": {
+      "sku": "ai",
+      "lambdas": [
+        "ai"
+      ]
+    }
+  }
+}

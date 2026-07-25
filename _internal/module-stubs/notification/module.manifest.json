@@ -1,0 +1,8 @@
+{
+  "sku": "notification",
+  "packageName": "@arcforge/module-notification",
+  "compute": "lambda-sqs",
+  "requiredModules": [
+    "platform"
+  ]
+}

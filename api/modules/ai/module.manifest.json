@@ -1,0 +1,5 @@
+{
+  "sku": "ai",
+  "version": "1.0.0",
+  "lambdas": ["ai"]
+}

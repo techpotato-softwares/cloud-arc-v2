@@ -1,0 +1,8 @@
+# ArcForge — update GitHub team handles for your org before first PR merge
+
+* @arcforge/maintainers
+
+/docs/ @arcforge/maintainers
+/api/ @arcforge/maintainers
+/python/ @arcforge/maintainers
+/cdk/ @arcforge/maintainers

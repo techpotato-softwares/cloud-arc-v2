@@ -1,0 +1,8 @@
+{
+  "sku": "whatsapp",
+  "packageName": "@arcforge/module-whatsapp",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform"
+  ]
+}

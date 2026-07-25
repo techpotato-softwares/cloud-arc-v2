@@ -1,0 +1,10 @@
+{
+  "sku": "enquiry",
+  "packageName": "@arcforge/module-enquiry",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform",
+    "customers"
+  ],
+  "mfe": "mfe-pipeline"
+}

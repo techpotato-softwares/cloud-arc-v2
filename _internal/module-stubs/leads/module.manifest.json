@@ -1,0 +1,9 @@
+{
+  "sku": "leads",
+  "packageName": "@arcforge/module-leads",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform"
+  ],
+  "mfe": "mfe-leads"
+}

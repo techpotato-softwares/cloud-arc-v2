@@ -1,0 +1,9 @@
+{
+  "sku": "gst",
+  "packageName": "@arcforge/module-gst",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform",
+    "invoicing"
+  ]
+}

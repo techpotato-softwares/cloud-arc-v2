@@ -1,0 +1,9 @@
+{
+  "sku": "platform",
+  "packageName": "@arcforge/module-platform",
+  "compute": "lambda",
+  "required": true,
+  "requiredModules": [],
+  "mfe": "mfe-settings",
+  "lambdas": ["auth", "user", "role", "permission"]
+}

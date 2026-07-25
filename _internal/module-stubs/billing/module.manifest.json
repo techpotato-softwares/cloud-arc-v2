@@ -1,0 +1,8 @@
+{
+  "sku": "billing",
+  "packageName": "@arcforge/module-billing",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform"
+  ]
+}

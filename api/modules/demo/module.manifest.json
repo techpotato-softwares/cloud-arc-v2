@@ -1,0 +1,5 @@
+{
+  "sku": "demo",
+  "version": "1.0.0",
+  "lambdas": ["demo"]
+}

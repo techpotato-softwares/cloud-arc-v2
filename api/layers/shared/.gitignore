@@ -1,0 +1,6 @@
+# Dependencies
+node_modules/
+nodejs/node_modules/
+
+# Prisma generated client (regenerated on build)
+nodejs/node_modules/.prisma/

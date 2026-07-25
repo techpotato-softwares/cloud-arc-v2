@@ -1,0 +1,25 @@
+name: ArcForge Python CI
+
+on:
+  push:
+    paths: ["python/**", ".github/workflows/python-ci.yml"]
+  pull_request:
+    paths: ["python/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Test
+        run: pytest
+        env:
+          IS_LOCAL: "true"

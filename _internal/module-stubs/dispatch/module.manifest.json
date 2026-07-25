@@ -1,0 +1,11 @@
+{
+  "sku": "dispatch",
+  "packageName": "@arcforge/module-dispatch",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform",
+    "sales-order",
+    "inventory"
+  ],
+  "mfe": "mfe-dispatch"
+}

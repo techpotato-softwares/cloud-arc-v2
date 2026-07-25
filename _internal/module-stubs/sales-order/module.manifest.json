@@ -1,0 +1,11 @@
+{
+  "sku": "sales-order",
+  "packageName": "@arcforge/module-sales-order",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform",
+    "customers",
+    "quotation"
+  ],
+  "mfe": "mfe-sales"
+}

@@ -1,0 +1,10 @@
+{
+  "sku": "purchase",
+  "packageName": "@arcforge/module-purchase",
+  "compute": "lambda",
+  "requiredModules": [
+    "platform",
+    "inventory"
+  ],
+  "mfe": "mfe-purchase"
+}

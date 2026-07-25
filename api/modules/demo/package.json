@@ -1,0 +1,10 @@
+{
+  "name": "@arcforge/module-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ArcForge demo CRUD module — buyer tutorial sample",
+  "scripts": {
+    "build": "npm run build --prefix ../..",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}
