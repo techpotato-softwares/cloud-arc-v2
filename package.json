@@ -2,24 +2,9 @@
   "name": "arcforge",
   "version": "1.0.0",
   "private": true,
-  "description": "ArcForge — dual-language AWS serverless CloudArc kits (Node + Python)",
-  "packageManager": "pnpm@9.15.0",
-  "engines": {
-    "node": ">=20.0.0"
-  },
+  "description": "ArcForge vendor hub — kits: node-cloud-arc/, python-cloud-arc/",
   "scripts": {
-    "dev:api": "npm run dev:express --prefix api",
-    "dev:python": "cd python && uvicorn src.dev_server:app --reload --port 4001",
-    "dev": "docker compose up -d && pnpm dev:api",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
-    "test:python": "cd python && pytest",
     "pack:node": "bash scripts/pack-node.sh",
     "pack:python": "bash scripts/pack-python.sh"
-  },
-  "devDependencies": {
-    "turbo": "^2.3.0"
   }
 }

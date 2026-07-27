@@ -1,8 +1,0 @@
-{
-  "sku": "mobile-api",
-  "packageName": "@arcforge/module-mobile-api",
-  "compute": "ecs",
-  "requiredModules": [
-    "platform"
-  ]
-}

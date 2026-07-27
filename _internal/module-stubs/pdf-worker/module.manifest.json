@@ -1,8 +1,0 @@
-{
-  "sku": "pdf-worker",
-  "packageName": "@arcforge/module-pdf-worker",
-  "compute": "lambda-container",
-  "requiredModules": [
-    "platform"
-  ]
-}

@@ -1,49 +1,15 @@
-# Dependencies
-node_modules/
-.pnpm-store/
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.python-version
+# ArcForge vendor repo
 
-# Build
-dist/
-cdk.out/
-*.tsbuildinfo
-api/layers/shared/nodejs/bundled/
-api/layers/shared/bundled/
-python/layers/shared/python/bundled/
-*.egg-info/
-.eggs/
-build/
-
-# Env & secrets
+node-cloud-arc/
+python-cloud-arc/
+releases/
+.DS_Store
 .env
 .env.*
-!.env.example
-cdk/env.local.json
-**/secrets.json
-
-# IDE / OS
-.DS_Store
-.idea/
-.vscode/
-*.swp
-
-# Test / coverage
-coverage/
-.pytest_cache/
-.mypy_cache/
-htmlcov/
-
-# Logs
-*.log
-npm-debug.log*
-
-# Packs
-releases/
+node_modules/
+**/node_modules/
+**/.venv/
+**/__pycache__/
+**/dist/
+**/cdk.out/
 *.zip
-
-# Prisma
-**/prisma/*.db

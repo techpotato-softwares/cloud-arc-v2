@@ -1,8 +1,0 @@
-{
-  "sku": "audit",
-  "packageName": "@arcforge/module-audit",
-  "compute": "lambda-sqs",
-  "requiredModules": [
-    "platform"
-  ]
-}

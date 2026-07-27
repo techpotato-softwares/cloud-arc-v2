@@ -1,9 +1,0 @@
-{
-  "sku": "inventory",
-  "packageName": "@arcforge/module-inventory",
-  "compute": "lambda",
-  "requiredModules": [
-    "platform"
-  ],
-  "mfe": "mfe-inventory"
-}

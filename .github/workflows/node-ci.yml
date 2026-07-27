@@ -1,33 +1,22 @@
-name: ArcForge Node CI
-
+name: Node CloudArc CI
 on:
   push:
-    paths:
-      - 'api/**'
-      - 'cdk/**'
-      - '.github/workflows/node-ci.yml'
+    paths: ['node-cloud-arc/**']
   pull_request:
-    paths:
-      - 'api/**'
-      - 'cdk/**'
-
+    paths: ['node-cloud-arc/**']
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: api
+        working-directory: node-cloud-arc/api
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install
-        run: npm ci || npm install
-      - name: Lint
-        run: npm run lint || true
-      - name: Test
-        run: npm test
+      - run: npm ci || npm install
+      - run: npm test
         env:
           IS_LOCAL: 'true'
           DB_USERNAME: postgres

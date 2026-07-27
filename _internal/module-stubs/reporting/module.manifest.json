@@ -1,9 +1,0 @@
-{
-  "sku": "reporting",
-  "packageName": "@arcforge/module-reporting",
-  "compute": "lambda",
-  "requiredModules": [
-    "platform"
-  ],
-  "mfe": "mfe-reports"
-}
