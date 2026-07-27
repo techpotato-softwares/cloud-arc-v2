@@ -1,0 +1,83 @@
+{
+  "name": "@arcforge/cdk",
+  "version": "1.0.0",
+  "description": "CDK Infrastructure for ArcForge CloudArc API",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    
+    "======== BUILD COMMANDS ========": "",
+    "build:api": "cd ../api && npm run build:all",
+    "build:ui": "cd ../ui && npm run build",
+    "build:all": "npm run build:api && npm run build:ui",
+    
+    "======== PRE-DEPLOY HOOKS ========": "",
+    "presynth": "npm run build:api",
+    "presynth:full": "npm run build:all",
+    
+    "======== SYNTH COMMANDS ========": "",
+    "synth:dev": "cdk synth ApiStack-dev",
+    "synth:qa": "cdk synth ApiStack-qa",
+    "synth:prod": "cdk synth ApiStack-prod",
+    "clean": "rimraf cdk.out",
+    
+    "======== LOCAL DEV (SAM) ========": "",
+    "sam:start": "sam local start-api -p 4000 -t cdk.out/ApiStack-dev.template.json --env-vars env.local.json --warm-containers EAGER --skip-pull-image",
+    "sam:start:port": "node scripts/sam-start.js",
+    "dev": "npm run synth:dev && npm run sam:start",
+    "dev:port": "npm run synth:dev && npm run sam:start:port",
+    "dev:watch": "npm run synth:dev && node scripts/sam-start-watch.js",
+    "dev:all": "npm run synth:dev && concurrently -n \"API,SAM\" -c \"cyan,magenta\" \"cd ../api && npm run watch\" \"node scripts/sam-start-watch.js\"",
+    "dev:fresh": "npm run clean && npm run dev",
+    "dev:debug": "npm run synth:dev && sam local start-api -p 4000 -t cdk.out/ApiStack-dev.template.json --env-vars env.local.json --warm-containers EAGER --skip-pull-image --debug",
+    "dev:quick": "cdk synth ApiStack-dev && npm run sam:start",
+    
+    "======== OPTIMIZED LOCAL DEV ========": "",
+    "dev:fast": "node scripts/dev-fast.js",
+    "dev:fast:init": "node scripts/dev-fast.js --init",
+    "dev:hot": "node scripts/dev-hot.js",
+    
+    "======== EXPRESS DEV (NO DOCKER) ========": "",
+    "dev:express": "cd ../api && npm run dev:express",
+    "dev:express:watch": "cd ../api && npm run dev:express:watch",
+    
+    "======== INVOKE COMMANDS ========": "",
+    "invoke:po": "npm run synth:dev && sam local invoke poFunction -t cdk.out/ApiStack-dev.template.json --env-vars env.local.json --skip-pull-image",
+    "invoke:po:event": "npm run synth:dev && sam local invoke poFunction -t cdk.out/ApiStack-dev.template.json --env-vars env.local.json -e events/po-create.json",
+    
+    "======== DEPLOY API ONLY ========": "",
+    "deploy:api:dev": "npm run build:api && cdk deploy ApiStack-dev --require-approval never",
+    "deploy:api:qa": "npm run build:api && cdk deploy ApiStack-qa --require-approval never",
+    "deploy:api:prod": "npm run build:api && cdk deploy ApiStack-prod",
+    
+    "======== DEPLOY FULL (API + UI) ========": "",
+    "deploy:dev": "npm run build:all && cdk deploy ApiStack-dev --require-approval never",
+    "deploy:qa": "npm run build:all && cdk deploy ApiStack-qa --require-approval never",
+    "deploy:prod": "npm run build:all && cdk deploy ApiStack-prod",
+    
+    "======== DIFF & DESTROY ========": "",
+    "diff:dev": "cdk diff ApiStack-dev",
+    "diff:qa": "cdk diff ApiStack-qa",
+    "diff:prod": "cdk diff ApiStack-prod",
+    "destroy:dev": "cdk destroy ApiStack-dev",
+    "destroy:qa": "cdk destroy ApiStack-qa",
+    
+    "======== CDK UTILITIES ========": "",
+    "bootstrap": "cdk bootstrap",
+    "cdk": "cdk"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.115.0",
+    "constructs": "^10.3.0",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2",
+    "aws-cdk": "^2.115.0",
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.19.8",
+    "prettier": "^3.1.0",
+    "rimraf": "^5.0.5"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "python-cloud-arc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ArcForge Python CloudArc — copy this folder to start a Python serverless backend",
+  "scripts": {
+    "dev": "docker compose up -d && npm run dev:api",
+    "dev:api": "cd api && uvicorn src.dev_server:app --reload --port 4001",
+    "install:api": "cd api && python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'",
+    "install:cdk": "cd cdk && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+    "build:layer": "cd api && python layers/shared/python/scripts/build_layer.py",
+    "test": "cd api && pytest",
+    "synth:dev": "npm run build:layer && cd cdk && ./scripts/deploy.sh dev synth",
+    "deploy:dev": "npm run build:layer && cd cdk && ./scripts/deploy.sh dev deploy"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

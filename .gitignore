@@ -1,11 +1,11 @@
 # ArcForge vendor repo
+# Kits (node-cloud-arc/, python-cloud-arc/) are tracked source — do not ignore them.
 
-node-cloud-arc/
-python-cloud-arc/
 releases/
 .DS_Store
 .env
 .env.*
+!**/.env.example
 node_modules/
 **/node_modules/
 **/.venv/

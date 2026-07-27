@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "runtime": "python",
+  "generatedAt": "2026-07-27T00:00:00Z",
+  "lambdas": {
+    "auth": {
+      "handler": "modules.platform.lambdas.auth.handler",
+      "controller": "AuthController",
+      "routes": [
+        { "method": "POST", "path": "/api/login", "controller": "AuthController", "action": "login" },
+        { "method": "POST", "path": "/api/auth/refresh", "controller": "AuthController", "action": "refresh" }
+      ]
+    },
+    "demo": {
+      "handler": "modules.demo.lambdas.demo.handler",
+      "controller": "DemoItemController",
+      "routes": [
+        { "method": "GET", "path": "/api/demo/items", "controller": "DemoItemController", "action": "list" },
+        { "method": "POST", "path": "/api/demo/items", "controller": "DemoItemController", "action": "create" },
+        { "method": "GET", "path": "/api/demo/items/{id}", "controller": "DemoItemController", "action": "get" },
+        { "method": "PUT", "path": "/api/demo/items/{id}", "controller": "DemoItemController", "action": "update" },
+        { "method": "DELETE", "path": "/api/demo/items/{id}", "controller": "DemoItemController", "action": "remove" }
+      ]
+    },
+    "ai": {
+      "handler": "modules.ai.lambdas.ai.handler",
+      "controller": "AiController",
+      "routes": [
+        { "method": "POST", "path": "/api/ai/chat", "controller": "AiController", "action": "chat" }
+      ]
+    }
+  },
+  "modules": {
+    "platform": { "sku": "platform", "lambdas": ["auth"] },
+    "demo": { "sku": "demo", "lambdas": ["demo"] },
+    "ai": { "sku": "ai", "lambdas": ["ai"] }
+  }
+}
