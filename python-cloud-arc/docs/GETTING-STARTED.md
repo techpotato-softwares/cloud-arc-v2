@@ -11,8 +11,9 @@ Copy the **`python-cloud-arc`** folder, then:
 7. [ ] `uvicorn src.dev_server:app --reload --port 4001`
 8. [ ] Login + demo CRUD + `POST /api/ai/chat`
 9. [ ] `python layers/shared/python/scripts/build_layer.py`
-10. [ ] `cd ../cdk && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && cdk deploy ApiStack-dev`
-11. [ ] Set `AI_PROVIDER` + keys only via env / Secrets Manager in prod
-12. [ ] Read [SECURITY.md](SECURITY.md) and [LAYER-PARITY.md](LAYER-PARITY.md)
+10. [ ] `python scripts/generate_manifest.py && python scripts/generate_openapi.py`
+11. [ ] `cd ../cdk && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && cdk deploy ApiStack-dev`
+12. [ ] Set `AI_PROVIDER` + keys only via env / Secrets Manager in prod
+13. [ ] Read [SECURITY.md](SECURITY.md) and [LAYER-PARITY.md](LAYER-PARITY.md)
 
 Full architecture: [ARCHITECTURE.md](ARCHITECTURE.md)

@@ -51,7 +51,7 @@ def _parse_lambda(raw: dict[str, Any]) -> LambdaManifestEntry:
 def read_manifest() -> AppManifest:
     if not MANIFEST_PATH.exists():
         print(f"⚠️  Warning: app-manifest.json not found at {MANIFEST_PATH}")
-        print("   Ensure api/app-manifest.json exists (hand-maintained in the Python kit).")
+        print('   Run "python scripts/generate_manifest.py" in the api folder first.')
         print("   Using default empty manifest.\n")
         return AppManifest(
             version="1.0",

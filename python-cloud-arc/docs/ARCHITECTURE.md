@@ -51,6 +51,14 @@ See [LAYER-PARITY.md](LAYER-PARITY.md).
 
 CDK under each kit’s `cdk/` reads `api/app-manifest.json` to wire API Gateway routes to handlers.
 
+- Node kit: `npm run build:manifest` (scans `@Controller` metadata)
+- Python kit: `python scripts/generate_manifest.py` (same idea)
+
+OpenAPI is generated from request schemas on build:
+
+- Node: Zod + `npm run build:openapi` → `api/openapi/`
+- Python: Pydantic `@ApiBody` + `python scripts/generate_openapi.py` → `api/openapi/`
+
 - Node kit: TypeScript CDK (`node-cloud-arc/cdk`)
 - Python kit: **Python CDK** (`python-cloud-arc/cdk`, `aws-cdk-lib`)
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Any, Callable
+import inspect
+from typing import Any
 from utils.logger import logger
 
 class LambdaRegistry:
@@ -7,8 +8,24 @@ class LambdaRegistry:
         self._defs: dict[str, dict[str, Any]] = {}
         self._containers: dict[str, dict[str, Any]] = {}
 
-    def define(self, name: str, controllers: list[type], bindings: list[dict] | None = None):
-        self._defs[name] = {"controllers": controllers, "bindings": bindings or []}
+    def define(
+        self,
+        name: str,
+        controllers: list[type],
+        bindings: list[dict] | None = None,
+        handler: str | None = None,
+    ):
+        self._defs[name] = {
+            "controllers": controllers,
+            "bindings": bindings or [],
+            "handler": handler,
+        }
+
+    def get_handler(self, name: str) -> str | None:
+        definition = self._defs.get(name)
+        if not definition:
+            return None
+        return definition.get("handler")
 
     def get_container(self, name: str) -> dict[str, Any]:
         if name in self._containers:
@@ -27,4 +44,9 @@ class LambdaRegistry:
 lambda_registry = LambdaRegistry()
 
 def define_lambda(*, name: str, controllers: list[type], bindings: list | None = None):
-    lambda_registry.define(name, controllers, bindings)
+    caller = inspect.currentframe()
+    module_name = ""
+    if caller and caller.f_back:
+        module_name = caller.f_back.f_globals.get("__name__", "") or ""
+    handler = f"{module_name}.handler" if module_name else None
+    lambda_registry.define(name, controllers, bindings, handler=handler)

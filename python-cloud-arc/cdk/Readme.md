@@ -51,6 +51,7 @@ Or: `./scripts/deploy.sh dev`
 
 Lambdas: `arcforge-py-{auth|demo|ai}-{env}`  
 Layer: `arcforge-py-shared-layer-{env}`  
-Handlers from [`../api/app-manifest.json`](../api/app-manifest.json).
+Handlers from generated [`../api/app-manifest.json`](../api/app-manifest.json)
+(`python scripts/generate_manifest.py` in `api/`). OpenAPI: `python scripts/generate_openapi.py`.
 
 > The CDK **CLI** still needs Node; the **infra code** is pure Python.

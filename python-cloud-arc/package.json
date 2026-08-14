@@ -9,9 +9,12 @@
     "install:api": "cd api && python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'",
     "install:cdk": "cd cdk && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
     "build:layer": "cd api && python layers/shared/python/scripts/build_layer.py",
+    "build:manifest": "cd api && python scripts/generate_manifest.py",
+    "build:openapi": "cd api && python scripts/generate_openapi.py",
+    "build:all": "npm run build:layer && npm run build:manifest && npm run build:openapi",
     "test": "cd api && pytest",
-    "synth:dev": "npm run build:layer && cd cdk && ./scripts/deploy.sh dev synth",
-    "deploy:dev": "npm run build:layer && cd cdk && ./scripts/deploy.sh dev deploy"
+    "synth:dev": "npm run build:all && cd cdk && ./scripts/deploy.sh dev synth",
+    "deploy:dev": "npm run build:all && cd cdk && ./scripts/deploy.sh dev deploy"
   },
   "engines": {
     "node": ">=20.0.0"

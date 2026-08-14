@@ -22,7 +22,10 @@ Keep this green before each release.
 | Layer build script | `layers/shared/python/scripts/build_layer.py` | OK |
 | `@RequirePermission` / `@RequireModule` | `auth_decorators.py` | OK |
 | Express `src/dev-server.ts` | FastAPI `src/dev_server.py` | OK |
-| `app-manifest.json` | `app-manifest.json` | OK |
+| `scripts/merge-manifest.ts` + `build:manifest` | `scripts/generate_manifest.py` | OK |
+| `scripts/generate-openapi.ts` + `build:openapi` | `scripts/generate_openapi.py` | OK |
+| `openapi/openapi.json` | `openapi/openapi.json` | OK |
+| `app-manifest.json` | `app-manifest.json` (generated) | OK |
 | `modules/*/lambdas/*.lambda.ts` | `modules/*/lambdas/*.py` | OK |
 | `cdk/` TypeScript CDK | `cdk/` **Python CDK** (`aws-cdk-lib`) | OK |
 

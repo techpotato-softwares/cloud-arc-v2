@@ -2,6 +2,8 @@ from __future__ import annotations
 import os
 from decorators import Controller, Post
 from decorators.auth_decorators import RequirePermission, RequireModule
+from core.openapi import ApiBody
+from modules.ai.src.schemas.ai import ChatRequest
 from middleware.error_handler import create_success_response
 
 class AIProvider:
@@ -39,6 +41,7 @@ class AiController:
     @Post("/chat")
     @RequireModule("ai")
     @RequirePermission("ai:chat", "admin")
+    @ApiBody(ChatRequest)
     def chat(self, data: dict, user=None):
         message = (data or {}).get("message") or ""
         result = get_provider().chat(message)

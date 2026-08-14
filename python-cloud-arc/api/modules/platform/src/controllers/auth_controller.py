@@ -3,6 +3,8 @@ from passlib.hash import bcrypt
 from sqlmodel import select
 from decorators import Controller, Post
 from decorators.auth_decorators import ApiPublic
+from core.openapi import ApiBody
+from modules.platform.src.schemas.auth import LoginRequest, RefreshRequest
 from database import get_session
 from database.models import User, Role, RolePermission, Permission, Tenant
 from utils.webtoken import generate_tokens
@@ -12,6 +14,7 @@ from middleware.error_handler import AppError, ValidationError, create_success_r
 class AuthController:
     @Post("/login")
     @ApiPublic()
+    @ApiBody(LoginRequest)
     def login(self, data: dict):
         username = (data or {}).get("username")
         password = (data or {}).get("password")
@@ -65,6 +68,7 @@ class AuthController:
 
     @Post("/auth/refresh")
     @ApiPublic()
+    @ApiBody(RefreshRequest)
     def refresh(self, data: dict):
         from utils.webtoken import verify_refresh_token
         token = (data or {}).get("refreshToken")

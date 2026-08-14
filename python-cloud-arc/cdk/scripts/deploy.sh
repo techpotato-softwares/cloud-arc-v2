@@ -8,6 +8,10 @@ API="$(cd "$ROOT/../api" && pwd)"
 echo "==> Building Python Lambda layer"
 python3 "$API/layers/shared/python/scripts/build_layer.py"
 
+echo "==> Generating app-manifest.json + OpenAPI"
+python3 "$API/scripts/generate_manifest.py"
+python3 "$API/scripts/generate_openapi.py"
+
 cd "$ROOT"
 if [[ ! -d .venv ]]; then
   python3 -m venv .venv

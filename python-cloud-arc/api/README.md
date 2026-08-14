@@ -20,7 +20,18 @@ uvicorn src.dev_server:app --reload --port 4001
 - **Shared layer** `layers/shared/python` — decorators, router, SQLModel, JWT, middleware
 - **Modules** `modules/platform`, `modules/demo`, `modules/ai` (entrypoints in `lambdas/`)
 - **Scheduled** `src/lambdas/` — e.g. RDS start/stop scheduler
-- **CDK** `../cdk` — Python CDK (`aws-cdk-lib`) wires API Gateway + Lambda from `app-manifest.json`
+- **CDK** `../cdk` — Python CDK (`aws-cdk-lib`) wires API Gateway + Lambda from generated `app-manifest.json`
+
+## Build artifacts
+
+```bash
+python scripts/generate_manifest.py   # api/app-manifest.json from @Controller routes
+python scripts/generate_openapi.py    # api/openapi/openapi.{json,yaml} from Pydantic + routes
+```
+
+Or from the kit root: `npm run build:manifest` / `npm run build:openapi` / `npm run build:all`.
+
+New controllers or routes are picked up automatically when you re-run those scripts (import via `modules/*/lambdas/*.py`). Attach request schemas with `@ApiBody(MyModel)` so they appear in OpenAPI.
 
 
 ## Auth

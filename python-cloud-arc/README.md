@@ -77,6 +77,8 @@ Python CDK (`aws-cdk-lib`) — same stack/construct architecture as the Node kit
 ```bash
 cd api
 python layers/shared/python/scripts/build_layer.py
+python scripts/generate_manifest.py
+python scripts/generate_openapi.py
 cd ../cdk
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt

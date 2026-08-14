@@ -2,6 +2,8 @@ from __future__ import annotations
 from sqlmodel import select
 from decorators import Controller, Get, Post, Put, Delete
 from decorators.auth_decorators import RequirePermission, RequireModule
+from core.openapi import ApiBody
+from modules.demo.src.schemas.demo import CreateDemoItemRequest, UpdateDemoItemRequest
 from database import get_session
 from database.models import DemoItem
 from middleware.error_handler import NotFoundError, create_success_response
@@ -11,6 +13,7 @@ class DemoItemController:
     @Post("/")
     @RequireModule("demo")
     @RequirePermission("demo:write", "admin")
+    @ApiBody(CreateDemoItemRequest)
     def create(self, data: dict, user=None):
         with get_session() as session:
             item = DemoItem(
@@ -50,6 +53,7 @@ class DemoItemController:
     @Put("/{id}")
     @RequireModule("demo")
     @RequirePermission("demo:write", "admin")
+    @ApiBody(UpdateDemoItemRequest)
     def update(self, id: str, data: dict, user=None):
         with get_session() as session:
             item = session.get(DemoItem, int(id))
