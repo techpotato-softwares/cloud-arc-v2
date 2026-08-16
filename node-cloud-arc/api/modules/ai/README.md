@@ -2,9 +2,13 @@
 
 | | |
 |---|---|
-| **SKU** | `ai-service` |
-| **Compute** | ecs |
-| **Requires** | platform, leads |
-| **MFE** | n/a |
+| **SKU** | `ai` |
+| **Compute** | Lambda (`ai`) |
+| **Requires** | platform |
+| **CSR** | `AiController` → `AiService` (providers behind the service) |
 
-Stub — Phase 1+ implementation.
+`POST /api/ai/chat` with `@RequireModule('ai')` and `@RequirePermission('ai:chat', 'admin')`.
+
+Set `AI_PROVIDER=stub|openai|bedrock` plus provider credentials in env / Secrets Manager — never in code.
+
+Pattern: [docs/CSR-AND-DI.md](../../../docs/CSR-AND-DI.md).

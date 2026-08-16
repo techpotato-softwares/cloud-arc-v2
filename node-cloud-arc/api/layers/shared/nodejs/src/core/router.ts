@@ -25,6 +25,7 @@ interface MatchedRoute {
 const PUBLIC_ROUTES: Array<{ method: HttpMethod; path: string }> = [
   { method: 'POST', path: '/api/login' },
   { method: 'POST', path: '/api/auth/refresh' },
+  { method: 'GET', path: '/health' },
 ];
 
 function assertPermissions(user: JWTPayload | undefined, required?: string[]): void {
@@ -38,7 +39,7 @@ function assertPermissions(user: JWTPayload | undefined, required?: string[]): v
 
 function assertModule(user: JWTPayload | undefined, sku?: string): void {
   if (!sku) return;
-  const enabled = user?.modulesEnabled || ['platform', 'demo'];
+  const enabled = user?.modulesEnabled || ['platform', 'demo', 'ai', 'files'];
   if (!enabled.includes(sku)) {
     throw new ForbiddenError(`Module '${sku}' is not enabled for this tenant`);
   }

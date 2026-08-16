@@ -38,6 +38,13 @@ export const MODULE_CATALOG: ModuleCatalogEntry[] = [
     compute: 'lambda',
     requiredModules: ['platform'],
   },
+  {
+    sku: 'files',
+    packageName: '@arcforge/module-files',
+    path: 'modules/files',
+    compute: 'lambda',
+    requiredModules: ['platform'],
+  },
 ];
 
 export function getModuleBySku(sku: string): ModuleCatalogEntry | undefined {

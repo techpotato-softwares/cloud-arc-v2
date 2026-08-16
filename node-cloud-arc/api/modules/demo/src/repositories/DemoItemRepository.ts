@@ -6,7 +6,11 @@ import { NotFoundError } from '@arcforge/shared';
 
 export interface IDemoItemRepository {
   create(data: CreateDemoItemRequest & { tenantId?: number; createdById?: number }): Promise<DemoItem>;
-  findAll(tenantId?: number): Promise<DemoItem[]>;
+  findAll(
+    tenantId?: number,
+    page?: number,
+    limit?: number
+  ): Promise<{ rows: DemoItem[]; count: number }>;
   findById(id: number): Promise<DemoItem | null>;
   update(id: number, data: UpdateDemoItemRequest & { updatedById?: number }): Promise<DemoItem>;
   delete(id: number): Promise<void>;
@@ -29,11 +33,18 @@ export class DemoItemRepository implements IDemoItemRepository {
     });
   }
 
-  findAll(tenantId?: number) {
-    return this.prisma.demoItem.findMany({
-      where: tenantId != null ? { tenantId } : undefined,
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(tenantId?: number, page = 1, limit = 20) {
+    const where = tenantId != null ? { tenantId } : undefined;
+    const [rows, count] = await this.prisma.$transaction([
+      this.prisma.demoItem.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.demoItem.count({ where }),
+    ]);
+    return { rows, count };
   }
 
   findById(id: number) {

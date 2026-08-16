@@ -23,3 +23,4 @@ jobs:
           DB_PASSWORD: secret
           DB_HOST: localhost
           DB_NAME: arcforge
+      - run: npx eslint src/ modules/ --ext .ts

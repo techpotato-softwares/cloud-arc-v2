@@ -40,6 +40,7 @@
 ## Messaging
 
 - “Same CloudArc in TypeScript or Python — buy only what you need.”
+- Same **CSR + DI** in both kits (Controller → Service → Repository). Python spelling: `Inject(TYPES.X)` vs Node `@inject(TYPES.X)`.
 - Lead with **RBAC + modules + CDK + dual language**, not “another CRUD boilerplate.”
 - Be honest about deferred WAF/Cognito (builds trust).
 

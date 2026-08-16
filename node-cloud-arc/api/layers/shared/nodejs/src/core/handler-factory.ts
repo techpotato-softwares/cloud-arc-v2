@@ -170,9 +170,14 @@ export function createLambdaHandler(lambdaName: string): LambdaHandler {
       return handleOptions();
     }
 
+    const rid =
+      event.headers?.['X-Request-Id'] ||
+      event.headers?.['x-request-id'] ||
+      context.awsRequestId;
+
     // Set logging context
     logger.setContext({
-      requestId: context.awsRequestId,
+      requestId: String(rid),
       functionName: context.functionName,
       lambdaName,
     });
@@ -190,6 +195,7 @@ export function createLambdaHandler(lambdaName: string): LambdaHandler {
 
       // Route the request
       const response = await router.handleRequest(event, context);
+      response.headers = { ...response.headers, 'X-Request-Id': String(rid) };
 
       const duration = Date.now() - startTime;
       logger.info('Request completed', {
@@ -201,7 +207,9 @@ export function createLambdaHandler(lambdaName: string): LambdaHandler {
     } catch (error) {
       const duration = Date.now() - startTime;
       logger.error('Unhandled error in handler', { error, duration: `${duration}ms` });
-      return createErrorResponse(error as Error);
+      const errRes = createErrorResponse(error as Error);
+      errRes.headers = { ...errRes.headers, 'X-Request-Id': String(rid) };
+      return errRes;
     } finally {
       logger.clearContext();
     }

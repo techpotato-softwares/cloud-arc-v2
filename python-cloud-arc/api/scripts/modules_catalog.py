@@ -25,4 +25,11 @@ MODULE_CATALOG: list[dict[str, Any]] = [
         "compute": "lambda",
         "requiredModules": ["platform"],
     },
+    {
+        "sku": "files",
+        "packageName": "arcforge-module-files",
+        "path": "modules/files",
+        "compute": "lambda",
+        "requiredModules": ["platform"],
+    },
 ]

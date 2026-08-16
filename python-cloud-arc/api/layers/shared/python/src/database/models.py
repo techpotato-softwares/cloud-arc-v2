@@ -9,7 +9,7 @@ class Tenant(SQLModel, table=True):
     name: str
     slug: str = Field(unique=True, index=True)
     # JSON-encoded list, e.g. '["platform","demo","ai"]'
-    modules_enabled: str = Field(default='["platform","demo","ai"]')
+    modules_enabled: str = Field(default='["platform","demo","ai","files"]')
     is_active: bool = True
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

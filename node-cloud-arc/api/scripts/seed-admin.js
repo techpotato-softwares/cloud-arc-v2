@@ -50,6 +50,8 @@ const PERMISSIONS = [
   { code: "ai:chat", name: "AI Chat", description: "Use AI chat endpoint" },
   { code: "role:write", name: "Role Write", description: "Manage roles" },
   { code: "permission:write", name: "Permission Write", description: "Manage permissions" },
+  { code: "files:read", name: "Files Read", description: "Download files" },
+  { code: "files:write", name: "Files Write", description: "Upload files" },
 ];
 
 // ─── Menu Definition ──────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   Param,
+  Query,
   Body,
   CurrentUser,
   ApiBody,
@@ -51,9 +52,17 @@ export class DemoItemController {
   @RequireModule('demo')
   @RequirePermission('demo:read', 'admin')
   @ApiTags('Demo')
-  async list(@CurrentUser() user?: JWTPayload): Promise<APIGatewayProxyResult> {
-    const items = await this.service.list(user?.tenantId);
-    return createSuccessResponse(items);
+  async list(
+    @CurrentUser() user?: JWTPayload,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ): Promise<APIGatewayProxyResult> {
+    const result = await this.service.list(
+      user?.tenantId,
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 20
+    );
+    return createSuccessResponse(result);
   }
 
   @Get('/{id}')

@@ -1,11 +1,14 @@
 from __future__ import annotations
+
 from typing import Any, Callable
+
 from core.service_registry import lambda_registry
 from core.router import create_router
 from middleware.error_handler import create_error_response
 from utils.logger import logger
 
 _states: dict[str, dict[str, Any]] = {}
+
 
 def create_lambda_handler(lambda_name: str) -> Callable:
     def handler(event, context=None):
@@ -19,4 +22,10 @@ def create_lambda_handler(lambda_name: str) -> Callable:
         except Exception as e:
             logger.error("Unhandled handler error", {"error": str(e)})
             return create_error_response(e)
+
     return handler
+
+
+def reset_handler_state(lambda_name: str) -> None:
+    _states.pop(lambda_name, None)
+    lambda_registry.reset_container(lambda_name)

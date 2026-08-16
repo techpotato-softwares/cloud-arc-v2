@@ -14,7 +14,7 @@ python-cloud-arc/
 ├── docs/                  ← architecture, security, getting started
 ├── api/                   ← Lambda host, shared layer, modules
 │   ├── layers/shared/python/
-│   ├── modules/{platform,demo,ai}/lambdas/
+│   ├── modules/{platform,demo,ai,files}/   ← CSR: controllers / services / repositories
 │   ├── src/dev_server.py  ← FastAPI local API on :4001
 │   ├── app-manifest.json  ← CDK wires routes from this
 │   └── .env.example
@@ -38,8 +38,10 @@ python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 
-# 4. Create tables
+# 4. Create tables + admin
 python -c "import os,sys; os.environ['IS_LOCAL']='true'; sys.path.insert(0,'layers/shared/python/src'); from database import init_db; import database.models; init_db()"
+python scripts/seed_admin.py
+# or: alembic upgrade head && python scripts/seed_admin.py
 
 # 5. Run local API
 uvicorn src.dev_server:app --reload --port 4001
@@ -57,10 +59,11 @@ npm run dev
 
 1. [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md)
 2. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-3. [docs/API-CONTRACT.md](docs/API-CONTRACT.md)
-4. [docs/SECURITY.md](docs/SECURITY.md)
-5. [docs/LAYER-PARITY.md](docs/LAYER-PARITY.md)
-6. [docs/ROADMAP-AI.md](docs/ROADMAP-AI.md)
+3. [docs/CSR-AND-DI.md](docs/CSR-AND-DI.md) — Controller → Service → Repository (same as Node)
+4. [docs/API-CONTRACT.md](docs/API-CONTRACT.md)
+5. [docs/SECURITY.md](docs/SECURITY.md)
+6. [docs/LAYER-PARITY.md](docs/LAYER-PARITY.md)
+7. [docs/ROADMAP-AI.md](docs/ROADMAP-AI.md)
 
 Also: [api/README.md](api/README.md) · [docs/PRICING.md](docs/PRICING.md) · [LICENSE](LICENSE) · [api/CHANGELOG.md](api/CHANGELOG.md)
 

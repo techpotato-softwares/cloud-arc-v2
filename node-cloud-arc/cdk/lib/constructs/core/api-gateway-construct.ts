@@ -15,7 +15,7 @@ export interface ApiGatewayConstructProps {
 const CORS_RESPONSE_HEADERS: { [key: string]: string } = {
   "Access-Control-Allow-Origin": "'*'",
   "Access-Control-Allow-Headers":
-    "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+    "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Request-Id'",
   "Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE,OPTIONS'",
 };
 
@@ -46,6 +46,7 @@ export class ApiGatewayConstruct extends Construct {
           "X-Amz-Date",
           "X-Api-Key",
           "X-Amz-Security-Token",
+          "X-Request-Id",
         ],
         maxAge: Duration.days(1),
       },

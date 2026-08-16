@@ -14,7 +14,7 @@ node-cloud-arc/
 ├── docs/                  ← architecture, security, getting started
 ├── api/                   ← Lambda host, shared layer, modules
 │   ├── layers/shared/nodejs/
-│   ├── modules/{platform,demo,ai}/
+│   ├── modules/{platform,demo,ai,files}/
 │   ├── src/dev-server.ts  ← local API on :4000
 │   └── .env.example
 └── cdk/                   ← AWS CDK (API Gateway, Lambda, etc.)
@@ -56,8 +56,9 @@ npm run dev
 
 1. [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md)
 2. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-3. [docs/API-CONTRACT.md](docs/API-CONTRACT.md)
-4. [docs/SECURITY.md](docs/SECURITY.md)
+3. [docs/CSR-AND-DI.md](docs/CSR-AND-DI.md) — Controller → Service → Repository
+4. [docs/API-CONTRACT.md](docs/API-CONTRACT.md)
+5. [docs/SECURITY.md](docs/SECURITY.md)
 
 Also: [api/README.md](api/README.md) · [docs/PRICING.md](docs/PRICING.md) · [LICENSE](LICENSE)
 

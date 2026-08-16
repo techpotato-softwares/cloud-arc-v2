@@ -16,4 +16,7 @@ pnpm --filter @arcforge/module-platform build
 # CDK: deploy only platform lambdas via enabledModules context
 ```
 
-Other modules declare `"requiredModules": ["platform"]` in `module.manifest.json`.
+Login, refresh, and `GET /health` stay public. Users/roles/permissions are JWT-gated.
+
+Pattern: [docs/CSR-AND-DI.md](../../../docs/CSR-AND-DI.md).
+

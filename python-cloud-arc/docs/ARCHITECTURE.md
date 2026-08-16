@@ -23,10 +23,10 @@ flowchart TB
 1. API Gateway invokes a per-module Lambda.
 2. Shared layer **handler factory** cold-starts DI/container once, caches router.
 3. **Router** matches method/path from decorator registry.
-4. Public routes skip JWT (`/api/login`, `/api/auth/refresh`).
+4. Public routes skip JWT (`/api/login`, `/api/auth/refresh`, `GET /health`).
 5. Authenticated routes: Bearer JWT → `@RequirePermission` → `@RequireModule`.
-6. Controller → Service → Repository (CSR).
-7. JSON envelope `{ success, data | error }`.
+6. Controller → Service → Repository (CSR) via DI (`@inject` / `Inject(TYPES.…)`).
+7. JSON envelope `{ success, data | error }`. `X-Request-Id` on every response.
 
 ## Shared layer modules
 
@@ -35,17 +35,20 @@ flowchart TB
 | Config | `layers/shared/nodejs/src/config` | `layers/shared/python/src/config` |
 | DB | Prisma | SQLModel / SQLAlchemy |
 | Decorators | reflect-metadata | registry decorators |
+| DI | Inversify (`defineLambda` + `TYPES`) | `core/di.py` (`define_lambda` + `TYPES` + `Inject`) |
+| CSR | `controllers/` `services/` `repositories/` | same folders per module |
 | Router / handler factory | `core/` | `core/` |
 | Auth / errors | `middleware/` | `middleware/` |
 | JWT / secrets / S3 / logger | `utils/` | `utils/` |
 
-See [LAYER-PARITY.md](LAYER-PARITY.md).
+See [LAYER-PARITY.md](LAYER-PARITY.md) and the Python CSR/DI guide: [CSR-AND-DI.md](CSR-AND-DI.md).
 
 ## Modules
 
-- **platform** (required) — auth, users, roles, permissions
-- **demo** — tutorial CRUD `/api/demo/items`
-- **ai** — chat stub / providers
+- **platform** (required) — auth, users, roles, permissions, `GET /health`
+- **demo** — tutorial CRUD `/api/demo/items` (paginated list)
+- **ai** — chat stub / providers (Controller → Service)
+- **files** — S3 presign upload/download
 
 ## Deploy
 

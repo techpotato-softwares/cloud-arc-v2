@@ -1,10 +1,10 @@
 {
   "version": "2.0",
-  "generatedAt": "2026-05-20T19:59:26.345Z",
+  "generatedAt": "2026-08-16T07:56:03.045Z",
   "lambdas": {
     "auth": {
       "handler": "dist/handlers/auth.handler",
-      "controller": "AuthController",
+      "controller": "AuthController, HealthController",
       "routes": [
         {
           "method": "POST",
@@ -17,6 +17,12 @@
           "path": "/api/auth/refresh",
           "controller": "AuthController",
           "action": "refresh"
+        },
+        {
+          "method": "GET",
+          "path": "/health",
+          "controller": "HealthController",
+          "action": "health"
         }
       ]
     },
@@ -128,411 +134,69 @@
         }
       ]
     },
-    "CreatePO": {
-      "handler": "dist/handlers/CreatePO.handler",
-      "controller": "POController, SummaryController",
+    "demo": {
+      "handler": "dist/handlers/demo.handler",
+      "controller": "DemoItemController",
       "routes": [
         {
           "method": "POST",
-          "path": "/api/po",
-          "controller": "POController",
+          "path": "/api/demo/items",
+          "controller": "DemoItemController",
           "action": "create"
         },
         {
-          "method": "POST",
-          "path": "/api/po/import-csv",
-          "controller": "POController",
-          "action": "importCsv"
+          "method": "GET",
+          "path": "/api/demo/items",
+          "controller": "DemoItemController",
+          "action": "list"
         },
         {
           "method": "GET",
-          "path": "/api/po",
-          "controller": "POController",
-          "action": "getAll"
-        },
-        {
-          "method": "GET",
-          "path": "/api/po/{id}",
-          "controller": "POController",
-          "action": "getById"
+          "path": "/api/demo/items/{id}",
+          "controller": "DemoItemController",
+          "action": "get"
         },
         {
           "method": "PUT",
-          "path": "/api/po/{id}",
-          "controller": "POController",
+          "path": "/api/demo/items/{id}",
+          "controller": "DemoItemController",
           "action": "update"
         },
         {
           "method": "DELETE",
-          "path": "/api/po/{id}",
-          "controller": "POController",
-          "action": "delete"
-        },
-        {
-          "method": "GET",
-          "path": "/api/po/summary",
-          "controller": "SummaryController",
-          "action": "getList"
-        },
-        {
-          "method": "GET",
-          "path": "/api/po/summary/stats",
-          "controller": "SummaryController",
-          "action": "getStats"
-        },
-        {
-          "method": "GET",
-          "path": "/api/po/summary/export",
-          "controller": "SummaryController",
-          "action": "getExport"
-        },
-        {
-          "method": "GET",
-          "path": "/api/po/summary/report",
-          "controller": "SummaryController",
-          "action": "getReports"
+          "path": "/api/demo/items/{id}",
+          "controller": "DemoItemController",
+          "action": "remove"
         }
       ]
     },
-    "productManagement": {
-      "handler": "dist/handlers/productManagement.handler",
-      "controller": "CategoryController, OEMController, ProductController, ClientController",
+    "ai": {
+      "handler": "dist/handlers/ai.handler",
+      "controller": "AiController",
       "routes": [
         {
           "method": "POST",
-          "path": "/api/category",
-          "controller": "CategoryController",
-          "action": "create"
-        },
-        {
-          "method": "GET",
-          "path": "/api/category",
-          "controller": "CategoryController",
-          "action": "getAll"
-        },
-        {
-          "method": "GET",
-          "path": "/api/category/{id}",
-          "controller": "CategoryController",
-          "action": "getById"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/category/{id}",
-          "controller": "CategoryController",
-          "action": "update"
-        },
-        {
-          "method": "DELETE",
-          "path": "/api/category/{id}",
-          "controller": "CategoryController",
-          "action": "delete"
-        },
-        {
-          "method": "POST",
-          "path": "/api/oem",
-          "controller": "OEMController",
-          "action": "create"
-        },
-        {
-          "method": "GET",
-          "path": "/api/oem",
-          "controller": "OEMController",
-          "action": "getAll"
-        },
-        {
-          "method": "GET",
-          "path": "/api/oem/{id}",
-          "controller": "OEMController",
-          "action": "getById"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/oem/{id}",
-          "controller": "OEMController",
-          "action": "update"
-        },
-        {
-          "method": "DELETE",
-          "path": "/api/oem/{id}",
-          "controller": "OEMController",
-          "action": "delete"
-        },
-        {
-          "method": "POST",
-          "path": "/api/product",
-          "controller": "ProductController",
-          "action": "create"
-        },
-        {
-          "method": "GET",
-          "path": "/api/product",
-          "controller": "ProductController",
-          "action": "getAll"
-        },
-        {
-          "method": "GET",
-          "path": "/api/product/{id}",
-          "controller": "ProductController",
-          "action": "getById"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/product/{id}",
-          "controller": "ProductController",
-          "action": "update"
-        },
-        {
-          "method": "DELETE",
-          "path": "/api/product/{id}",
-          "controller": "ProductController",
-          "action": "delete"
-        },
-        {
-          "method": "POST",
-          "path": "/api/client",
-          "controller": "ClientController",
-          "action": "create"
-        },
-        {
-          "method": "GET",
-          "path": "/api/client",
-          "controller": "ClientController",
-          "action": "getAll"
-        },
-        {
-          "method": "GET",
-          "path": "/api/client/{id}",
-          "controller": "ClientController",
-          "action": "getById"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/client/{id}",
-          "controller": "ClientController",
-          "action": "update"
-        },
-        {
-          "method": "DELETE",
-          "path": "/api/client/{id}",
-          "controller": "ClientController",
-          "action": "delete"
+          "path": "/api/ai/chat",
+          "controller": "AiController",
+          "action": "chat"
         }
       ]
     },
-    "file": {
-      "handler": "dist/handlers/file.handler",
-      "controller": "FileController",
+    "files": {
+      "handler": "dist/handlers/files.handler",
+      "controller": "FilesController",
       "routes": [
         {
           "method": "POST",
-          "path": "/api/files/presigned-urls",
-          "controller": "FileController",
-          "action": "generatePresignedUrls"
+          "path": "/api/files/presign",
+          "controller": "FilesController",
+          "action": "presign"
         },
         {
           "method": "POST",
-          "path": "/api/files/confirm",
-          "controller": "FileController",
-          "action": "confirmFiles"
-        },
-        {
-          "method": "GET",
-          "path": "/api/files/{fileId}/download-url",
-          "controller": "FileController",
-          "action": "getDownloadUrl"
-        },
-        {
-          "method": "GET",
-          "path": "/api/files/entity/{entityType}/{entityId}",
-          "controller": "FileController",
-          "action": "getEntityFiles"
-        },
-        {
-          "method": "GET",
-          "path": "/api/files/po/{poId}",
-          "controller": "FileController",
-          "action": "getPOFiles"
-        },
-        {
-          "method": "GET",
-          "path": "/api/files/{fileId}",
-          "controller": "FileController",
-          "action": "getFileById"
-        },
-        {
-          "method": "DELETE",
-          "path": "/api/files/{fileId}",
-          "controller": "FileController",
-          "action": "deleteFile"
-        },
-        {
-          "method": "POST",
-          "path": "/api/files/cleanup",
-          "controller": "FileController",
-          "action": "cleanupOrphanedFiles"
-        }
-      ]
-    },
-    "dispatch": {
-      "handler": "dist/handlers/dispatch.handler",
-      "controller": "DispatchController",
-      "routes": [
-        {
-          "method": "POST",
-          "path": "/api/dispatch",
-          "controller": "DispatchController",
-          "action": "create"
-        },
-        {
-          "method": "GET",
-          "path": "/api/dispatch",
-          "controller": "DispatchController",
-          "action": "getAll"
-        },
-        {
-          "method": "GET",
-          "path": "/api/dispatch/po/{poId}",
-          "controller": "DispatchController",
-          "action": "getByPoId"
-        },
-        {
-          "method": "GET",
-          "path": "/api/dispatch/po/{poId}/status",
-          "controller": "DispatchController",
-          "action": "getAccordionStatus"
-        },
-        {
-          "method": "GET",
-          "path": "/api/dispatch/{id}",
-          "controller": "DispatchController",
-          "action": "getById"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/dispatch/{id}",
-          "controller": "DispatchController",
-          "action": "updateDetails"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/dispatch/{id}/documents",
-          "controller": "DispatchController",
-          "action": "updateDocuments"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/dispatch/{id}/delivery",
-          "controller": "DispatchController",
-          "action": "updateDelivery"
-        },
-        {
-          "method": "DELETE",
-          "path": "/api/dispatch/{id}",
-          "controller": "DispatchController",
-          "action": "delete"
-        }
-      ]
-    },
-    "service": {
-      "handler": "dist/handlers/service.handler",
-      "controller": "ServiceController",
-      "routes": [
-        {
-          "method": "POST",
-          "path": "/api/service",
-          "controller": "ServiceController",
-          "action": "create"
-        },
-        {
-          "method": "GET",
-          "path": "/api/service",
-          "controller": "ServiceController",
-          "action": "getAll"
-        },
-        {
-          "method": "GET",
-          "path": "/api/service/dispatch/{dispatchId}",
-          "controller": "ServiceController",
-          "action": "getByDispatchId"
-        },
-        {
-          "method": "GET",
-          "path": "/api/service/po/{poId}",
-          "controller": "ServiceController",
-          "action": "getByPoId"
-        },
-        {
-          "method": "GET",
-          "path": "/api/service/{id}",
-          "controller": "ServiceController",
-          "action": "getById"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/service/{id}",
-          "controller": "ServiceController",
-          "action": "updateService"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/service/{id}/commissioning",
-          "controller": "ServiceController",
-          "action": "updateCommissioning"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/service/{id}/warranty",
-          "controller": "ServiceController",
-          "action": "updateWarranty"
-        },
-        {
-          "method": "DELETE",
-          "path": "/api/service/{id}",
-          "controller": "ServiceController",
-          "action": "delete"
-        }
-      ]
-    },
-    "accounting": {
-      "handler": "dist/handlers/accounting.handler",
-      "controller": "AccountingEntryController",
-      "routes": [
-        {
-          "method": "POST",
-          "path": "/api/accounting",
-          "controller": "AccountingEntryController",
-          "action": "create"
-        },
-        {
-          "method": "GET",
-          "path": "/api/accounting",
-          "controller": "AccountingEntryController",
-          "action": "getAll"
-        },
-        {
-          "method": "GET",
-          "path": "/api/accounting/po/{poId}",
-          "controller": "AccountingEntryController",
-          "action": "getByPoId"
-        },
-        {
-          "method": "GET",
-          "path": "/api/accounting/{id}",
-          "controller": "AccountingEntryController",
-          "action": "getById"
-        },
-        {
-          "method": "PUT",
-          "path": "/api/accounting/{id}",
-          "controller": "AccountingEntryController",
-          "action": "update"
-        },
-        {
-          "method": "DELETE",
-          "path": "/api/accounting/{id}",
-          "controller": "AccountingEntryController",
-          "action": "delete"
+          "path": "/api/files/download",
+          "controller": "FilesController",
+          "action": "download"
         }
       ]
     }
@@ -544,7 +208,6 @@
       "compute": "lambda",
       "requiredModules": [],
       "required": true,
-      "mfe": "mfe-settings",
       "lambdas": [
         "auth",
         "user",
@@ -552,189 +215,38 @@
         "permission"
       ]
     },
-    "leads": {
-      "sku": "leads",
-      "packageName": "@arcforge/module-leads",
+    "demo": {
+      "sku": "demo",
+      "packageName": "@arcforge/module-demo",
       "compute": "lambda",
       "requiredModules": [
         "platform"
       ],
-      "mfe": "mfe-leads",
-      "lambdas": []
-    },
-    "customers": {
-      "sku": "customers",
-      "packageName": "@arcforge/module-customers",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform"
-      ],
-      "mfe": "mfe-customers",
-      "lambdas": []
-    },
-    "enquiry": {
-      "sku": "enquiry",
-      "packageName": "@arcforge/module-enquiry",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform",
-        "customers"
-      ],
-      "mfe": "mfe-pipeline",
-      "lambdas": []
-    },
-    "quotation": {
-      "sku": "quotation",
-      "packageName": "@arcforge/module-quotation",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform",
-        "customers"
-      ],
-      "mfe": "mfe-quotations",
-      "lambdas": []
-    },
-    "sales-order": {
-      "sku": "sales-order",
-      "packageName": "@arcforge/module-sales-order",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform",
-        "customers",
-        "quotation"
-      ],
-      "mfe": "mfe-sales",
-      "lambdas": []
-    },
-    "invoicing": {
-      "sku": "invoicing",
-      "packageName": "@arcforge/module-invoicing",
-      "compute": "ecs",
-      "requiredModules": [
-        "platform",
-        "sales-order"
-      ],
-      "mfe": "mfe-sales",
-      "lambdas": []
-    },
-    "dispatch": {
-      "sku": "dispatch",
-      "packageName": "@arcforge/module-dispatch",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform",
-        "sales-order",
-        "inventory"
-      ],
-      "mfe": "mfe-dispatch",
       "lambdas": [
-        "dispatch"
+        "demo"
       ]
     },
-    "gst": {
-      "sku": "gst",
-      "packageName": "@arcforge/module-gst",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform",
-        "invoicing"
-      ],
-      "lambdas": []
-    },
-    "inventory": {
-      "sku": "inventory",
-      "packageName": "@arcforge/module-inventory",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform"
-      ],
-      "mfe": "mfe-inventory",
-      "lambdas": []
-    },
-    "purchase": {
-      "sku": "purchase",
-      "packageName": "@arcforge/module-purchase",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform",
-        "inventory"
-      ],
-      "mfe": "mfe-purchase",
-      "lambdas": []
-    },
-    "whatsapp": {
-      "sku": "whatsapp",
-      "packageName": "@arcforge/module-whatsapp",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform"
-      ],
-      "lambdas": []
-    },
-    "notification": {
-      "sku": "notification",
-      "packageName": "@arcforge/module-notification",
-      "compute": "lambda-sqs",
-      "requiredModules": [
-        "platform"
-      ],
-      "lambdas": []
-    },
-    "reporting": {
-      "sku": "reporting",
-      "packageName": "@arcforge/module-reporting",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform"
-      ],
-      "mfe": "mfe-reports",
-      "lambdas": []
-    },
-    "audit": {
-      "sku": "audit",
-      "packageName": "@arcforge/module-audit",
-      "compute": "lambda-sqs",
-      "requiredModules": [
-        "platform"
-      ],
-      "lambdas": []
-    },
-    "billing": {
-      "sku": "billing",
-      "packageName": "@arcforge/module-billing",
-      "compute": "lambda",
-      "requiredModules": [
-        "platform"
-      ],
-      "lambdas": []
-    },
-    "pdf-worker": {
-      "sku": "pdf-worker",
-      "packageName": "@arcforge/module-pdf-worker",
-      "compute": "lambda-container",
-      "requiredModules": [
-        "platform"
-      ],
-      "lambdas": []
-    },
-    "mobile-api": {
-      "sku": "mobile-api",
-      "packageName": "@arcforge/module-mobile-api",
-      "compute": "ecs",
-      "requiredModules": [
-        "platform"
-      ],
-      "lambdas": []
-    },
-    "ai-service": {
-      "sku": "ai-service",
+    "ai": {
+      "sku": "ai",
       "packageName": "@arcforge/module-ai",
-      "compute": "ecs",
+      "compute": "lambda",
       "requiredModules": [
-        "platform",
-        "leads"
+        "platform"
       ],
-      "lambdas": []
+      "lambdas": [
+        "ai"
+      ]
+    },
+    "files": {
+      "sku": "files",
+      "packageName": "@arcforge/module-files",
+      "compute": "lambda",
+      "requiredModules": [
+        "platform"
+      ],
+      "lambdas": [
+        "files"
+      ]
     }
   }
 }

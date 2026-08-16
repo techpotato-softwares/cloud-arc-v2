@@ -24,3 +24,5 @@ ArcForge Lambda handlers use a **module-scoped DI container**, not a new contain
 - **ECS/Fastify services (Phase 2):** use a separate bootstrap; share services/repos, not the API Gateway router.
 
 See `handler-factory.ts` log line: `Lambda '<name>' initialized in <ms>ms`.
+
+Python kit equivalent: `python-cloud-arc/api/layers/shared/DI.md` and `python-cloud-arc/docs/CSR-AND-DI.md` (`Inject(TYPES.X)` instead of `@inject`).

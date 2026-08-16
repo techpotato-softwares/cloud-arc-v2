@@ -12,7 +12,7 @@ from utils.manifest_reader import AppManifest, RouteManifestEntry
 CORS_RESPONSE_HEADERS = {
     "Access-Control-Allow-Origin": "'*'",
     "Access-Control-Allow-Headers": (
-        "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Request-Id'"
     ),
     "Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE,OPTIONS'",
 }
@@ -50,6 +50,7 @@ class ApiGatewayConstruct(Construct):
                     "X-Amz-Date",
                     "X-Api-Key",
                     "X-Amz-Security-Token",
+                    "X-Request-Id",
                 ],
                 max_age=Duration.days(1),
             ),

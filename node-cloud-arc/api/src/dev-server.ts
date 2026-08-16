@@ -61,6 +61,7 @@ import '../modules/platform/lambdas/permission.lambda';
 // Demo + AI modules
 import '../modules/demo/lambdas/demo.lambda';
 import '../modules/ai/lambdas/ai.lambda';
+import '../modules/files/lambdas/files.lambda';
 
 // Import shared utilities
 import { lambdaRegistry, routeRegistry, Router, createRouter } from '@arcforge/shared';

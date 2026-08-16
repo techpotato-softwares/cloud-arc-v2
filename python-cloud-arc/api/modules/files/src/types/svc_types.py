@@ -1,0 +1,2 @@
+class TYPES:
+    FilesService = "FilesService"

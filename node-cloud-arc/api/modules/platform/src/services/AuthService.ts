@@ -57,7 +57,7 @@ export class AuthService implements IAuthService {
         .filter((code): code is string => Boolean(code)) || [];
 
     const modulesEnabled =
-      userWithRole.tenant?.modulesEnabled || ['platform', 'demo', 'ai'];
+      userWithRole.tenant?.modulesEnabled || ['platform', 'demo', 'ai', 'files'];
 
     // Generate JWT tokens after successful password validation
     const tokenPayload: JWTPayload = {

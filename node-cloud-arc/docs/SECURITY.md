@@ -6,6 +6,8 @@
 - Password hashing (bcrypt)
 - Bearer auth middleware on non-public routes
 - `@RequirePermission` / `@RequireModule` enforcement after JWT
+- Public `GET /health`; `X-Request-Id` on responses
+- CORS origin from `ALLOWED_ORIGINS` (default `*` for local)
 - User registration is **not** public (requires permission)
 - No hardcoded cloud credentials or customer domains in sold defaults
 - DB password fallbacks removed for non-local environments
@@ -22,7 +24,7 @@
 |-----|----------|---------|
 | No WAF / rate limiting | Medium | Next infra release |
 | No Cognito / OAuth / MFA | Medium | Enterprise add-on |
-| CORS `*` default | Medium | Restrict per env in CDK |
+| CORS `*` default | Medium | Set `ALLOWED_ORIGINS` (comma-separated) in env; restrict in CDK |
 | Token blacklist / logout | Low | Redis-backed denylist |
 | Multi-tenant RLS at DB | Medium | Postgres RLS later |
 | Audit log module | Low | `audit` SKU |

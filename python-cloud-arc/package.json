@@ -12,6 +12,10 @@
     "build:manifest": "cd api && python scripts/generate_manifest.py",
     "build:openapi": "cd api && python scripts/generate_openapi.py",
     "build:all": "npm run build:layer && npm run build:manifest && npm run build:openapi",
+    "scaffold:module": "cd api && python scripts/scaffold_module.py",
+    "db:seed:admin": "cd api && python scripts/seed_admin.py",
+    "db:migrate": "cd api && alembic upgrade head",
+    "lint": "cd api && ruff check tests scripts",
     "test": "cd api && pytest",
     "synth:dev": "npm run build:all && cd cdk && ./scripts/deploy.sh dev synth",
     "deploy:dev": "npm run build:all && cd cdk && ./scripts/deploy.sh dev deploy"

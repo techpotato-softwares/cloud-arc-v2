@@ -10,7 +10,8 @@ Keep this green before each release. CI should fail if a Node layer path has no 
 | `core/handler-factory.ts` | `core/handler_factory.py` | OK |
 | `core/router.ts` | `core/router.py` | OK |
 | `core/parameter-resolver.ts` | `core/parameter_resolver.py` | OK |
-| `core/service-registry.ts` | `core/service_registry.py` | OK |
+| `core/service-registry.ts` | `core/service_registry.py` + `core/di.py` | OK |
+| CSR `services/` + `repositories/` | CSR `services/` + `repositories/` | OK |
 | `core/openapi/` | `core/openapi/` + FastAPI OpenAPI | OK |
 | `middleware/authMiddleware.ts` | `middleware/auth.py` | OK |
 | `middleware/errorHandler.ts` | `middleware/error_handler.py` | OK |
@@ -22,6 +23,11 @@ Keep this green before each release. CI should fail if a Node layer path has no 
 | Layer build script | `scripts/build_layer.py` | OK |
 | `@RequirePermission` / `@RequireModule` | `auth_decorators.py` | OK |
 | Express local | FastAPI `src/dev_server.py` | OK |
+| `GET /health` | `GET /health` | OK |
+| `X-Request-Id` / `ALLOWED_ORIGINS` | `request_context.py` | OK |
+| Zod body validation | Pydantic `validation.py` | OK |
+| Demo pagination | Demo pagination | OK |
+| `modules/files` | `modules/files` | OK |
 | `app-manifest.json` | `app-manifest.json` (kit root) | OK |
 
-**Idiomatic note:** TypeScript uses `experimentalDecorators`; Python uses real decorators + a route registry. Behavior (CSR, cold-start cache, JWT gates) matches.
+**Idiomatic note:** TypeScript uses `experimentalDecorators` + Inversify `@inject(TYPES.X)`. Python uses real decorators and constructor defaults `Inject(TYPES.X)`. CSR, cold-start cache, and JWT gates match. See `python-cloud-arc/docs/CSR-AND-DI.md` and `node-cloud-arc/docs/CSR-AND-DI.md`.

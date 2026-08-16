@@ -58,13 +58,20 @@ export interface ApiResponse<T = unknown> {
 }
 
 // Pre-computed CORS headers for performance
+function allowOrigin(): string {
+  const raw = process.env.ALLOWED_ORIGINS || '*';
+  const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
+  if (parts.includes('*') || parts.length === 0) return '*';
+  return parts[0];
+}
+
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': allowOrigin(),
   'Access-Control-Allow-Headers':
-    'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
+    'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Request-Id',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-  'Access-Control-Max-Age': '86400', // Cache preflight for 24 hours
+  'Access-Control-Max-Age': '86400',
 } as const;
 
 // Cache headers for responses

@@ -20,13 +20,13 @@ npm run dev:express   # http://localhost:4000
 ## Layout
 
 - **Shared layer** `layers/shared/nodejs` — decorators, router, Prisma, JWT, OpenAPI
-- **Modules** `modules/platform`, `modules/demo`, `modules/ai`
+- **Modules** `modules/platform`, `modules/demo`, `modules/ai`, `modules/files`
 - **CDK** `../cdk` — API Gateway + Lambda from `app-manifest.json`
 
 ## Auth
 
-- `POST /api/login`, `POST /api/auth/refresh` (public)
-- User create requires `@RequirePermission`
+- `POST /api/login`, `POST /api/auth/refresh`, `GET /health` (public)
+- Users / roles / permissions: `/api/user`, `/api/role`, `/api/permission`
 - Route guards: `@RequirePermission`, `@RequireModule`
 
-Kit docs: [../docs/GETTING-STARTED.md](../docs/GETTING-STARTED.md) · [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
+Kit docs: [../docs/GETTING-STARTED.md](../docs/GETTING-STARTED.md) · [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) · [../docs/CSR-AND-DI.md](../docs/CSR-AND-DI.md)
