@@ -1,6 +1,11 @@
-# ArcForge — update GitHub team handles for your org
+# ForgeArc — update GitHub team handles for your org
 
-* @arcforge/maintainers
+* @forgearc/maintainers
 
-/node-cloud-arc/ @arcforge/maintainers
-/python-cloud-arc/ @arcforge/maintainers
+/apps/ @forgearc/maintainers
+/services/commerce/ @forgearc/maintainers
+/products/forgearc-node/ @forgearc/maintainers
+/products/forgearc-python/ @forgearc/maintainers
+/products/forgearc-ai/ @forgearc/maintainers
+/packages/commercial-catalog/ @forgearc/maintainers
+/tooling/release/ @forgearc/maintainers

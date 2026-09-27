@@ -1,0 +1,80 @@
+name: ForgeArc CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/**"
+      - "services/**"
+      - "products/**"
+      - "packages/**"
+      - "tooling/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "turbo.json"
+  push:
+    branches: [main]
+
+concurrency:
+  group: forgearc-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.0.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run lint typecheck test build
+      - run: pnpm --filter @forgearc/cdk exec cdk synth ApiStack-dev
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.0.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          version: "0.12.13"
+      - run: uv lock --check
+      - run: uv sync --all-packages --frozen
+      - run: uv run ruff check services/commerce products/forgearc-python
+      - run: uv run pytest services/commerce/tests products/forgearc-python/apps/api/tests
+      - run: uv run --package forgearc-python-api python products/forgearc-python/packages/shared/scripts/build_layer.py
+      - run: cd products/forgearc-python/infra/cdk && pnpm dlx aws-cdk@2 synth ApiStack-dev
+
+  standalone-products:
+    runs-on: ubuntu-latest
+    needs: [javascript, python]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.0.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          version: "0.12.13"
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --all-packages --frozen
+      - run: bash tooling/release/export-node.sh
+      - run: bash tooling/release/export-python.sh

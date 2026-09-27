@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#17130f"/>
+      <stop offset="1" stop-color="#351508"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="78%" cy="18%" r="70%">
+      <stop stop-color="#ea580c" stop-opacity=".48"/>
+      <stop offset="1" stop-color="#ea580c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" rx="36" fill="url(#bg)"/>
+  <rect width="1200" height="630" rx="36" fill="url(#glow)"/>
+  <g transform="translate(82 78)">
+    <rect width="62" height="62" rx="16" fill="#ea580c"/>
+    <path d="M19 20h25M19 31h18M19 42h25" stroke="#fff7ed" stroke-width="5" stroke-linecap="round"/>
+    <text x="82" y="46" fill="#fff7ed" font-family="Georgia,serif" font-size="42" font-weight="700">ForgeArc</text>
+  </g>
+  <text x="82" y="282" fill="#fff7ed" font-family="Georgia,serif" font-size="72" font-weight="700">
+    <tspan x="82">Build the product.</tspan>
+    <tspan x="82" dy="86" fill="#fb923c">Not the backend baseline.</tspan>
+  </text>
+  <text x="84" y="490" fill="#b9aca4" font-family="Arial,sans-serif" font-size="27">
+    Production backend source products for Node, Python, AWS, and AI.
+  </text>
+  <g transform="translate(84 545)" fill="#fed7aa" font-family="monospace" font-size="19">
+    <text>AUTH  ·  MODULES  ·  OPENAPI  ·  TESTS  ·  AWS CDK</text>
+  </g>
+</svg>

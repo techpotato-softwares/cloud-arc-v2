@@ -1,0 +1,106 @@
+:root {
+  --vp-c-brand-1: #9a3412;
+  --vp-c-brand-2: #c2410c;
+  --vp-c-brand-3: #ea580c;
+  --vp-c-brand-soft: rgba(234, 88, 12, 0.14);
+  --vp-font-family-base: "Source Serif 4", Georgia, serif;
+  --vp-font-family-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.VPHero .name,
+.VPNavBarTitle .title {
+  font-family: "Source Serif 4", Georgia, serif;
+}
+
+.arch-figure {
+  margin: 1.25rem 0 1.75rem;
+}
+
+.arch-figure figcaption {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.arch-figure figcaption span {
+  color: var(--vp-c-text-2);
+  font-size: 14px;
+}
+
+.arch-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 2px 12px;
+}
+
+.arch-lane {
+  display: grid;
+  gap: 8px;
+  min-width: 190px;
+  align-content: start;
+}
+
+.arch-lane-label {
+  margin: 0;
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vp-c-brand-1);
+}
+
+.arch-join {
+  align-self: center;
+  color: var(--vp-c-text-3);
+  font-size: 22px;
+  padding-top: 18px;
+}
+
+.arch-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 1.25rem 0 1.5rem;
+}
+
+.arch-node {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  background: var(--vp-c-bg-soft);
+}
+
+.arch-node svg {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  color: var(--vp-c-brand-1);
+}
+
+.arch-tile {
+  fill: var(--vp-c-brand-soft);
+}
+
+.arch-node strong,
+.arch-node span {
+  display: block;
+}
+
+.arch-node span {
+  color: var(--vp-c-text-2);
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px;
+}
+
+.mermaid-host {
+  overflow-x: auto;
+  margin: 1rem 0 1.5rem;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--vp-c-bg-soft);
+}

@@ -1,9 +1,0 @@
-{
-  "name": "@arcforge/module-ai",
-  "version": "1.0.0",
-  "private": true,
-  "description": "ArcForge AI stub module (Node) — full AI richness ships in ArcForge Python",
-  "scripts": {
-    "build": "npm run build --prefix ../.."
-  }
-}

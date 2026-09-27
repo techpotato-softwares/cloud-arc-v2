@@ -1,4 +1,0 @@
-[lint]
-select = ["E", "F", "W"]
-exclude = [".venv", "alembic/versions"]
-ignore = ["E501", "E712"]

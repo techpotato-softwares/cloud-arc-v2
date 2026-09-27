@@ -1,30 +1,49 @@
-# ArcForge vendor monorepo
+# ForgeArc polyglot monorepo
 
-Two **self-contained** kits. Copy one folder to start a backend — nothing else required.
+One governed workspace contains the ForgeArc web properties, commerce service,
+and independently exportable ForgeArc products.
 
-| Copy this folder | Stack | Start here |
-|------------------|-------|------------|
-| [`node-cloud-arc/`](node-cloud-arc/) | TypeScript / AWS Lambda | [node-cloud-arc/README.md](node-cloud-arc/README.md) |
-| [`python-cloud-arc/`](python-cloud-arc/) | Python / FastAPI | [python-cloud-arc/README.md](python-cloud-arc/README.md) |
-
-```bash
-cp -R node-cloud-arc ~/Projects/my-api
-# or
-cp -R python-cloud-arc ~/Projects/my-py-api
+```text
+apps/                 Documentation and marketing applications
+services/commerce/    Checkout, entitlements, email, and delivery API
+packages/             Internal catalog and web configuration
+products/             ForgeArc Node, ForgeArc Python, and ForgeArc AI
+product-specs/        Product and go-to-market source documents
+tooling/release/      Standalone product exporters
 ```
 
-## Vendor helpers
+## Prerequisites and setup
 
-| Path | Purpose |
-|------|---------|
-| `scripts/pack-node.sh` / `pack-python.sh` | Zip a kit for sale |
-| `.github/workflows/` | CI for each kit |
+- Node.js 20+, pnpm 11.0.9
+- Python 3.12+, uv 0.12+
 
 ```bash
-npm run pack:node     # → releases/arcforge-node-*.zip
-npm run pack:python   # → releases/arcforge-python-*.zip
+pnpm install
+uv sync --all-packages --frozen
+pnpm check
 ```
 
-## License
+Use `pnpm docs:dev`, `pnpm marketing:dev`, and `pnpm commerce:dev` for local
+applications. Turborepo orchestrates JavaScript tasks; uv owns every supported
+Python environment and command.
 
-[LICENSE](LICENSE)
+## Products and releases
+
+- [`products/forgearc-node`](products/forgearc-node/README.md)
+- [`products/forgearc-python`](products/forgearc-python/README.md)
+- [`products/forgearc-ai`](products/forgearc-ai/README.md)
+
+Product runtime code does not import root-only apps, services, or commercial
+packages. Build isolated buyer artifacts with:
+
+```bash
+pnpm pack:node
+pnpm pack:python
+```
+
+Each exporter generates a product-local lock and reruns installation and tests
+without access to the repository workspace.
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
+[`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md), and
+[`docs/RELEASING.md`](docs/RELEASING.md).

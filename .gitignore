@@ -1,5 +1,4 @@
-# ArcForge vendor repo
-# Kits (node-cloud-arc/, python-cloud-arc/) are tracked source — do not ignore them.
+# ForgeArc polyglot monorepo.
 
 releases/
 .DS_Store
@@ -8,8 +7,15 @@ releases/
 !**/.env.example
 node_modules/
 **/node_modules/
+.pnpm-store/
+.turbo/
 **/.venv/
+**/.uv-cache/
 **/__pycache__/
 **/dist/
 **/cdk.out/
+**/.vitepress/cache/
+**/.vitepress/dist/
+services/commerce/data/
+/data/
 *.zip

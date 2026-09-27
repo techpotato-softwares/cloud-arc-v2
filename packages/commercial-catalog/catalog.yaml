@@ -1,0 +1,136 @@
+# Commercial catalog.
+# AI tiers match the ForgeArc AI requirement document and stay closed until that kit ships.
+# ForgeArc Node, Python, and the bundle match docs/PRICING.md and can be purchased now.
+# INR amounts for those three SKUs are the India checkout prices for the current kits.
+
+plans:
+  - id: forgearc-node
+    name: ForgeArc Node
+    summary: TypeScript serverless kit with auth, modules, and CDK.
+    price_inr: 28999
+    price_usd: 349
+    checkout_enabled: true
+    badge: Available
+    artifacts: [node-kit, node-setup]
+    includes:
+      - TypeScript ForgeArc source
+      - Platform auth, demo, files, and AI stub modules
+      - 12 months of updates
+      - Private setup guide
+
+  - id: forgearc-python
+    name: ForgeArc Python
+    summary: Python serverless kit with SQLAlchemy, Alembic, and CDK.
+    price_inr: 32999
+    price_usd: 399
+    checkout_enabled: true
+    badge: Available
+    artifacts: [python-kit, python-setup]
+    includes:
+      - ForgeArc Python source
+      - SQLAlchemy, SQLModel, and Alembic
+      - Platform auth, demo, files, and AI stub modules
+      - 12 months of updates
+      - Private setup guide
+
+  - id: forgearc-bundle
+    name: ForgeArc Bundle
+    summary: Node and Python kits with one license.
+    price_inr: 49999
+    price_usd: 599
+    checkout_enabled: true
+    badge: Available
+    artifacts: [node-kit, node-setup, python-kit, python-setup]
+    includes:
+      - Both ForgeArc kits
+      - Shared API contract
+      - 12 months of updates
+
+  - id: free
+    name: Free
+    summary: Public CLI and core for local evaluation.
+    price_inr: 0
+    price_usd: 0
+    checkout_enabled: false
+    badge: Coming with AI
+    artifacts: [cli-core]
+    includes:
+      - CLI and provider-agnostic core
+      - Local development with the OpenAI path
+
+  - id: starter-aws
+    name: Starter AWS
+    summary: ForgeArc AI with the AWS adapter.
+    price_inr: 3999
+    price_usd: 48
+    checkout_enabled: false
+    badge: Coming with AI
+    artifacts: [ai-core, aws-adapter, ai-setup]
+    includes:
+      - ForgeArc AI core
+      - AWS adapter and docs
+      - Bedrock, S3, and SQS path
+
+  - id: starter-gcp
+    name: Starter GCP
+    summary: ForgeArc AI with the GCP adapter.
+    price_inr: 3999
+    price_usd: 48
+    checkout_enabled: false
+    badge: Coming with GCP
+    artifacts: [ai-core, gcp-adapter, ai-setup]
+    includes:
+      - ForgeArc AI core
+      - GCP adapter and docs
+
+  - id: professional
+    name: Professional
+    summary: Both cloud adapters, updates, and support allowance.
+    price_inr: 9999
+    price_usd: 120
+    checkout_enabled: false
+    badge: Coming with AI
+    artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, support-allowance]
+    includes:
+      - AWS and GCP adapters
+      - Lifetime updates
+      - Documented support allowance
+
+  - id: agency
+    name: Agency
+    summary: Multi-project license and setup support.
+    price_inr: 24999
+    price_usd: 299
+    checkout_enabled: false
+    badge: Coming with AI
+    artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, agency-license]
+    includes:
+      - Multi-project use
+      - Setup support
+      - Both adapters
+
+  - id: enterprise
+    name: Enterprise
+    summary: Team license, SLA, and workshop.
+    price_inr: 79999
+    price_usd: 960
+    checkout_enabled: false
+    badge: Coming with AI
+    artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, enterprise-sla]
+    includes:
+      - Team license
+      - Custom adapter engagement
+      - SLA and workshop
+
+  - id: suite
+    name: ForgeArc Suite
+    summary: Node, Python, and ForgeArc AI together.
+    price_inr: 29999
+    price_usd: 360
+    checkout_enabled: false
+    badge: Coming with AI
+    artifacts: [node-kit, python-kit, ai-core, aws-adapter, gcp-adapter, suite-setup]
+    includes:
+      - ForgeArc Node
+      - ForgeArc Python
+      - ForgeArc AI and both adapters

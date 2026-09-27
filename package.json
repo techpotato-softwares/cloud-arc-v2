@@ -1,10 +1,30 @@
 {
-  "name": "arcforge",
-  "version": "1.0.0",
+  "name": "@forgearc/workspace",
+  "version": "2.0.0",
   "private": true,
-  "description": "ArcForge vendor hub — kits: node-cloud-arc/, python-cloud-arc/",
+  "description": "ForgeArc polyglot product workspace",
+  "packageManager": "pnpm@11.0.9",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
-    "pack:node": "bash scripts/pack-node.sh",
-    "pack:python": "bash scripts/pack-python.sh"
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint && uv run ruff check services/commerce products/forgearc-python",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test && uv run pytest services/commerce/tests products/forgearc-python/apps/api/tests",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "docs:dev": "pnpm --filter @forgearc/docs dev",
+    "docs:build": "pnpm --filter @forgearc/docs build",
+    "marketing:dev": "pnpm --filter @forgearc/marketing dev",
+    "marketing:build": "pnpm --filter @forgearc/marketing build",
+    "commerce:dev": "COMMERCE_TEST_MODE=true uv run --package forgearc-commerce uvicorn app.main:app --app-dir services/commerce --port 4100",
+    "commerce:test": "uv run --package forgearc-commerce pytest services/commerce/tests",
+    "pack:node": "bash tooling/release/export-node.sh",
+    "pack:python": "bash tooling/release/export-python.sh"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.12",
+    "turbo": "^2.5.8"
   }
 }

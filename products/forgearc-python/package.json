@@ -1,0 +1,25 @@
+{
+  "name": "@forgearc/python",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Standalone ForgeArc Python serverless backend product",
+  "scripts": {
+    "sync": "uv sync --all-packages --frozen",
+    "dev": "docker compose up -d && pnpm dev:api",
+    "dev:api": "uv run --package forgearc-python-api uvicorn --app-dir apps/api src.dev_server:app --reload --port 4001",
+    "build:layer": "uv run --package forgearc-python-api python packages/shared/scripts/build_layer.py",
+    "build:manifest": "uv run --package forgearc-python-api python apps/api/scripts/generate_manifest.py",
+    "build:openapi": "uv run --package forgearc-python-api python apps/api/scripts/generate_openapi.py",
+    "build:all": "pnpm build:layer && pnpm build:manifest && pnpm build:openapi",
+    "scaffold:module": "uv run --package forgearc-python-api python apps/api/scripts/scaffold_module.py",
+    "db:seed:admin": "uv run --package forgearc-python-api python apps/api/scripts/seed_admin.py",
+    "db:migrate": "uv run --package forgearc-python-api alembic -c migrations/alembic.ini upgrade head",
+    "lint": "uv run ruff check apps packages modules migrations infra",
+    "test": "uv run --package forgearc-python-api pytest apps/api/tests",
+    "synth:dev": "pnpm build:all && bash infra/cdk/scripts/deploy.sh dev synth",
+    "deploy:dev": "pnpm build:all && bash infra/cdk/scripts/deploy.sh dev deploy"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

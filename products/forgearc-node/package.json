@@ -1,0 +1,21 @@
+{
+  "name": "@forgearc/node",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Standalone ForgeArc Node serverless backend product",
+  "scripts": {
+    "dev": "docker compose up -d && pnpm --filter @forgearc/api-host dev",
+    "build": "pnpm --filter @forgearc/api-host build:all",
+    "lint": "pnpm --filter @forgearc/api-host lint",
+    "typecheck": "pnpm --filter @forgearc/api-host typecheck",
+    "test": "pnpm --filter @forgearc/api-host test",
+    "db:generate": "pnpm --filter @forgearc/api-host db:generate",
+    "db:push": "pnpm --filter @forgearc/api-host db:push",
+    "db:seed": "pnpm --filter @forgearc/api-host db:seed:admin",
+    "synth": "pnpm --filter @forgearc/cdk synth:dev"
+  },
+  "engines": { "node": ">=20.0.0" },
+  "devDependencies": {
+    "esbuild": "^0.25.12"
+  }
+}

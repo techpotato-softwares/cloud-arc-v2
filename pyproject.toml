@@ -1,0 +1,44 @@
+[project]
+name = "forgearc-workspace"
+version = "2.0.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+  "services/commerce",
+  "products/forgearc-python/apps/api",
+  "products/forgearc-python/packages/shared",
+  "products/forgearc-python/modules/platform",
+  "products/forgearc-python/modules/demo",
+  "products/forgearc-python/modules/ai",
+  "products/forgearc-python/modules/files",
+  "products/forgearc-python/infra/cdk",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.5",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E402", "E501", "E712", "F401", "F403"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = [
+  "services/commerce",
+  "products/forgearc-python",
+  "products/forgearc-python/apps/api",
+  "products/forgearc-python/packages/shared/src",
+]
