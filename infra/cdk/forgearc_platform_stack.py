@@ -14,11 +14,10 @@ from aws_cdk import (
     aws_cloudfront_origins as origins,
     aws_cloudwatch as cloudwatch,
     aws_cloudwatch_actions as cloudwatch_actions,
-    aws_ec2 as ec2,
+    aws_dynamodb as dynamodb,
     aws_iam as iam,
     aws_lambda as lambda_,
     aws_logs as logs,
-    aws_rds as rds,
     aws_route53 as route53,
     aws_route53_targets as targets,
     aws_s3 as s3,
@@ -66,53 +65,26 @@ class ForgeArcPlatformStack(Stack):
             validation=acm.CertificateValidation.from_dns(zone),
         )
 
-        vpc = ec2.Vpc(
+        commerce_table = dynamodb.Table(
             self,
-            "Vpc",
-            max_azs=2,
-            nat_gateways=int(config["natGateways"]),
-            subnet_configuration=[
-                ec2.SubnetConfiguration(
-                    name="public", subnet_type=ec2.SubnetType.PUBLIC, cidr_mask=24
-                ),
-                ec2.SubnetConfiguration(
-                    name="application",
-                    subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS,
-                    cidr_mask=24,
-                ),
-                ec2.SubnetConfiguration(
-                    name="database",
-                    subnet_type=ec2.SubnetType.PRIVATE_ISOLATED,
-                    cidr_mask=24,
-                ),
-            ],
-        )
-        lambda_sg = ec2.SecurityGroup(self, "CommerceLambdaSg", vpc=vpc)
-        database_sg = ec2.SecurityGroup(self, "CommerceDatabaseSg", vpc=vpc)
-        database_sg.add_ingress_rule(lambda_sg, ec2.Port.tcp(5432), "Commerce Lambda")
-
-        database = rds.DatabaseInstance(
-            self,
-            "CommerceDatabase",
-            engine=rds.DatabaseInstanceEngine.postgres(
-                version=rds.PostgresEngineVersion.VER_16_6
+            "CommerceTable",
+            table_name=f"forgearc-commerce-{self.stage}",
+            partition_key=dynamodb.Attribute(name="pk", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="sk", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            point_in_time_recovery_specification=dynamodb.PointInTimeRecoverySpecification(
+                point_in_time_recovery_enabled=True
             ),
-            credentials=rds.Credentials.from_generated_secret("forgearc"),
-            database_name=config["databaseName"],
-            instance_type=self._database_instance_type(config["databaseInstanceType"]),
-            vpc=vpc,
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED),
-            security_groups=[database_sg],
-            publicly_accessible=False,
-            multi_az=bool(config["databaseMultiAz"]),
-            allocated_storage=20,
-            max_allocated_storage=100,
-            storage_encrypted=True,
-            backup_retention=Duration.days(int(config["databaseBackupRetentionDays"])),
             deletion_protection=True,
-            removal_policy=RemovalPolicy.SNAPSHOT,
-            cloudwatch_logs_exports=["postgresql"],
-            cloudwatch_logs_retention=logs.RetentionDays.ONE_MONTH,
+            removal_policy=RemovalPolicy.RETAIN,
+        )
+        commerce_table.add_global_secondary_index(
+            index_name="gsi1",
+            partition_key=dynamodb.Attribute(
+                name="gsi1pk", type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(name="gsi1sk", type=dynamodb.AttributeType.STRING),
+            projection_type=dynamodb.ProjectionType.ALL,
         )
 
         payment_secret = secretsmanager.Secret(
@@ -143,15 +115,10 @@ class ForgeArcPlatformStack(Stack):
             timeout=Duration.seconds(30),
             tracing=lambda_.Tracing.ACTIVE,
             log_retention=logs.RetentionDays.ONE_MONTH,
-            vpc=vpc,
-            vpc_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
-            ),
-            security_groups=[lambda_sg],
             environment={
                 "COMMERCE_TEST_MODE": "false",
                 "COMMERCE_PUBLIC_BASE_URL": f"https://{self.domain}",
-                "COMMERCE_DATABASE_SECRET_ARN": database.secret.secret_arn,
+                "COMMERCE_TABLE": commerce_table.table_name,
                 "COMMERCE_PAYMENT_SECRET_ARN": payment_secret.secret_arn,
                 "COMMERCE_CATALOG": "/var/task/catalog.yaml",
                 "COMMERCE_ARTIFACT_DIR": "/var/task/artifacts",
@@ -159,7 +126,7 @@ class ForgeArcPlatformStack(Stack):
                 "SMTP_FROM": f"ForgeArc <{config['senderEmail']}>",
             },
         )
-        database.secret.grant_read(commerce)
+        commerce_table.grant_read_write_data(commerce)
         payment_secret.grant_read(commerce)
 
         email_identity = ses.EmailIdentity(
@@ -429,7 +396,3 @@ class ForgeArcPlatformStack(Stack):
                 )
             ],
         )
-
-    @staticmethod
-    def _database_instance_type(value: str) -> ec2.InstanceType:
-        return ec2.InstanceType(value)

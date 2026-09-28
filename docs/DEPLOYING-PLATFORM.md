@@ -5,7 +5,7 @@ The `Deploy ForgeArc platform` GitHub Actions workflow builds and deploys:
 - `forgearc.dev` and `www.forgearc.dev`: Vue marketing and checkout UI
 - `docs.forgearc.dev`: VitePress documentation
 - `api.forgearc.dev`: FastAPI commerce API on Lambda and API Gateway
-- private CloudFront S3 origins, VPC, NAT, private PostgreSQL RDS, Secrets Manager,
+- private CloudFront S3 origins, on-demand DynamoDB, Secrets Manager,
   SES identity, Route 53 records, CloudWatch alarms, and an AWS Budget
 
 Infrastructure settings are committed in `infra/cdk/config.json`. The workflow
@@ -75,10 +75,10 @@ mail can be sent to arbitrary buyers.
 
 ## AWS Free Tier
 
-`databaseBackupRetentionDays` is 1 because an AWS Free Tier account rejects a
-longer RDS backup window. Raise it after the account is upgraded. API access
-logs use a log group owned by this stack, so a retry does not try to recreate
-the API Gateway account log group left behind by a failed deployment.
+Commerce orders, leads, and licenses are stored in on-demand DynamoDB. There is
+no RDS instance and no NAT gateway, so the database does not bill while idle.
+API access logs use a log group owned by this stack, so a retry does not try to
+recreate the API Gateway account log group left behind by a failed deployment.
 
 If `forgearc-prod` is in `ROLLBACK_COMPLETE`, delete that stack in
 CloudFormation and run the workflow again. Keep `forgearc-dns-prod` when its
@@ -86,7 +86,7 @@ nameservers are already set at the registrar.
 
 ## Costs and operations
 
-The production stack intentionally uses one NAT gateway, a private RDS instance,
-CloudFront, and API Gateway. `monthlyBudgetUsd` in `infra/cdk/config.json`
+The production stack uses CloudFront, API Gateway, Lambda, and on-demand
+DynamoDB. `monthlyBudgetUsd` in `infra/cdk/config.json`
 controls the forecast alert threshold. Subscribe an operator to the
 `AlarmTopicArn` output to receive Lambda and API 5xx alarms.

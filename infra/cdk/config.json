@@ -8,10 +8,5 @@
   "hostedZoneName": "forgearc.dev",
   "hostedZoneId": "",
   "senderEmail": "hello@forgearc.dev",
-  "databaseName": "forgearc",
-  "databaseInstanceType": "t4g.micro",
-  "databaseMultiAz": false,
-  "databaseBackupRetentionDays": 1,
-  "natGateways": 1,
   "monthlyBudgetUsd": 150
 }

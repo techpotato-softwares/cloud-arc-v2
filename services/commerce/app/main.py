@@ -3,19 +3,16 @@ from __future__ import annotations
 import json
 from contextlib import asynccontextmanager
 from datetime import UTC
-from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker
 
 from app.catalog import load_catalog, public_catalog
-from app.models import Base, Entitlement, Order
 from app.payments import start_checkout, verify_razorpay, verify_stripe
 from app.service import artifact_ids, create_lead, create_order, fulfill, read_artifact
 from app.settings import Settings, load_settings
+from app.store import DynamoCommerceStore, MemoryCommerceStore
 
 
 class LeadIn(BaseModel):
@@ -48,13 +45,11 @@ def iso_utc(value):
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or load_settings()
-    if settings.database_url.startswith("sqlite:///"):
-        sqlite_path = Path(settings.database_url.removeprefix("sqlite:///"))
-        if sqlite_path.name != ":memory:":
-            sqlite_path.parent.mkdir(parents=True, exist_ok=True)
-    engine = create_engine(settings.database_url, future=True)
-    Base.metadata.create_all(engine)
-    sessions = sessionmaker(bind=engine, expire_on_commit=False, future=True)
+    store = (
+        DynamoCommerceStore(settings.table_name)
+        if settings.table_name
+        else MemoryCommerceStore()
+    )
     plans = load_catalog(settings.catalog_path)
     smtp = {
         "host": settings.smtp_host,
@@ -68,9 +63,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         yield
-        engine.dispose()
 
     app = FastAPI(title="ForgeArc Commerce", version="0.1.0", lifespan=lifespan)
+    app.state.store = store
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[settings.public_base_url, "http://127.0.0.1:4173", "http://localhost:4173"],
@@ -88,18 +83,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.post("/api/leads")
     def leads(body: LeadIn):
-        db = sessions()
-        try:
-            lead = create_lead(
-                db,
-                email=body.email,
-                whatsapp=body.whatsapp,
-                consent=body.consent,
-                page=body.page,
-            )
-            return {"id": lead.id, "followUpStatus": lead.follow_up_status}
-        finally:
-            db.close()
+        lead = create_lead(
+            store,
+            email=body.email,
+            whatsapp=body.whatsapp,
+            consent=body.consent,
+            page=body.page,
+        )
+        return {"id": lead.id, "followUpStatus": lead.follow_up_status}
 
     @app.post("/api/checkout")
     def checkout(body: CheckoutIn):
@@ -113,39 +104,31 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(422, "India billing uses Razorpay")
         if body.country.upper() != "IN" and provider != "stripe":
             raise HTTPException(422, "International billing uses Stripe")
-        db = sessions()
+        order = create_order(
+            store,
+            plan=plan,
+            provider=provider,
+            email=str(body.email),
+            buyer_name=body.name,
+        )
         try:
-            order = create_order(
-                db,
-                plan=plan,
-                provider=provider,
-                email=str(body.email),
-                buyer_name=body.name,
-            )
-            try:
-                started = start_checkout(settings, plan, order.id, provider)
-            except RuntimeError as exc:
-                raise HTTPException(503, str(exc)) from exc
-            if started.get("providerReference"):
-                order.provider_reference = started["providerReference"]
-                db.commit()
-            return {"orderId": order.id, **started}
-        finally:
-            db.close()
+            started = start_checkout(settings, plan, order.id, provider)
+        except RuntimeError as exc:
+            raise HTTPException(503, str(exc)) from exc
+        if started.get("providerReference"):
+            order.provider_reference = started["providerReference"]
+            store.save_order(order)
+        return {"orderId": order.id, **started}
 
     @app.post("/api/checkout/simulate")
     def simulate(body: SimulateIn):
         if not settings.test_mode:
             raise HTTPException(404, "Not found")
-        db = sessions()
-        try:
-            order = db.get(Order, body.orderId)
-            if order is None or order.provider != body.provider:
-                raise HTTPException(404, "Order not found")
-            entitlement = fulfill(db, order, plans[order.plan_id], settings.artifact_dir, smtp)
-            return {"orderId": order.id, "token": entitlement.token, "status": order.status}
-        finally:
-            db.close()
+        order = store.get_order(body.orderId)
+        if order is None or order.provider != body.provider:
+            raise HTTPException(404, "Order not found")
+        entitlement = fulfill(store, order, plans[order.plan_id], settings.artifact_dir, smtp)
+        return {"orderId": order.id, "token": entitlement.token, "status": order.status}
 
     @app.post("/api/webhooks/stripe")
     async def stripe_webhook(request: Request):
@@ -157,15 +140,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if event.get("type") != "checkout.session.completed":
             return {"ok": True}
         order_id = event["data"]["object"].get("client_reference_id")
-        db = sessions()
-        try:
-            order = db.get(Order, order_id)
-            if order is None:
-                raise HTTPException(404, "Order not found")
-            fulfill(db, order, plans[order.plan_id], settings.artifact_dir, smtp)
-            return {"ok": True}
-        finally:
-            db.close()
+        order = store.get_order(order_id)
+        if order is None:
+            raise HTTPException(404, "Order not found")
+        fulfill(store, order, plans[order.plan_id], settings.artifact_dir, smtp)
+        return {"ok": True}
 
     @app.post("/api/webhooks/razorpay")
     async def razorpay_webhook(request: Request):
@@ -178,78 +157,56 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             return {"ok": True}
         notes = event["payload"]["payment"]["entity"].get("notes") or {}
         order_id = notes.get("commerce_order_id")
-        db = sessions()
-        try:
-            order = db.get(Order, order_id)
-            if order is None:
-                raise HTTPException(404, "Order not found")
-            fulfill(db, order, plans[order.plan_id], settings.artifact_dir, smtp)
-            return {"ok": True}
-        finally:
-            db.close()
+        order = store.get_order(order_id)
+        if order is None:
+            raise HTTPException(404, "Order not found")
+        fulfill(store, order, plans[order.plan_id], settings.artifact_dir, smtp)
+        return {"ok": True}
 
     @app.get("/api/orders/{order_id}")
     def get_order(order_id: str):
-        db = sessions()
-        try:
-            order = db.get(Order, order_id)
-            if order is None:
-                raise HTTPException(404, "Order not found")
-            entitlement = db.scalar(select(Entitlement).where(Entitlement.order_id == order.id))
-            return {
-                "orderId": order.id,
-                "planName": order.plan_name,
-                "status": order.status,
-                "currency": order.currency,
-                "amount": order.amount,
-                "downloadToken": entitlement.token if entitlement else None,
-            }
-        finally:
-            db.close()
+        order = store.get_order(order_id)
+        if order is None:
+            raise HTTPException(404, "Order not found")
+        entitlement = store.get_entitlement_by_order(order.id)
+        return {
+            "orderId": order.id,
+            "planName": order.plan_name,
+            "status": order.status,
+            "currency": order.currency,
+            "amount": order.amount,
+            "downloadToken": entitlement.token if entitlement else None,
+        }
 
     @app.get("/api/purchases/recent")
     def recent():
-        db = sessions()
-        try:
-            rows = db.scalars(
-                select(Order).where(Order.status == "paid").order_by(Order.paid_at.desc()).limit(8)
-            ).all()
-            return {
-                "purchases": [
-                    {"planName": row.plan_name, "purchasedAt": iso_utc(row.paid_at)}
-                    for row in rows
-                ]
-            }
-        finally:
-            db.close()
+        rows = store.recent_paid_orders()
+        return {
+            "purchases": [
+                {"planName": row.plan_name, "purchasedAt": iso_utc(row.paid_at)}
+                for row in rows
+            ]
+        }
 
     @app.get("/api/downloads/{token}")
     def list_downloads(token: str):
-        db = sessions()
-        try:
-            entitlement = db.scalar(select(Entitlement).where(Entitlement.token == token))
-            if entitlement is None:
-                raise HTTPException(404, "License not found")
-            return {"artifacts": artifact_ids(entitlement)}
-        finally:
-            db.close()
+        entitlement = store.get_entitlement_by_token(token)
+        if entitlement is None:
+            raise HTTPException(404, "License not found")
+        return {"artifacts": artifact_ids(entitlement)}
 
     @app.get("/api/downloads/{token}/{artifact_id}")
     def download(token: str, artifact_id: str):
-        db = sessions()
+        entitlement = store.get_entitlement_by_token(token)
+        if entitlement is None:
+            raise HTTPException(404, "License not found")
+        if artifact_id not in artifact_ids(entitlement):
+            raise HTTPException(403, "This plan does not include that artifact")
         try:
-            entitlement = db.scalar(select(Entitlement).where(Entitlement.token == token))
-            if entitlement is None:
-                raise HTTPException(404, "License not found")
-            if artifact_id not in artifact_ids(entitlement):
-                raise HTTPException(403, "This plan does not include that artifact")
-            try:
-                content = read_artifact(settings.artifact_dir, artifact_id)
-            except FileNotFoundError as exc:
-                raise HTTPException(409, "This artifact ships with a later release") from exc
-            return {"artifactId": artifact_id, "content": content}
-        finally:
-            db.close()
+            content = read_artifact(settings.artifact_dir, artifact_id)
+        except FileNotFoundError as exc:
+            raise HTTPException(409, "This artifact ships with a later release") from exc
+        return {"artifactId": artifact_id, "content": content}
 
     return app
 

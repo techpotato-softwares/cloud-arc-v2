@@ -6,18 +6,18 @@ import uuid
 from email.message import EmailMessage as SmtpEmail
 from pathlib import Path
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
 from app.catalog import Plan
 from app.models import EmailMessage, Entitlement, Lead, Order, utcnow
+from app.store import DynamoCommerceStore, MemoryCommerceStore
+
+CommerceStore = MemoryCommerceStore | DynamoCommerceStore
 
 
 def new_id() -> str:
     return str(uuid.uuid4())
 
 
-def create_lead(db: Session, *, email: str, whatsapp: str, consent: bool, page: str) -> Lead:
+def create_lead(store: CommerceStore, *, email: str, whatsapp: str, consent: bool, page: str) -> Lead:
     can_follow = consent and bool(email or whatsapp)
     lead = Lead(
         id=new_id(),
@@ -27,13 +27,12 @@ def create_lead(db: Session, *, email: str, whatsapp: str, consent: bool, page: 
         page=page.strip(),
         follow_up_status="queued" if can_follow else "skipped_no_consent",
     )
-    db.add(lead)
-    db.commit()
+    store.put_lead(lead)
     return lead
 
 
 def create_order(
-    db: Session,
+    store: CommerceStore,
     *,
     plan: Plan,
     provider: str,
@@ -53,17 +52,19 @@ def create_order(
         currency=currency,
         status="pending",
     )
-    db.add(order)
-    db.commit()
+    store.put_order(order)
     return order
 
 
-def fulfill(db: Session, order: Order, plan: Plan, artifact_dir: Path, smtp: dict) -> Entitlement:
-    existing = db.scalar(select(Entitlement).where(Entitlement.order_id == order.id))
+def fulfill(
+    store: CommerceStore, order: Order, plan: Plan, artifact_dir: Path, smtp: dict
+) -> Entitlement:
+    existing = store.get_entitlement_by_order(order.id)
     if existing:
         return existing
     order.status = "paid"
     order.paid_at = utcnow()
+    store.save_order(order)
     entitlement = Entitlement(
         id=new_id(),
         order_id=order.id,
@@ -71,15 +72,16 @@ def fulfill(db: Session, order: Order, plan: Plan, artifact_dir: Path, smtp: dic
         email=order.email,
         artifacts=json.dumps(list(plan.artifacts)),
     )
-    db.add(entitlement)
-    message = _queue_email(db, order, plan, entitlement)
-    db.commit()
+    store.put_entitlement(entitlement)
+    message = _queue_email(store, order, plan, entitlement)
     _send_email(message, smtp)
-    db.commit()
+    store.save_email(message)
     return entitlement
 
 
-def _queue_email(db: Session, order: Order, plan: Plan, entitlement: Entitlement) -> EmailMessage:
+def _queue_email(
+    store: CommerceStore, order: Order, plan: Plan, entitlement: Entitlement
+) -> EmailMessage:
     steps = "\n".join(f"- {item}" for item in plan.includes)
     body = (
         f"Hello {order.buyer_name},\n\n"
@@ -103,7 +105,7 @@ def _queue_email(db: Session, order: Order, plan: Plan, entitlement: Entitlement
         body=body,
         status="stored",
     )
-    db.add(message)
+    store.put_email(message)
     return message
 
 

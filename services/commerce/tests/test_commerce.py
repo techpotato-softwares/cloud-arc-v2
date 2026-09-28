@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 def build_client(tmp_path, catalog_path) -> TestClient:
     settings = Settings(
         test_mode=True,
-        database_url=f"sqlite:///{tmp_path / 'commerce.sqlite'}",
+        table_name="",
         public_base_url="http://127.0.0.1:4173",
         catalog_path=catalog_path,
         artifact_dir=catalog_path.parents[2] / "services" / "commerce" / "artifacts",
@@ -158,16 +158,10 @@ def test_razorpay_payment_sends_onboarding_and_rejects_bad_signature(tmp_path):
         headers={"x-razorpay-signature": header},
     )
     assert paid.status_code == 200
-    from app.models import EmailMessage
-    from sqlalchemy import create_engine, select
-    from sqlalchemy.orm import Session
-
-    engine = create_engine(f"sqlite:///{tmp_path / 'commerce.sqlite'}")
-    with Session(engine) as db:
-        mail = db.scalar(select(EmailMessage).where(EmailMessage.to_email == "node@example.com"))
-        assert mail is not None
-        assert "private repository invite" in mail.body
-        assert "ForgeArc Node" in mail.subject
+    mail = client.app.state.store.email_for("node@example.com")
+    assert mail is not None
+    assert "private repository invite" in mail.body
+    assert "ForgeArc Node" in mail.subject
 
 
 def test_follow_up_requires_consent(tmp_path):
