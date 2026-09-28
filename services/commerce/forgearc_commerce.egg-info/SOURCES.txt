@@ -1,6 +1,7 @@
 pyproject.toml
 app/__init__.py
 app/catalog.py
+app/lambda_handler.py
 app/main.py
 app/models.py
 app/payments.py

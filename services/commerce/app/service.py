@@ -108,6 +108,21 @@ def _queue_email(db: Session, order: Order, plan: Plan, entitlement: Entitlement
 
 
 def _send_email(message: EmailMessage, smtp: dict) -> None:
+    if smtp.get("ses_region"):
+        import boto3
+
+        boto3.client("sesv2", region_name=smtp["ses_region"]).send_email(
+            FromEmailAddress=smtp["from"],
+            Destination={"ToAddresses": [message.to_email]},
+            Content={
+                "Simple": {
+                    "Subject": {"Data": message.subject},
+                    "Body": {"Text": {"Data": message.body}},
+                }
+            },
+        )
+        message.status = "sent"
+        return
     if not smtp.get("host"):
         return
     mail = SmtpEmail()

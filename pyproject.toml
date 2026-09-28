@@ -9,6 +9,7 @@ package = false
 
 [tool.uv.workspace]
 members = [
+  "infra/cdk",
   "services/commerce",
   "products/forgearc-python/apps/api",
   "products/forgearc-python/packages/shared",

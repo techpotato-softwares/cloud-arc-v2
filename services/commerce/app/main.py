@@ -62,6 +62,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         "username": settings.smtp_username,
         "password": settings.smtp_password,
         "from": settings.smtp_from,
+        "ses_region": settings.ses_region,
     }
 
     @asynccontextmanager
@@ -76,6 +77,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.get("/health")
+    def health():
+        return {"status": "ok"}
 
     @app.get("/api/catalog")
     def catalog():

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import time
 from urllib.parse import urlencode
 
 import httpx
@@ -26,6 +27,12 @@ def verify_stripe(payload: bytes, header: str, secret: str) -> bool:
     timestamp = parts.get("t")
     received = parts.get("v1")
     if not timestamp or not received:
+        return False
+    try:
+        age = abs(int(time.time()) - int(timestamp))
+    except ValueError:
+        return False
+    if age > 300:
         return False
     signed = f"{timestamp}.".encode() + payload
     expected = hmac.new(secret.encode(), signed, hashlib.sha256).hexdigest()
@@ -103,9 +110,18 @@ def _razorpay(settings: Settings, plan: Plan, order_id: str) -> dict:
     )
     response.raise_for_status()
     payload = response.json()
+    checkout_query = urlencode(
+        {
+            "order": order_id,
+            "providerOrder": payload["id"],
+            "key": settings.razorpay_key_id,
+            "amount": plan.price_inr * 100,
+            "name": plan.name,
+        }
+    )
     return {
         "mode": "live",
-        "url": f"{settings.public_base_url}/checkout/razorpay?order={order_id}",
+        "url": f"{settings.public_base_url}/checkout/razorpay?{checkout_query}",
         "providerReference": payload["id"],
         "razorpayKeyId": settings.razorpay_key_id,
         "amount": plan.price_inr * 100,

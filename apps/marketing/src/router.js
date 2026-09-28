@@ -3,6 +3,7 @@ import Home from "./views/Home.vue";
 import Pricing from "./views/Pricing.vue";
 import Checkout from "./views/Checkout.vue";
 import TestCheckout from "./views/TestCheckout.vue";
+import RazorpayCheckout from "./views/RazorpayCheckout.vue";
 import Thanks from "./views/Thanks.vue";
 import { trackPageView } from "./analytics";
 
@@ -27,6 +28,7 @@ export const router = createRouter({
     },
     { path: "/checkout", component: Checkout, meta: { title: "Secure checkout — ForgeArc", noindex: true } },
     { path: "/checkout/test", component: TestCheckout, meta: { title: "Checkout test — ForgeArc", noindex: true } },
+    { path: "/checkout/razorpay", component: RazorpayCheckout, meta: { title: "Razorpay checkout — ForgeArc", noindex: true } },
     { path: "/thanks", component: Thanks, meta: { title: "Purchase received — ForgeArc", noindex: true } }
   ],
   scrollBehavior(to) {

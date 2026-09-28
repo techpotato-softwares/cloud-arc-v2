@@ -1,0 +1,89 @@
+name: Deploy ForgeArc platform
+
+on:
+  workflow_dispatch:
+    inputs:
+      dns_only:
+        description: Create DNS and print registrar nameservers only
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - "apps/marketing/**"
+      - "apps/docs/**"
+      - "services/commerce/**"
+      - "packages/commercial-catalog/**"
+      - "infra/cdk/**"
+      - "tooling/deploy/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/deploy-sites.yml"
+
+concurrency:
+  group: forgearc-sites-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read deploy config
+        id: sites
+        run: |
+          echo "region=$(jq -r '.region' infra/cdk/config.json)" >> "$GITHUB_OUTPUT"
+          echo "docs_url=https://$(jq -r '.docsDomainName' infra/cdk/config.json)" >> "$GITHUB_OUTPUT"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.0.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.12.13"
+          enable-cache: true
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ steps.sites.outputs.region }}
+
+      - name: Install and build platform
+        env:
+          VITE_DOCS_URL: ${{ steps.sites.outputs.docs_url }}
+        run: |
+          pnpm install --frozen-lockfile
+          uv sync --all-packages --frozen
+          pnpm marketing:build
+          pnpm docs:build
+          bash tooling/deploy/build-commerce-lambda.sh
+
+      - name: Bootstrap and deploy CDK
+        working-directory: infra/cdk
+        env:
+          DNS_ONLY: ${{ inputs.dns_only || 'false' }}
+        run: |
+          account="$(aws sts get-caller-identity --query Account --output text)"
+          pnpm dlx aws-cdk@2 bootstrap "aws://$account/${{ steps.sites.outputs.region }}"
+          if [[ "$DNS_ONLY" == "true" ]]; then
+            pnpm dlx aws-cdk@2 deploy forgearc-dns-prod --require-approval never --outputs-file cdk-outputs.json
+          else
+            pnpm dlx aws-cdk@2 deploy --all --require-approval never --outputs-file cdk-outputs.json
+          fi
+          echo '## ForgeArc platform deployed' >> "$GITHUB_STEP_SUMMARY"
+          jq -r 'to_entries[] | .value | to_entries[] | "- **\(.key):** \(.value)"' cdk-outputs.json >> "$GITHUB_STEP_SUMMARY"

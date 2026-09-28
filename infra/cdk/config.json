@@ -1,0 +1,16 @@
+{
+  "appName": "forgearc",
+  "stage": "prod",
+  "region": "ap-south-1",
+  "domainName": "forgearc.dev",
+  "docsDomainName": "docs.forgearc.dev",
+  "apiDomainName": "api.forgearc.dev",
+  "hostedZoneName": "forgearc.dev",
+  "hostedZoneId": "",
+  "senderEmail": "hello@forgearc.dev",
+  "databaseName": "forgearc",
+  "databaseInstanceType": "t4g.micro",
+  "databaseMultiAz": false,
+  "natGateways": 1,
+  "monthlyBudgetUsd": 150
+}

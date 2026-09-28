@@ -10,6 +10,7 @@ packages/             Internal catalog and web configuration
 products/             ForgeArc Node, ForgeArc Python, and ForgeArc AI
 product-specs/        Product and go-to-market source documents
 tooling/release/      Standalone product exporters
+infra/cdk/            Production AWS platform infrastructure
 ```
 
 ## Prerequisites and setup
@@ -47,4 +48,5 @@ without access to the repository workspace.
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
 [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md), and
-[`docs/RELEASING.md`](docs/RELEASING.md).
+[`docs/RELEASING.md`](docs/RELEASING.md). Production deployment is documented
+in [`docs/DEPLOYING-PLATFORM.md`](docs/DEPLOYING-PLATFORM.md).
