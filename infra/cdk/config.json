@@ -2,6 +2,7 @@
   "appName": "forgearc",
   "stage": "prod",
   "region": "ap-south-1",
+  "customDomain": false,
   "domainName": "forgearc.dev",
   "docsDomainName": "docs.forgearc.dev",
   "apiDomainName": "api.forgearc.dev",

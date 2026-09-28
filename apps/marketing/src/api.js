@@ -1,6 +1,17 @@
 import catalogSnapshot from "./catalog.json";
 
-export const DOCS_URL = import.meta.env.VITE_DOCS_URL || "http://127.0.0.1:4174";
+export let DOCS_URL = import.meta.env.VITE_DOCS_URL || "http://127.0.0.1:4174";
+
+export async function loadRuntimeConfig() {
+  try {
+    const response = await fetch("/runtime-config.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const config = await response.json();
+    if (config.docsUrl) DOCS_URL = config.docsUrl;
+  } catch {
+    // Local development has no deployed runtime config.
+  }
+}
 
 export async function getCatalog() {
   try {

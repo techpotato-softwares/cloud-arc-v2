@@ -2,6 +2,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import { router } from "./router";
 import { capture } from "./analytics";
+import { loadRuntimeConfig } from "./api";
 import "./styles.css";
 
 const observer = typeof IntersectionObserver === "undefined"
@@ -19,7 +20,7 @@ const observer = typeof IntersectionObserver === "undefined"
       { threshold: 0.12 }
     );
 
-createApp(App)
+const app = createApp(App)
   .use(router)
   .directive("reveal", {
     mounted(el) {
@@ -30,8 +31,9 @@ createApp(App)
     unmounted(el) {
       observer?.unobserve(el);
     }
-  })
-  .mount("#app");
+  });
+
+loadRuntimeConfig().finally(() => app.mount("#app"));
 
 document.addEventListener("click", (event) => {
   const cta = event.target.closest("a.btn, button.btn");

@@ -45,7 +45,9 @@ def load_settings() -> Settings:
     return Settings(
         test_mode=os.environ.get("COMMERCE_TEST_MODE", "false").lower() == "true",
         table_name=os.environ.get("COMMERCE_TABLE", ""),
-        public_base_url=os.environ.get("COMMERCE_PUBLIC_BASE_URL", "http://127.0.0.1:4173"),
+        public_base_url=os.environ.get(
+            "COMMERCE_PUBLIC_BASE_URL", "http://127.0.0.1:4173"
+        ).rstrip("/"),
         catalog_path=Path(catalog),
         artifact_dir=Path(os.environ.get("COMMERCE_ARTIFACT_DIR", COMMERCE_ROOT / "artifacts")),
         stripe_secret_key=os.environ.get("STRIPE_SECRET_KEY", payment.get("stripeSecretKey", "")),

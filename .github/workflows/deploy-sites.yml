@@ -85,6 +85,10 @@ jobs:
           account="$(aws sts get-caller-identity --query Account --output text)"
           pnpm dlx aws-cdk@2 bootstrap "aws://$account/${{ steps.sites.outputs.region }}"
           if [[ "$DNS_ONLY" == "true" ]]; then
+            if [[ "$(jq -r '.customDomain' config.json)" != "true" ]]; then
+              echo "::error::dns_only needs \"customDomain\": true in infra/cdk/config.json"
+              exit 1
+            fi
             pnpm dlx aws-cdk@2 deploy forgearc-dns-prod --require-approval never --outputs-file cdk-outputs.json
           else
             pnpm dlx aws-cdk@2 deploy --all --require-approval never --outputs-file cdk-outputs.json

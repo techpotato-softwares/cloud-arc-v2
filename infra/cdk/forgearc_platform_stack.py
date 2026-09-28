@@ -45,30 +45,34 @@ class ForgeArcPlatformStack(Stack):
         self.config = config
         self.stage = config["stage"]
         self.domain = config["domainName"]
+        self.custom_domain = bool(config.get("customDomain"))
 
-        zone = hosted_zone or self._hosted_zone()
-        edge_certificate = acm.DnsValidatedCertificate(
-            self,
-            "EdgeCertificate",
-            domain_name=self.domain,
-            subject_alternative_names=[
-                f"www.{self.domain}",
-                config["docsDomainName"],
-            ],
-            hosted_zone=zone,
-            region="us-east-1",
-        )
-        api_certificate = acm.Certificate(
-            self,
-            "ApiCertificate",
-            domain_name=config["apiDomainName"],
-            validation=acm.CertificateValidation.from_dns(zone),
-        )
+        zone = None
+        edge_certificate = None
+        api_certificate = None
+        if self.custom_domain:
+            zone = hosted_zone or self._hosted_zone()
+            edge_certificate = acm.DnsValidatedCertificate(
+                self,
+                "EdgeCertificate",
+                domain_name=self.domain,
+                subject_alternative_names=[
+                    f"www.{self.domain}",
+                    config["docsDomainName"],
+                ],
+                hosted_zone=zone,
+                region="us-east-1",
+            )
+            api_certificate = acm.Certificate(
+                self,
+                "ApiCertificate",
+                domain_name=config["apiDomainName"],
+                validation=acm.CertificateValidation.from_dns(zone),
+            )
 
         commerce_table = dynamodb.Table(
             self,
             "CommerceTable",
-            table_name=f"forgearc-commerce-{self.stage}",
             partition_key=dynamodb.Attribute(name="pk", type=dynamodb.AttributeType.STRING),
             sort_key=dynamodb.Attribute(name="sk", type=dynamodb.AttributeType.STRING),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -117,29 +121,32 @@ class ForgeArcPlatformStack(Stack):
             log_retention=logs.RetentionDays.ONE_MONTH,
             environment={
                 "COMMERCE_TEST_MODE": "false",
-                "COMMERCE_PUBLIC_BASE_URL": f"https://{self.domain}",
+                "COMMERCE_PUBLIC_BASE_URL": (
+                    f"https://{self.domain}" if self.custom_domain else ""
+                ),
                 "COMMERCE_TABLE": commerce_table.table_name,
                 "COMMERCE_PAYMENT_SECRET_ARN": payment_secret.secret_arn,
                 "COMMERCE_CATALOG": "/var/task/catalog.yaml",
                 "COMMERCE_ARTIFACT_DIR": "/var/task/artifacts",
-                "SES_REGION": self.region,
                 "SMTP_FROM": f"ForgeArc <{config['senderEmail']}>",
             },
         )
         commerce_table.grant_read_write_data(commerce)
         payment_secret.grant_read(commerce)
 
-        email_identity = ses.EmailIdentity(
-            self,
-            "ForgeArcEmailIdentity",
-            identity=ses.Identity.public_hosted_zone(zone),
-        )
-        commerce.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=["ses:SendEmail"],
-                resources=[email_identity.email_identity_arn],
+        if self.custom_domain:
+            email_identity = ses.EmailIdentity(
+                self,
+                "ForgeArcEmailIdentity",
+                identity=ses.Identity.public_hosted_zone(zone),
             )
-        )
+            commerce.add_environment("SES_REGION", self.region)
+            commerce.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["ses:SendEmail"],
+                    resources=[email_identity.email_identity_arn],
+                )
+            )
 
         api_access_logs = logs.LogGroup(
             self,
@@ -172,22 +179,23 @@ class ForgeArcPlatformStack(Stack):
                 ),
             ),
         )
-        api_domain = api.add_domain_name(
-            "ApiDomain",
-            domain_name=config["apiDomainName"],
-            certificate=api_certificate,
-            endpoint_type=apigateway.EndpointType.REGIONAL,
-            security_policy=apigateway.SecurityPolicy.TLS_1_2,
-        )
-        route53.ARecord(
-            self,
-            "ApiAlias",
-            zone=zone,
-            record_name="api",
-            target=route53.RecordTarget.from_alias(
-                targets.ApiGatewayDomain(api_domain)
-            ),
-        )
+        if self.custom_domain:
+            api_domain = api.add_domain_name(
+                "ApiDomain",
+                domain_name=config["apiDomainName"],
+                certificate=api_certificate,
+                endpoint_type=apigateway.EndpointType.REGIONAL,
+                security_policy=apigateway.SecurityPolicy.TLS_1_2,
+            )
+            route53.ARecord(
+                self,
+                "ApiAlias",
+                zone=zone,
+                record_name="api",
+                target=route53.RecordTarget.from_alias(
+                    targets.ApiGatewayDomain(api_domain)
+                ),
+            )
 
         marketing_bucket = self._site_bucket("MarketingBucket")
         docs_bucket = self._site_bucket("DocsBucket")
@@ -197,7 +205,9 @@ class ForgeArcPlatformStack(Stack):
         marketing_distribution = cloudfront.Distribution(
             self,
             "MarketingDistribution",
-            domain_names=[self.domain, f"www.{self.domain}"],
+            domain_names=(
+                [self.domain, f"www.{self.domain}"] if self.custom_domain else None
+            ),
             certificate=edge_certificate,
             default_root_object="index.html",
             default_behavior=cloudfront.BehaviorOptions(
@@ -235,7 +245,7 @@ class ForgeArcPlatformStack(Stack):
         docs_distribution = cloudfront.Distribution(
             self,
             "DocsDistribution",
-            domain_names=[config["docsDomainName"]],
+            domain_names=[config["docsDomainName"]] if self.custom_domain else None,
             certificate=edge_certificate,
             default_root_object="index.html",
             default_behavior=cloudfront.BehaviorOptions(
@@ -254,13 +264,24 @@ class ForgeArcPlatformStack(Stack):
             price_class=cloudfront.PriceClass.PRICE_CLASS_200,
             minimum_protocol_version=cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
         )
-        self._aliases(zone, marketing_distribution, docs_distribution)
+        if self.custom_domain:
+            self._aliases(zone, marketing_distribution, docs_distribution)
+            website_url = f"https://{self.domain}"
+            docs_url = f"https://{config['docsDomainName']}"
+            api_url = f"https://{config['apiDomainName']}"
+        else:
+            website_url = f"https://{marketing_distribution.distribution_domain_name}"
+            docs_url = f"https://{docs_distribution.distribution_domain_name}"
+            api_url = website_url
 
         s3deploy.BucketDeployment(
             self,
             "DeployMarketing",
             destination_bucket=marketing_bucket,
-            sources=[s3deploy.Source.asset(str(root / "apps" / "marketing" / "dist"))],
+            sources=[
+                s3deploy.Source.asset(str(root / "apps" / "marketing" / "dist")),
+                s3deploy.Source.json_data("runtime-config.json", {"docsUrl": docs_url}),
+            ],
             distribution=marketing_distribution,
             distribution_paths=["/*"],
             prune=True,
@@ -296,22 +317,25 @@ class ForgeArcPlatformStack(Stack):
         ).add_alarm_action(cloudwatch_actions.SnsAction(alarm_topic))
         self._budget(config)
 
-        cdk.CfnOutput(self, "WebsiteUrl", value=f"https://{self.domain}")
+        cdk.CfnOutput(self, "WebsiteUrl", value=website_url)
         cdk.CfnOutput(
             self,
             "MarketingCloudFrontUrl",
             value=f"https://{marketing_distribution.distribution_domain_name}",
         )
-        cdk.CfnOutput(self, "DocsUrl", value=f"https://{config['docsDomainName']}")
+        cdk.CfnOutput(self, "DocsUrl", value=docs_url)
         cdk.CfnOutput(
             self,
             "DocsCloudFrontUrl",
             value=f"https://{docs_distribution.distribution_domain_name}",
         )
-        cdk.CfnOutput(self, "ApiUrl", value=f"https://{config['apiDomainName']}")
+        cdk.CfnOutput(self, "ApiUrl", value=api_url)
+        cdk.CfnOutput(self, "StripeWebhookUrl", value=f"{api_url}/api/webhooks/stripe")
+        cdk.CfnOutput(self, "RazorpayWebhookUrl", value=f"{api_url}/api/webhooks/razorpay")
         cdk.CfnOutput(self, "PaymentSecretArn", value=payment_secret.secret_arn)
         cdk.CfnOutput(self, "AlarmTopicArn", value=alarm_topic.topic_arn)
-        cdk.CfnOutput(self, "HostedZoneId", value=zone.hosted_zone_id)
+        if zone is not None:
+            cdk.CfnOutput(self, "HostedZoneId", value=zone.hosted_zone_id)
 
     def _hosted_zone(self) -> route53.IHostedZone:
         zone_id = self.config.get("hostedZoneId", "")

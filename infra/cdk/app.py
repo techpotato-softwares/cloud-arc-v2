@@ -18,7 +18,7 @@ environment = cdk.Environment(
     region=config["region"],
 )
 dns_stack = None
-if not config.get("hostedZoneId"):
+if config.get("customDomain") and not config.get("hostedZoneId"):
     dns_stack = ForgeArcDnsStack(
         app,
         f"{config['appName']}-dns-{config['stage']}",

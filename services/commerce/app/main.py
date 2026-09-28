@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 from contextlib import asynccontextmanager
+from dataclasses import replace
 from datetime import UTC
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -68,7 +70,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.store = store
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.public_base_url, "http://127.0.0.1:4173", "http://localhost:4173"],
+        allow_origins=[
+            origin
+            for origin in (settings.public_base_url, "http://127.0.0.1:4173", "http://localhost:4173")
+            if origin
+        ],
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -92,8 +98,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         return {"id": lead.id, "followUpStatus": lead.follow_up_status}
 
+    def checkout_settings(request: Request) -> Settings:
+        if settings.public_base_url:
+            return settings
+        origin = request.headers.get("origin", "")
+        parsed = urlparse(origin)
+        if parsed.scheme != "https" or not (parsed.hostname or "").endswith(".cloudfront.net"):
+            raise HTTPException(400, "Checkout must start from the ForgeArc website")
+        return replace(settings, public_base_url=f"https://{parsed.hostname}")
+
     @app.post("/api/checkout")
-    def checkout(body: CheckoutIn):
+    def checkout(body: CheckoutIn, request: Request):
         plan = plans.get(body.planId)
         if plan is None:
             raise HTTPException(404, "Unknown plan")
@@ -104,6 +119,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(422, "India billing uses Razorpay")
         if body.country.upper() != "IN" and provider != "stripe":
             raise HTTPException(422, "International billing uses Stripe")
+        request_settings = checkout_settings(request)
         order = create_order(
             store,
             plan=plan,
@@ -112,7 +128,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             buyer_name=body.name,
         )
         try:
-            started = start_checkout(settings, plan, order.id, provider)
+            started = start_checkout(request_settings, plan, order.id, provider)
         except RuntimeError as exc:
             raise HTTPException(503, str(exc)) from exc
         if started.get("providerReference"):
