@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import { router } from "./router";
+import { capture } from "./analytics";
 import "./styles.css";
 
 const observer = typeof IntersectionObserver === "undefined"
@@ -10,6 +11,7 @@ const observer = typeof IntersectionObserver === "undefined"
         for (const entry of entries) {
           if (entry.isIntersecting) {
             entry.target.classList.add("visible");
+            if (entry.target.id) capture("funnel_section_viewed", { section: entry.target.id });
             observer.unobserve(entry.target);
           }
         }
@@ -30,3 +32,12 @@ createApp(App)
     }
   })
   .mount("#app");
+
+document.addEventListener("click", (event) => {
+  const cta = event.target.closest("a.btn, button.btn");
+  if (!cta) return;
+  capture("cta_clicked", {
+    label: cta.textContent.trim().replace(/\s+/g, " ").slice(0, 80),
+    destination: cta.getAttribute("href") || undefined
+  });
+});

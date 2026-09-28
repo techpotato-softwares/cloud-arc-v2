@@ -1,12 +1,16 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
-import { RouterLink, RouterView } from "vue-router";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { RouterLink, RouterView, useRoute } from "vue-router";
 import Icon from "./components/Icon.vue";
+import AnalyticsConsent from "./components/AnalyticsConsent.vue";
 import PurchaseToast from "./components/PurchaseToast.vue";
 import { DOCS_URL } from "./api";
 
 const scrolled = ref(false);
 const dark = ref(document.documentElement.classList.contains("dark"));
+const menuOpen = ref(false);
+const menuButton = ref(null);
+const route = useRoute();
 
 function onScroll() {
   scrolled.value = window.scrollY > 8;
@@ -18,8 +22,46 @@ function toggleTheme() {
   localStorage.setItem("forgearc-theme", dark.value ? "dark" : "light");
 }
 
-onMounted(() => window.addEventListener("scroll", onScroll, { passive: true }));
-onUnmounted(() => window.removeEventListener("scroll", onScroll));
+function closeMenu(restoreFocus = false) {
+  menuOpen.value = false;
+  if (restoreFocus) nextTick(() => menuButton.value?.focus());
+}
+
+function toggleMenu() {
+  menuOpen.value = !menuOpen.value;
+}
+
+function onKeydown(event) {
+  if (event.key === "Escape" && menuOpen.value) closeMenu(true);
+  if (event.key !== "Tab" || !menuOpen.value) return;
+
+  const focusable = [...document.querySelectorAll("#primary-navigation a, #primary-navigation button, .menu-toggle")]
+    .filter((element) => element.offsetParent !== null);
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last?.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first?.focus();
+  }
+}
+
+watch(() => route.fullPath, () => closeMenu());
+watch(menuOpen, (open) => {
+  document.body.classList.toggle("menu-open", open);
+  if (open) nextTick(() => document.querySelector("#primary-navigation a")?.focus());
+});
+onMounted(() => {
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("keydown", onKeydown);
+});
+onUnmounted(() => {
+  window.removeEventListener("scroll", onScroll);
+  window.removeEventListener("keydown", onKeydown);
+  document.body.classList.remove("menu-open");
+});
 </script>
 
 <template>
@@ -29,17 +71,29 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
         <img src="/logo.svg" alt="" />
         ForgeArc
       </RouterLink>
-      <nav class="nav-links">
-        <RouterLink class="nav-link hide-sm" to="/#products">Products</RouterLink>
-        <RouterLink class="nav-link hide-sm" to="/#tour">Tour</RouterLink>
-        <RouterLink class="nav-link hide-sm" to="/#code">Code</RouterLink>
+      <nav id="primary-navigation" class="nav-links" :class="{ open: menuOpen }" aria-label="Primary">
+        <RouterLink class="nav-link" to="/#products">Products</RouterLink>
+        <RouterLink class="nav-link" to="/#architecture">Architecture</RouterLink>
         <RouterLink class="nav-link" to="/pricing">Pricing</RouterLink>
-        <a class="nav-link hide-sm" :href="DOCS_URL">Docs</a>
+        <RouterLink class="nav-link" to="/#faq">FAQ</RouterLink>
+        <a class="nav-link" href="https://techpotato.in">Blog</a>
+        <a class="nav-link" :href="DOCS_URL">Docs</a>
         <button class="icon-btn" type="button" :aria-label="dark ? 'Switch to light theme' : 'Switch to dark theme'" @click="toggleTheme">
           <Icon :name="dark ? 'sun' : 'moon'" :size="18" />
         </button>
         <RouterLink class="btn btn-brand btn-sm" to="/pricing">Get the kit</RouterLink>
       </nav>
+      <button
+        ref="menuButton"
+        class="menu-toggle"
+        type="button"
+        :aria-expanded="menuOpen"
+        aria-controls="primary-navigation"
+        :aria-label="menuOpen ? 'Close navigation' : 'Open navigation'"
+        @click="toggleMenu"
+      >
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
 
@@ -73,4 +127,5 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   </footer>
 
   <PurchaseToast />
+  <AnalyticsConsent />
 </template>

@@ -7,6 +7,11 @@
 plans:
   - id: forgearc-node
     name: ForgeArc Node
+    family: node
+    tier: Production source
+    recommended: true
+    license_scope: One organization and its products
+    updates: 12 months included
     summary: TypeScript serverless kit with auth, modules, and CDK.
     price_inr: 28999
     price_usd: 349
@@ -21,6 +26,11 @@ plans:
 
   - id: forgearc-python
     name: ForgeArc Python
+    family: python
+    tier: Production source
+    recommended: true
+    license_scope: One organization and its products
+    updates: 12 months included
     summary: Python serverless kit with SQLAlchemy, Alembic, and CDK.
     price_inr: 32999
     price_usd: 399
@@ -36,6 +46,11 @@ plans:
 
   - id: forgearc-bundle
     name: ForgeArc Bundle
+    family: bundle
+    tier: Node + Python
+    recommended: true
+    license_scope: One organization and its products
+    updates: 12 months included
     summary: Node and Python kits with one license.
     price_inr: 49999
     price_usd: 599
@@ -49,6 +64,10 @@ plans:
 
   - id: free
     name: Free
+    family: ai
+    tier: Evaluate
+    license_scope: Local evaluation
+    updates: Public core updates
     summary: Public CLI and core for local evaluation.
     price_inr: 0
     price_usd: 0
@@ -61,6 +80,12 @@ plans:
 
   - id: starter-aws
     name: Starter AWS
+    family: ai
+    tier: AWS source
+    recommended: true
+    license_scope: One organization and its products
+    updates: Current AWS MVP updates
+    excludes: [GCP adapter, Multi-project agency license]
     summary: ForgeArc AI with the AWS adapter.
     price_inr: 3999
     price_usd: 48
@@ -74,6 +99,10 @@ plans:
 
   - id: starter-gcp
     name: Starter GCP
+    family: ai
+    tier: GCP source
+    license_scope: One organization and its products
+    updates: Opens with GCP adapter
     summary: ForgeArc AI with the GCP adapter.
     price_inr: 3999
     price_usd: 48
@@ -86,6 +115,10 @@ plans:
 
   - id: professional
     name: Professional
+    family: ai
+    tier: Multi-cloud
+    license_scope: One organization and its products
+    updates: Lifetime updates
     summary: Both cloud adapters, updates, and support allowance.
     price_inr: 9999
     price_usd: 120
@@ -99,6 +132,10 @@ plans:
 
   - id: agency
     name: Agency
+    family: ai
+    tier: Multi-project
+    license_scope: Client and multi-project use
+    updates: Lifetime updates
     summary: Multi-project license and setup support.
     price_inr: 24999
     price_usd: 299
@@ -112,6 +149,10 @@ plans:
 
   - id: enterprise
     name: Enterprise
+    family: ai
+    tier: Team + SLA
+    license_scope: Team license
+    updates: Contract SLA
     summary: Team license, SLA, and workshop.
     price_inr: 79999
     price_usd: 960
@@ -125,6 +166,10 @@ plans:
 
   - id: suite
     name: ForgeArc Suite
+    family: bundle
+    tier: Node + Python + AI
+    license_scope: One organization and its products
+    updates: Plan-specific
     summary: Node, Python, and ForgeArc AI together.
     price_inr: 29999
     price_usd: 360

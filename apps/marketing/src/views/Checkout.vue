@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import Icon from "../components/Icon.vue";
 import { getCatalog, money, startCheckout } from "../api";
+import { capture } from "../analytics";
 
 const route = useRoute();
 const plan = ref(null);
@@ -24,6 +25,11 @@ onMounted(async () => {
 async function submit() {
   error.value = "";
   busy.value = true;
+  capture("checkout_started", {
+    plan: plan.value.id,
+    provider: provider.value.toLowerCase(),
+    region: country.value
+  });
   try {
     const result = await startCheckout({
       planId: plan.value.id,

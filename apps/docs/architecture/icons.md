@@ -1,7 +1,12 @@
 # Icon policy
 
-Architecture diagrams in this site use original geometric glyphs plus the official service name, for example “S3”, “Lambda”, “Vertex AI”, and “Cloud Run”.
+Architecture diagrams use official vendor assets for AWS and Google Cloud services. ForgeArc, local-runtime, browser, and framework-only nodes use original geometric glyphs. Every node retains its text label so diagrams remain understandable in dark mode, print, screen readers, and narrow layouts.
 
-Those drawings are documentation aids. They are not the AWS Architecture Icons package and they are not the Google Cloud icon set. Replacing a glyph with an official asset later must follow that vendor’s trademark and icon-use rules, including the rule that a diagram must not imply sponsorship or partnership.
+## Sources
 
-Keep the text label even when an official asset is added. The label is what remains clear in dark mode, print, and small layouts.
+- AWS Architecture Icons, 31 July 2026 release: [aws.amazon.com/architecture/icons](https://aws.amazon.com/architecture/icons/)
+- Google Cloud product and category icons: [cloud.google.com/icons](https://cloud.google.com/icons)
+
+The vendored files are limited to the services used in these diagrams and live under `public/icons/aws` and `public/icons/gcp`. They are not recolored or combined with the ForgeArc logo.
+
+AWS and Google Cloud names, trademarks, and icons belong to their respective owners. Their appearance describes deployment compatibility and does not imply endorsement, sponsorship, or partnership.

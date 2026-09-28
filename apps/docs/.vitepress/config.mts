@@ -23,7 +23,8 @@ export default defineConfig({
             { text: "Overview", link: "/node/" },
             { text: "Getting started", link: "/node/getting-started" },
             { text: "Architecture", link: "/node/architecture" },
-            { text: "Modules", link: "/node/modules" }
+            { text: "Modules", link: "/node/modules" },
+            { text: "Runtime and extension", link: "/node/runtime" }
           ]
         },
         {
@@ -42,7 +43,8 @@ export default defineConfig({
             { text: "Overview", link: "/python/" },
             { text: "Getting started", link: "/python/getting-started" },
             { text: "Architecture", link: "/python/architecture" },
-            { text: "Modules and data", link: "/python/modules" }
+            { text: "Modules and data", link: "/python/modules" },
+            { text: "Runtime and migrations", link: "/python/runtime" }
           ]
         },
         {
@@ -60,8 +62,13 @@ export default defineConfig({
           items: [
             { text: "Overview", link: "/ai/" },
             { text: "Quickstart", link: "/ai/quickstart" },
+            { text: "Configuration", link: "/ai/configuration" },
+            { text: "API routes", link: "/ai/api" },
             { text: "AWS and GCP", link: "/ai/aws-architecture" },
-            { text: "Chat and ingest flows", link: "/ai/flows" }
+            { text: "Chat and ingest flows", link: "/ai/flows" },
+            { text: "AWS deployment", link: "/ai/deploy" },
+            { text: "Security and operations", link: "/ai/security" },
+            { text: "Shipped scope and roadmap", link: "/ai/roadmap" }
           ]
         }
       ],
@@ -70,16 +77,26 @@ export default defineConfig({
           text: "Architecture",
           items: [
             { text: "Product map", link: "/architecture/" },
+            { text: "Architecture layers", link: "/architecture/layers" },
             { text: "Request path", link: "/architecture/request-path" },
             { text: "Modules", link: "/architecture/modules" },
             { text: "Deploy", link: "/architecture/deploy" },
             { text: "Security", link: "/architecture/security" },
-            { text: "Icon policy", link: "/architecture/icons" }
+            { text: "Icon policy", link: "/architecture/icons" },
+            { text: "Buying FAQ", link: "/commercial/faq" }
           ]
         }
       ]
     },
-    socialLinks: [{ icon: "github", link: "https://github.com/thinkincloud" }],
+    socialLinks: [
+      {
+        icon: {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>'
+        },
+        link: "https://techpotato.in",
+        ariaLabel: "TechPotato Softwares LLP"
+      }
+    ],
     search: { provider: "local" },
     footer: {
       message: "Built by TechPotato Softwares LLP",

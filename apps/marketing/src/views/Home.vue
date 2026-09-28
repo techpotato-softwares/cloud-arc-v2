@@ -1,12 +1,24 @@
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
 import Icon from "../components/Icon.vue";
 import LeadForm from "../components/LeadForm.vue";
 import ProductTour from "../components/ProductTour.vue";
-import { DOCS_URL } from "../api";
+import HeroTerminal from "../components/HeroTerminal.vue";
+import ProductTabs from "../components/ProductTabs.vue";
+import ArchitectureLayers from "../components/ArchitectureLayers.vue";
+import ArchitectureDiagram from "../components/ArchitectureDiagram.vue";
+import ROICalculator from "../components/ROICalculator.vue";
+import { DOCS_URL, getCatalog, money } from "../api";
+import catalogSnapshot from "../catalog.json";
 
 const activeCode = ref("node");
+const country = ref(Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Kolkata" ? "IN" : "US");
+const plans = ref(catalogSnapshot.plans);
+const openPlans = computed(() => plans.value.filter((plan) => plan.checkoutEnabled));
+getCatalog().then((payload) => {
+  if (payload.plans?.length) plans.value = payload.plans;
+});
 
 const codeSamples = {
   node: `@Controller({ path: "/api/invoices", lambdaName: "invoices" })
@@ -85,6 +97,14 @@ const faqs = [
   { q: "How do payments work?", a: "India billing uses Razorpay in rupees. International billing uses Stripe in US dollars. Delivery starts after verified payment confirmation." },
   { q: "Do I get updates?", a: "ForgeArc Node and ForgeArc Python include 12 months of updates. Renewal is optional and your licensed source keeps working." }
 ];
+
+const baselineWork = [
+  ["Authentication and RBAC", "16–28h"],
+  ["Module and data boundaries", "12–20h"],
+  ["API contracts and validation", "10–16h"],
+  ["AWS infrastructure and delivery", "24–40h"],
+  ["Tests, logging, and hardening", "15–24h"]
+];
 </script>
 
 <template>
@@ -108,34 +128,7 @@ const faqs = [
             <span><Icon name="check" :size="16" /> 12 months of updates</span>
           </div>
         </div>
-        <div class="hero-product" aria-label="ForgeArc product structure preview">
-          <div class="hero-product-top">
-            <span class="window-dots"><i></i><i></i><i></i></span>
-            <span>forgearc-python</span>
-            <span class="secure-label"><Icon name="lock" :size="13" /> private</span>
-          </div>
-          <div class="product-shell">
-            <aside class="file-tree">
-              <b>PRODUCT</b>
-              <span>▾ apps/api</span>
-              <span>▾ packages/shared</span>
-              <span class="active">▾ modules/platform</span>
-              <span>▾ modules/files</span>
-              <span>▾ infra/cdk</span>
-              <span> migrations</span>
-            </aside>
-            <div class="shell-content">
-              <span class="shell-tab">auth_controller.py</span>
-              <pre><span class="t-key">@Controller</span>(<span class="t-ok">"/api/auth"</span>)
-class AuthController:
-    <span class="t-key">@Post</span>(<span class="t-ok">"/login"</span>)
-    <span class="t-key">@ApiPublic</span>()
-    def login(self, body):
-        return self.service.login(body)</pre>
-              <div class="build-result"><Icon name="check" :size="16" /> Manifest, OpenAPI and Lambda routes generated</div>
-            </div>
-          </div>
-        </div>
+        <HeroTerminal />
       </div>
     </section>
 
@@ -149,6 +142,27 @@ class AuthController:
       </div>
     </section>
 
+    <section class="section">
+      <div class="container problem-grid">
+        <div v-reveal>
+          <span class="kicker">The recurring tax</span>
+          <h2 style="font-size: clamp(30px, 4vw, 44px); margin: 12px 0">Every product starts with the same invisible work.</h2>
+          <p class="section-copy">Authentication, permissions, contracts, persistence, deployment, and tests are essential—but they are rarely the reason customers choose your product.</p>
+          <ul class="pain-list">
+            <li><Icon name="check" :size="17" /> Stop copying unowned boilerplate between repositories.</li>
+            <li><Icon name="check" :size="17" /> Keep framework-native code your team can inspect.</li>
+            <li><Icon name="check" :size="17" /> Move baseline work out of the critical path.</li>
+          </ul>
+        </div>
+        <aside class="hours-card" v-reveal>
+          <span class="kicker">Typical baseline estimate</span>
+          <div v-for="[task, time] in baselineWork" :key="task" class="hours-row"><span>{{ task }}</span><strong>{{ time }}</strong></div>
+          <div class="hours-total">77–128 hours</div>
+          <small class="muted">Illustrative estimate. Your stack and standards determine the actual effort.</small>
+        </aside>
+      </div>
+    </section>
+
     <section id="products" class="section section-alt">
       <div class="container">
         <div class="section-head" v-reveal>
@@ -156,15 +170,20 @@ class AuthController:
           <h2>One product architecture. Two production stacks.</h2>
           <p>Pick the language your team already knows. The request path, module boundaries, contracts, and deployment model stay consistent.</p>
         </div>
-        <div class="grid-3">
-          <article v-for="p in products" :key="p.name" class="card product-card" v-reveal>
-            <span class="pill" :class="{ 'pill-muted': p.muted }">{{ p.pill }}</span>
-            <span class="card-icon"><Icon :name="p.icon" :size="22" /></span>
-            <h3>{{ p.name }}</h3>
-            <p>{{ p.text }}</p>
-            <div class="card-meta">{{ p.meta }}</div>
-          </article>
+        <ProductTabs v-reveal />
+      </div>
+    </section>
+
+    <section id="architecture" class="section">
+      <div class="container">
+        <div class="section-head" v-reveal>
+          <span class="kicker">Under the hood</span>
+          <h2>Layered enough to scale. Familiar enough to own.</h2>
+          <p>The same boundaries appear in the source, generated contracts, tests, and deployment. Cloud-specific services stay behind adapters.</p>
         </div>
+        <ArchitectureDiagram v-reveal />
+        <ArchitectureLayers v-reveal />
+        <div style="text-align: center; margin-top: 28px"><a class="text-link" :href="DOCS_URL">See deployment diagrams <Icon name="arrow" :size="16" /></a></div>
       </div>
     </section>
 
@@ -218,6 +237,38 @@ class AuthController:
             <button :class="{ active: activeCode === 'python' }" @click="activeCode = 'python'">Python</button>
           </div>
           <pre><code>{{ codeSamples[activeCode] }}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container"><ROICalculator v-reveal /></div>
+    </section>
+
+    <section id="catalog" class="section">
+      <div class="container">
+        <div class="section-head" v-reveal>
+          <span class="kicker">Pricing catalog</span>
+          <h2>The kits you can buy today.</h2>
+          <p>These prices come from the ForgeArc catalog. Open pricing for every module, license, and roadmap plan.</p>
+        </div>
+        <section class="plans">
+          <article v-for="plan in openPlans" :key="plan.id" class="card plan" :class="{ featured: plan.recommended }" v-reveal>
+            <span class="pill">{{ plan.badge }}</span>
+            <span class="card-meta">{{ plan.tier }}</span>
+            <h3>{{ plan.name }}</h3>
+            <p>{{ plan.summary }}</p>
+            <div class="price">
+              <strong>{{ money(plan, country) }}</strong>
+              <span>one time</span>
+            </div>
+            <RouterLink class="btn btn-block" :class="plan.recommended ? 'btn-brand' : 'btn-alt'" :to="`/checkout?plan=${plan.id}&country=${country}`">
+              Buy {{ plan.name }}
+            </RouterLink>
+          </article>
+        </section>
+        <div style="text-align: center; margin-top: 28px">
+          <RouterLink class="text-link" to="/pricing">See the full catalog <Icon name="arrow" :size="16" /></RouterLink>
         </div>
       </div>
     </section>
@@ -296,7 +347,7 @@ class AuthController:
       </div>
     </section>
 
-    <section class="section section-alt">
+    <section id="faq" class="section section-alt">
       <div class="container">
         <div class="section-head" v-reveal>
           <span class="kicker">Buying questions</span>

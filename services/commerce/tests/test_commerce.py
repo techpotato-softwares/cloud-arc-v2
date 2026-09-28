@@ -56,6 +56,20 @@ def test_closed_plan_cannot_be_purchased(tmp_path):
     assert response.status_code == 409
 
 
+def test_catalog_groups_pricing_without_changing_checkout_ids(tmp_path):
+    client = build_client(tmp_path, catalog_path())
+    payload = client.get("/api/catalog").json()
+    plans = {plan["id"]: plan for plan in payload["plans"]}
+    families = {family["id"]: family for family in payload["families"]}
+
+    assert {"node", "python", "ai", "bundle"} <= set(families)
+    assert plans["forgearc-node"]["family"] == "node"
+    assert plans["starter-aws"]["checkoutEnabled"] is True
+    assert plans["starter-gcp"]["checkoutEnabled"] is False
+    assert plans["forgearc-bundle"]["recommended"] is True
+    assert plans["forgearc-node"]["priceInr"] == 28999
+
+
 def test_aws_starter_checkout_is_open(tmp_path):
     client = build_client(tmp_path, catalog_path())
     response = client.post(

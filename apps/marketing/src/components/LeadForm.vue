@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { createLead } from "../api";
+import { capture } from "../analytics";
 
 const email = ref("");
 const whatsapp = ref("");
@@ -23,6 +24,11 @@ async function submit() {
     status.value = result.followUpStatus === "queued"
       ? "Saved. We will reach out only on the channel you allowed."
       : "Saved. We will not contact you unless you tick the box.";
+    capture("lead_submitted", {
+      contact_consent: consent.value,
+      has_email: Boolean(email.value),
+      has_whatsapp: Boolean(whatsapp.value)
+    });
   } catch (err) {
     error.value = err.message;
   } finally {

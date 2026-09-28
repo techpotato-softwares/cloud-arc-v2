@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /thanks
+
+Sitemap: https://forgearc.dev/sitemap.xml

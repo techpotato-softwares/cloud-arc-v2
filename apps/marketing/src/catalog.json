@@ -1,0 +1,208 @@
+{
+  "plans": [
+    {
+      "id": "forgearc-node",
+      "name": "ForgeArc Node",
+      "summary": "TypeScript serverless kit with auth, modules, and CDK.",
+      "priceInr": 28999,
+      "priceUsd": 349,
+      "checkoutEnabled": true,
+      "badge": "Available",
+      "includes": [
+        "TypeScript ForgeArc source",
+        "Platform auth, demo, files, and AI stub modules",
+        "12 months of updates",
+        "Private setup guide"
+      ],
+      "family": "node",
+      "tier": "Production source",
+      "recommended": true,
+      "licenseScope": "One organization and its products",
+      "updates": "12 months included",
+      "excludes": []
+    },
+    {
+      "id": "forgearc-python",
+      "name": "ForgeArc Python",
+      "summary": "Python serverless kit with SQLAlchemy, Alembic, and CDK.",
+      "priceInr": 32999,
+      "priceUsd": 399,
+      "checkoutEnabled": true,
+      "badge": "Available",
+      "includes": [
+        "ForgeArc Python source",
+        "SQLAlchemy, SQLModel, and Alembic",
+        "Platform auth, demo, files, and AI stub modules",
+        "12 months of updates",
+        "Private setup guide"
+      ],
+      "family": "python",
+      "tier": "Production source",
+      "recommended": true,
+      "licenseScope": "One organization and its products",
+      "updates": "12 months included",
+      "excludes": []
+    },
+    {
+      "id": "forgearc-bundle",
+      "name": "ForgeArc Bundle",
+      "summary": "Node and Python kits with one license.",
+      "priceInr": 49999,
+      "priceUsd": 599,
+      "checkoutEnabled": true,
+      "badge": "Available",
+      "includes": [
+        "Both ForgeArc kits",
+        "Shared API contract",
+        "12 months of updates"
+      ],
+      "family": "bundle",
+      "tier": "Node + Python",
+      "recommended": true,
+      "licenseScope": "One organization and its products",
+      "updates": "12 months included",
+      "excludes": []
+    },
+    {
+      "id": "free",
+      "name": "Free",
+      "summary": "Public CLI and core for local evaluation.",
+      "priceInr": 0,
+      "priceUsd": 0,
+      "checkoutEnabled": false,
+      "badge": "Local evaluation",
+      "includes": [
+        "CLI and provider-agnostic core",
+        "Local development with the OpenAI path"
+      ],
+      "family": "ai",
+      "tier": "Evaluate",
+      "recommended": false,
+      "licenseScope": "Local evaluation",
+      "updates": "Public core updates",
+      "excludes": []
+    },
+    {
+      "id": "starter-aws",
+      "name": "Starter AWS",
+      "summary": "ForgeArc AI with the AWS adapter.",
+      "priceInr": 3999,
+      "priceUsd": 48,
+      "checkoutEnabled": true,
+      "badge": "Available",
+      "includes": [
+        "ForgeArc AI core",
+        "AWS adapter and docs",
+        "Bedrock, S3, and SQS path"
+      ],
+      "family": "ai",
+      "tier": "AWS source",
+      "recommended": true,
+      "licenseScope": "One organization and its products",
+      "updates": "Current AWS MVP updates",
+      "excludes": [
+        "GCP adapter",
+        "Multi-project agency license"
+      ]
+    },
+    {
+      "id": "starter-gcp",
+      "name": "Starter GCP",
+      "summary": "ForgeArc AI with the GCP adapter.",
+      "priceInr": 3999,
+      "priceUsd": 48,
+      "checkoutEnabled": false,
+      "badge": "Coming with GCP",
+      "includes": [
+        "ForgeArc AI core",
+        "GCP adapter and docs"
+      ],
+      "family": "ai",
+      "tier": "GCP source",
+      "recommended": false,
+      "licenseScope": "One organization and its products",
+      "updates": "Opens with GCP adapter",
+      "excludes": []
+    },
+    {
+      "id": "professional",
+      "name": "Professional",
+      "summary": "Both cloud adapters, updates, and support allowance.",
+      "priceInr": 9999,
+      "priceUsd": 120,
+      "checkoutEnabled": false,
+      "badge": "Coming with GCP",
+      "includes": [
+        "AWS and GCP adapters",
+        "Lifetime updates",
+        "Documented support allowance"
+      ],
+      "family": "ai",
+      "tier": "Multi-cloud",
+      "recommended": false,
+      "licenseScope": "One organization and its products",
+      "updates": "Lifetime updates",
+      "excludes": []
+    },
+    {
+      "id": "agency",
+      "name": "Agency",
+      "summary": "Multi-project license and setup support.",
+      "priceInr": 24999,
+      "priceUsd": 299,
+      "checkoutEnabled": false,
+      "badge": "Coming with GCP",
+      "includes": [
+        "Multi-project use",
+        "Setup support",
+        "Both adapters"
+      ],
+      "family": "ai",
+      "tier": "Multi-project",
+      "recommended": false,
+      "licenseScope": "Client and multi-project use",
+      "updates": "Lifetime updates",
+      "excludes": []
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise",
+      "summary": "Team license, SLA, and workshop.",
+      "priceInr": 79999,
+      "priceUsd": 960,
+      "checkoutEnabled": false,
+      "badge": "Coming with GCP",
+      "includes": [
+        "Team license",
+        "Custom adapter engagement",
+        "SLA and workshop"
+      ],
+      "family": "ai",
+      "tier": "Team + SLA",
+      "recommended": false,
+      "licenseScope": "Team license",
+      "updates": "Contract SLA",
+      "excludes": []
+    },
+    {
+      "id": "suite",
+      "name": "ForgeArc Suite",
+      "summary": "Node, Python, and ForgeArc AI together.",
+      "priceInr": 29999,
+      "priceUsd": 360,
+      "checkoutEnabled": false,
+      "badge": "Coming with GCP",
+      "includes": [
+        "ForgeArc Node",
+        "ForgeArc Python",
+        "ForgeArc AI and both adapters"
+      ],
+      "family": "bundle",
+      "tier": "Node + Python + AI",
+      "recommended": false,
+      "licenseScope": "One organization and its products",
+      "updates": "Plan-specific",
+      "excludes": []
+    }
+  ]
+}

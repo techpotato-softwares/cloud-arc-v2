@@ -11,7 +11,7 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from app.catalog import load_catalog
+from app.catalog import load_catalog, public_catalog
 from app.models import Base, Entitlement, Order
 from app.payments import start_checkout, verify_razorpay, verify_stripe
 from app.service import artifact_ids, create_lead, create_order, fulfill, read_artifact
@@ -79,7 +79,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/catalog")
     def catalog():
-        return {"plans": [plan.public() for plan in plans.values()]}
+        return public_catalog(plans)
 
     @app.post("/api/leads")
     def leads(body: LeadIn):

@@ -23,15 +23,13 @@ Manifest generation imports the same registrations and CDK creates one Lambda
 per declared handler. Both paths use the router, DI container, middleware, and
 SQLAlchemy session in `packages/shared/src`.
 
-```mermaid
-flowchart LR
-  Client --> FastAPI["FastAPI local host"]
-  Client --> Gateway["API Gateway"]
+<Mermaid chart="flowchart LR
+  Client --> FastAPI[FastAPI local host]
+  Client --> Gateway[API Gateway]
   Gateway --> Lambda
   FastAPI --> Router
   Lambda --> Router
-  Router --> Controller --> Service --> Repository --> PostgreSQL
-```
+  Router --> Controller --> Service --> Repository --> PostgreSQL" />
 
 ## Generate and deploy
 

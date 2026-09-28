@@ -1,9 +1,18 @@
+import catalogSnapshot from "./catalog.json";
+
 export const DOCS_URL = import.meta.env.VITE_DOCS_URL || "http://127.0.0.1:4174";
 
 export async function getCatalog() {
-  const response = await fetch("/api/catalog");
-  if (!response.ok) throw new Error("Catalog unavailable");
-  return response.json();
+  try {
+    const response = await fetch("/api/catalog");
+    if (response.ok) {
+      const payload = await response.json();
+      if (payload.plans?.length) return payload;
+    }
+  } catch {
+    // The published catalog remains visible when checkout is offline.
+  }
+  return catalogSnapshot;
 }
 
 export async function createLead(body) {

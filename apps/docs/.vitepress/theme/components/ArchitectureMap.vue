@@ -1,28 +1,28 @@
 <script setup lang="ts">
-type NodeSpec = { id: string; label: string; group: string; mark: string; note: string };
+type NodeSpec = { id: string; label: string; group: string; mark: string; note: string; icon?: string };
 type Lane = { label: string; nodes: string[] };
 
 const catalog: Record<string, NodeSpec> = {
   client: { id: "client", label: "Client", group: "App", mark: "client", note: "SPA or curl" },
   express: { id: "express", label: "Express", group: "Local", mark: "api", note: "Port 4000" },
   fastapi: { id: "fastapi", label: "FastAPI", group: "Local", mark: "api", note: "Port 4001" },
-  apigw: { id: "apigw", label: "API Gateway", group: "AWS", mark: "gateway", note: "One route per manifest entry" },
-  lambda: { id: "lambda", label: "Module Lambda", group: "AWS", mark: "lambda", note: "Shared layer attached" },
+  apigw: { id: "apigw", label: "API Gateway", group: "AWS", mark: "gateway", note: "One route per manifest entry", icon: "/icons/aws/api-gateway.svg" },
+  lambda: { id: "lambda", label: "Module Lambda", group: "AWS", mark: "lambda", note: "Shared layer attached", icon: "/icons/aws/lambda.svg" },
   router: { id: "router", label: "Router", group: "Shared layer", mark: "gateway", note: "Method + path match" },
   auth: { id: "auth", label: "JWT gate", group: "Shared layer", mark: "lock", note: "Then permission and module" },
   csr: { id: "csr", label: "Controller", group: "Module", mark: "api", note: "Service, then repository" },
-  rds: { id: "rds", label: "PostgreSQL", group: "Data", mark: "db", note: "RDS in AWS, Docker locally" },
-  s3: { id: "s3", label: "S3", group: "AWS", mark: "bucket", note: "Presigned upload and download" },
-  secrets: { id: "secrets", label: "Secrets Manager", group: "AWS", mark: "lock", note: "JWT and database" },
-  sqs: { id: "sqs", label: "SQS", group: "AWS", mark: "queue", note: "Ingestion jobs" },
-  bedrock: { id: "bedrock", label: "Bedrock", group: "AWS", mark: "model", note: "Chat and embeddings" },
-  worker: { id: "worker", label: "Worker Lambda", group: "AWS", mark: "lambda", note: "Chunk and embed" },
-  run: { id: "run", label: "Cloud Run", group: "GCP", mark: "run", note: "API and workers" },
-  gcs: { id: "gcs", label: "Cloud Storage", group: "GCP", mark: "bucket", note: "Source documents" },
+  rds: { id: "rds", label: "PostgreSQL", group: "Data", mark: "db", note: "RDS in AWS, Docker locally", icon: "/icons/aws/rds.svg" },
+  s3: { id: "s3", label: "S3", group: "AWS", mark: "bucket", note: "Presigned upload and download", icon: "/icons/aws/s3.svg" },
+  secrets: { id: "secrets", label: "Secrets Manager", group: "AWS", mark: "lock", note: "JWT and database", icon: "/icons/aws/secrets-manager.svg" },
+  sqs: { id: "sqs", label: "SQS", group: "AWS", mark: "queue", note: "Ingestion jobs", icon: "/icons/aws/sqs.svg" },
+  bedrock: { id: "bedrock", label: "Bedrock", group: "AWS", mark: "model", note: "Chat and embeddings", icon: "/icons/aws/bedrock.svg" },
+  worker: { id: "worker", label: "Worker Lambda", group: "AWS", mark: "lambda", note: "Chunk and embed", icon: "/icons/aws/lambda.svg" },
+  run: { id: "run", label: "Cloud Run", group: "GCP", mark: "run", note: "API and workers", icon: "/icons/gcp/cloud-run.svg" },
+  gcs: { id: "gcs", label: "Cloud Storage", group: "GCP", mark: "bucket", note: "Source documents", icon: "/icons/gcp/cloud-storage.svg" },
   pubsub: { id: "pubsub", label: "Pub/Sub", group: "GCP", mark: "queue", note: "Ingestion jobs" },
   secretmgr: { id: "secretmgr", label: "Secret Manager", group: "GCP", mark: "lock", note: "Provider credentials" },
-  alloydb: { id: "alloydb", label: "AlloyDB", group: "GCP", mark: "db", note: "pgvector retrieval" },
-  vertex: { id: "vertex", label: "Vertex AI", group: "GCP", mark: "model", note: "Gemini and embeddings" }
+  alloydb: { id: "alloydb", label: "AlloyDB", group: "GCP", mark: "db", note: "pgvector retrieval", icon: "/icons/gcp/alloydb.svg" },
+  vertex: { id: "vertex", label: "Vertex AI", group: "GCP", mark: "model", note: "Gemini and embeddings", icon: "/icons/gcp/vertex-ai.svg" }
 };
 
 const layouts: Record<string, { caption: string; lanes: Lane[] }> = {
@@ -86,7 +86,8 @@ function node(id: string): NodeSpec {
         <div class="arch-lane">
           <p class="arch-lane-label">{{ lane.label }}</p>
           <article v-for="id in lane.nodes" :key="id" class="arch-node">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
+            <img v-if="node(id).icon" class="arch-official-icon" :src="node(id).icon" alt="" />
+            <svg v-else viewBox="0 0 64 64" aria-hidden="true">
               <rect width="64" height="64" rx="14" class="arch-tile" />
               <g v-if="node(id).mark === 'gateway'" fill="none" stroke="currentColor" stroke-width="3">
                 <rect x="14" y="18" width="36" height="28" rx="6" />
