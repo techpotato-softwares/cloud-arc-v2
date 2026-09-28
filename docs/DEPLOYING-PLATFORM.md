@@ -27,6 +27,20 @@ If an existing Route 53 zone must be reused, set its ID in `hostedZoneId` in
 `infra/cdk/config.json`; the DNS-only bootstrap is then unnecessary. DNS
 delegation is the only registrar-side step and requires no repository secret.
 
+## Deployment URLs
+
+After a full deployment, the GitHub Actions job summary includes both branded
+URLs and direct CloudFront URLs:
+
+- `WebsiteUrl`: marketing website at `https://forgearc.dev`
+- `MarketingCloudFrontUrl`: direct marketing CloudFront distribution URL
+- `DocsUrl`: documentation at `https://docs.forgearc.dev`
+- `DocsCloudFrontUrl`: direct documentation CloudFront distribution URL
+- `ApiUrl`: commerce API at `https://api.forgearc.dev`
+
+The direct CloudFront URLs are useful for deployment verification while DNS is
+still propagating. Use the branded URLs for public links.
+
 CDK creates the payment secret at `/forgearc/prod/payments` with empty fields.
 After the first deployment, set its value in AWS Secrets Manager:
 

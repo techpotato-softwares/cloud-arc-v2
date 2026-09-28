@@ -312,7 +312,17 @@ class ForgeArcPlatformStack(Stack):
         self._budget(config)
 
         cdk.CfnOutput(self, "WebsiteUrl", value=f"https://{self.domain}")
+        cdk.CfnOutput(
+            self,
+            "MarketingCloudFrontUrl",
+            value=f"https://{marketing_distribution.distribution_domain_name}",
+        )
         cdk.CfnOutput(self, "DocsUrl", value=f"https://{config['docsDomainName']}")
+        cdk.CfnOutput(
+            self,
+            "DocsCloudFrontUrl",
+            value=f"https://{docs_distribution.distribution_domain_name}",
+        )
         cdk.CfnOutput(self, "ApiUrl", value=f"https://{config['apiDomainName']}")
         cdk.CfnOutput(self, "PaymentSecretArn", value=payment_secret.secret_arn)
         cdk.CfnOutput(self, "AlarmTopicArn", value=alarm_topic.topic_arn)
