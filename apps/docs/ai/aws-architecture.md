@@ -1,6 +1,6 @@
 # AWS and GCP architecture
 
-AWS is the first adapter. GCP is drawn now so the core does not import a cloud SDK directly.
+AWS is the first adapter and is implemented in `products/forgearc-ai`. GCP is drawn now so the core does not import a cloud SDK directly.
 
 <ArchitectureMap title="ForgeArc AI on AWS" preset="ai-aws" />
 

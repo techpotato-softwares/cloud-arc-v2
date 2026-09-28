@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ForgeArc — Ship Production Architecture in Minutes, Not Weeks</title>
+
+<!-- SEO -->
+<meta name="description" content="ForgeArc gives senior developers a production-ready Node.js, Python FastAPI, or AI application scaffold with Clean Architecture, DI, RAG pipeline, LangGraph agents, and multi-cloud deployment — in under 10 minutes.">
+<meta name="keywords" content="AWS CDK starter kit, TypeScript serverless boilerplate, FastAPI clean architecture, LangGraph starter, RAG pipeline boilerplate, LangChain production template, AWS Bedrock starter kit, GCP Vertex AI starter, developer infrastructure kit, Inversify Lambda, serverless clean architecture 2026">
+<meta name="author" content="Hardik — thinkincloud.in">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://forgearc.dev">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://forgearc.dev">
+<meta property="og:title" content="ForgeArc — Production Backend Architecture in Minutes">
+<meta property="og:description" content="Stop rewriting the same boilerplate. ForgeArc ships Clean Architecture, DI, RAG, LangGraph agents, and multi-cloud deployment — ready in one command.">
+<meta property="og:image" content="https://forgearc.dev/og-image.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ForgeArc — Ship Production Architecture in Minutes">
+<meta name="twitter:description" content="Node.js + Python FastAPI + AI application starter kits. Production-ready architecture. One command.">
+<meta name="twitter:creator" content="@thinkincloud">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ForgeArc",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "description": "Production-ready backend starter kits for Node.js, Python FastAPI, and AI applications",
+  "offers": [
+    {"@type":"Offer","name":"ForgeArc Node.js Starter","price":"35","priceCurrency":"USD"},
+    {"@type":"Offer","name":"ForgeArc Python Starter","price":"42","priceCurrency":"USD"},
+    {"@type":"Offer","name":"ForgeArc AI Starter","price":"48","priceCurrency":"USD"},
+    {"@type":"Offer","name":"ForgeArc Suite Bundle","price":"299","priceCurrency":"USD"}
+  ],
+  "author": {"@type":"Person","name":"Hardik","url":"https://thinkincloud.in"}
+}
+</script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ═══ DESIGN TOKENS ═══ */
+:root {
+  --bg:       #060d1a;
+  --surface:  #0c1628;
+  --surface2: #111f38;
+  --border:   #1e3050;
+  --blue:     #3b82f6;
+  --blue-dim: #1d3f80;
+  --green:    #10b981;
+  --amber:    #f59e0b;
+  --red:      #ef4444;
+  --text:     #e8f0ff;
+  --muted:    #6b84a8;
+  --mono:     'JetBrains Mono', monospace;
+  --sans:     'Inter', system-ui, sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* ═══ TYPOGRAPHY ═══ */
+h1,h2,h3,h4{font-family:var(--mono);font-weight:700;line-height:1.15;letter-spacing:-0.02em}
+.display{font-size:clamp(2.2rem,5vw,3.8rem);line-height:1.08}
+.headline{font-size:clamp(1.6rem,3.5vw,2.6rem)}
+.subhead{font-size:clamp(1.1rem,2vw,1.4rem);font-family:var(--sans);font-weight:400;color:var(--muted);line-height:1.65;max-width:60ch}
+
+p{max-width:66ch;line-height:1.7}
+.mono{font-family:var(--mono)}
+.muted{color:var(--muted)}
+.blue{color:var(--blue)}
+.green{color:var(--green)}
+.amber{color:var(--amber)}
+
+/* ═══ LAYOUT ═══ */
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+.wrap-wide{max-width:1300px;margin:0 auto;padding:0 24px}
+section{padding:96px 0}
+@media(max-width:768px){section{padding:64px 0}.wrap,.wrap-wide{padding:0 16px}}
+
+/* ═══ NAV ═══ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(6,13,26,0.88);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+  height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:background .3s;
+}
+.nav-logo{
+  font-family:var(--mono);font-weight:700;font-size:1.1rem;
+  color:var(--text);text-decoration:none;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-logo span{color:var(--blue)}
+.nav-links{display:flex;align-items:center;gap:32px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{
+  background:var(--blue);color:#fff;padding:8px 20px;border-radius:6px;
+  text-decoration:none;font-size:.875rem;font-weight:600;
+  transition:opacity .2s;white-space:nowrap;
+}
+.nav-cta:hover{opacity:.88}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{width:22px;height:2px;background:var(--text);border-radius:2px;transition:.3s}
+@media(max-width:768px){
+  .nav-links{display:none}.hamburger{display:flex}
+  .nav-links.open{
+    display:flex;flex-direction:column;align-items:flex-start;gap:0;
+    position:fixed;top:60px;left:0;right:0;bottom:0;
+    background:var(--bg);padding:24px;
+    border-top:1px solid var(--border);
+  }
+  .nav-links.open li{width:100%;border-bottom:1px solid var(--border)}
+  .nav-links.open a{display:block;padding:16px 0;font-size:1rem}
+}
+
+/* ═══ HERO ═══ */
+.hero{
+  min-height:100vh;padding-top:120px;padding-bottom:80px;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-200px;left:-200px;
+  width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-100px;right:-100px;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(16,185,129,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  font-family:var(--mono);font-size:.8rem;color:var(--green);
+  letter-spacing:.12em;margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--green)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr}}
+
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.btn-primary{
+  background:var(--blue);color:#fff;padding:13px 28px;border-radius:8px;
+  text-decoration:none;font-weight:600;font-size:.95rem;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:transform .2s, box-shadow .2s;
+  box-shadow:0 0 0 0 rgba(59,130,246,0);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,130,246,.3)}
+.btn-secondary{
+  background:transparent;color:var(--text);padding:13px 28px;border-radius:8px;
+  text-decoration:none;font-weight:500;font-size:.95rem;
+  border:1px solid var(--border);
+  display:inline-flex;align-items:center;gap:8px;
+  transition:border-color .2s,background .2s;
+}
+.btn-secondary:hover{border-color:var(--blue);background:rgba(59,130,246,.06)}
+
+.install-cmd{
+  margin-top:24px;background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px 18px;
+  display:flex;align-items:center;gap:12px;
+  font-family:var(--mono);font-size:.85rem;color:var(--green);
+  max-width:420px;cursor:pointer;
+  transition:border-color .2s;
+}
+.install-cmd:hover{border-color:var(--blue)}
+.install-cmd .prompt{color:var(--muted)}
+.copy-badge{margin-left:auto;font-size:.7rem;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:4px}
+
+/* ═══ TERMINAL ═══ */
+.terminal{
+  background:#0a0f1c;border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;box-shadow:0 32px 64px rgba(0,0,0,.5);
+}
+.term-header{
+  background:var(--surface);padding:12px 16px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--border);
+}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot-r{background:#ff5f56}.dot-y{background:#ffbd2e}.dot-g{background:#27c93f}
+.term-title{margin-left:auto;font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.term-body{padding:20px;min-height:280px;font-family:var(--mono);font-size:.82rem;line-height:1.7}
+.term-line{display:flex;gap:8px;margin-bottom:2px}
+.term-ps{color:#6b84a8}
+.term-cmd{color:#e8f0ff}
+.term-out{color:#6b84a8;padding-left:0}
+.term-out.green{color:#10b981;padding-left:0}
+.term-out.blue{color:#3b82f6;padding-left:0}
+.term-out.amber{color:#f59e0b;padding-left:0}
+.term-out.dim{color:#374151;padding-left:0}
+.cursor{display:inline-block;width:8px;height:14px;background:var(--blue);animation:blink 1s step-end infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ═══ PROOF BAR ═══ */
+.proof-bar{
+  background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:28px 0;
+}
+.proof-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  text-align:center;
+}
+@media(max-width:600px){.proof-grid{grid-template-columns:repeat(2,1fr);gap:24px}}
+.proof-item{padding:0 24px;border-right:1px solid var(--border)}
+.proof-item:last-child{border-right:none}
+.proof-val{font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--text)}
+.proof-label{font-size:.8rem;color:var(--muted);margin-top:2px}
+
+/* ═══ PROBLEM ═══ */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+@media(max-width:768px){.problem-grid{grid-template-columns:1fr}}
+.pain-list{list-style:none;display:flex;flex-direction:column;gap:16px;margin-top:24px}
+.pain-item{
+  display:flex;align-items:flex-start;gap:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:16px 18px;
+}
+.pain-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+.pain-text{font-size:.9rem;color:var(--muted);line-height:1.55}
+.pain-text strong{color:var(--text);display:block;margin-bottom:2px;font-size:.95rem}
+
+.hours-wasted{
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  padding:28px;
+}
+.hw-title{font-family:var(--mono);font-size:.75rem;color:var(--muted);letter-spacing:.08em;margin-bottom:16px}
+.hw-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:.875rem}
+.hw-row:last-child{border-bottom:none}
+.hw-task{color:var(--muted)}
+.hw-hrs{color:var(--red);font-family:var(--mono);font-weight:600}
+.hw-total{
+  margin-top:16px;padding:14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
+  border-radius:8px;text-align:center;
+}
+.hw-total-val{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--red)}
+.hw-total-label{font-size:.8rem;color:var(--muted);margin-top:2px}
+
+/* ═══ PRODUCTS ═══ */
+.product-tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:40px;width:fit-content}
+.ptab{
+  padding:10px 24px;border-radius:7px;border:none;background:transparent;
+  color:var(--muted);font-family:var(--sans);font-size:.9rem;font-weight:500;
+  cursor:pointer;transition:.2s;white-space:nowrap;
+}
+.ptab.active{background:var(--blue);color:#fff}
+.ptab:hover:not(.active){color:var(--text)}
+.product-panel{display:none}
+.product-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+@media(max-width:768px){.product-panel.active{grid-template-columns:1fr}}
+.product-meta{font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-bottom:12px}
+.product-desc{color:var(--muted);font-size:.95rem;margin:16px 0 24px;line-height:1.65;max-width:50ch}
+.feature-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.feature-item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:.875rem;color:var(--muted);
+}
+.feature-item::before{content:'→';color:var(--green);flex-shrink:0;font-family:var(--mono);margin-top:1px}
+.feature-item strong{color:var(--text)}
+.product-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);
+  color:var(--green);font-size:.75rem;font-family:var(--mono);
+  padding:4px 10px;border-radius:4px;margin-bottom:20px;
+}
+
+/* ═══ ARCH DIAGRAM ═══ */
+.arch-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;overflow-x:auto}
+.arch-layer{
+  display:flex;align-items:stretch;
+  border:1px solid var(--border);border-radius:8px;
+  margin-bottom:6px;overflow:hidden;
+}
+.arch-label{
+  min-width:160px;padding:14px 16px;font-family:var(--mono);font-size:.72rem;
+  font-weight:600;display:flex;align-items:center;
+  border-right:1px solid var(--border);white-space:nowrap;
+}
+.arch-content{
+  padding:14px 16px;font-size:.82rem;color:var(--muted);
+  display:flex;align-items:center;flex-wrap:wrap;gap:8px;flex:1;
+}
+.arch-chip{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:4px;padding:3px 10px;font-family:var(--mono);font-size:.72rem;
+  white-space:nowrap;
+}
+.arch-arrow{
+  text-align:center;font-family:var(--mono);font-size:.9rem;
+  color:var(--border);margin:2px 0;
+}
+@media(max-width:600px){.arch-label{min-width:110px;font-size:.65rem}.arch-chip{font-size:.65rem}}
+
+/* ═══ HOW IT WORKS ═══ */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
+@media(max-width:768px){.steps{grid-template-columns:1fr}}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px}
+.step-num{
+  font-family:var(--mono);font-size:.72rem;color:var(--blue);
+  background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);
+  width:32px;height:32px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;font-weight:700;
+}
+.step h3{font-size:1.05rem;margin-bottom:8px}
+.step p{font-size:.875rem;color:var(--muted);max-width:none}
+.step-code{
+  margin-top:14px;background:var(--bg);border:1px solid var(--border);
+  border-radius:6px;padding:12px 14px;
+  font-family:var(--mono);font-size:.75rem;color:var(--green);
+}
+
+/* ═══ CALCULATOR ═══ */
+.calc-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:780px}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+@media(max-width:600px){.calc-grid{grid-template-columns:1fr}}
+.calc-label{font-size:.8rem;color:var(--muted);margin-bottom:6px;display:block}
+.calc-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);padding:10px 14px;border-radius:7px;
+  font-family:var(--sans);font-size:.9rem;outline:none;
+  transition:border-color .2s;
+}
+.calc-input:focus{border-color:var(--blue)}
+.calc-result{
+  margin-top:28px;background:rgba(16,185,129,.08);
+  border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:24px 28px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center;
+}
+@media(max-width:600px){.calc-result{grid-template-columns:1fr;gap:12px}}
+.cr-val{font-family:var(--mono);font-size:1.7rem;font-weight:700}
+.cr-label{font-size:.78rem;color:var(--muted);margin-top:2px}
+
+/* ═══ PRICING ═══ */
+.pricing-controls{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:40px}
+.pricing-tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px}
+.pricing-tab{
+  padding:8px 18px;border-radius:6px;border:none;background:transparent;
+  color:var(--muted);font-family:var(--sans);font-size:.85rem;cursor:pointer;transition:.2s;
+}
+.pricing-tab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.currency-toggle{
+  display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted);
+}
+.toggle{
+  width:44px;height:24px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;cursor:pointer;position:relative;transition:.2s;
+}
+.toggle.on{background:var(--blue);border-color:var(--blue)}
+.toggle-knob{
+  position:absolute;top:3px;left:3px;width:16px;height:16px;
+  background:#fff;border-radius:50%;transition:left .2s;
+}
+.toggle.on .toggle-knob{left:23px}
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1000px){.pricing-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.pricing-grid{grid-template-columns:1fr}}
+.price-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:28px 24px;display:flex;flex-direction:column;
+  transition:border-color .2s, transform .2s;
+  position:relative;
+}
+.price-card:hover{border-color:var(--blue);transform:translateY(-3px)}
+.price-card.featured{border-color:var(--amber);background:rgba(245,158,11,.04)}
+.popular-badge{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--amber);color:#000;font-size:.7rem;font-weight:700;
+  font-family:var(--mono);padding:3px 12px;border-radius:20px;white-space:nowrap;
+}
+.price-tier{font-size:.75rem;color:var(--muted);font-family:var(--mono);letter-spacing:.05em;margin-bottom:8px}
+.price-name{font-size:1.1rem;font-family:var(--mono);font-weight:700;margin-bottom:16px}
+.price-amount{font-family:var(--mono);font-size:2.2rem;font-weight:700;color:var(--text)}
+.price-amount .currency{font-size:1rem;color:var(--muted);vertical-align:top;margin-top:6px;display:inline-block}
+.price-period{font-size:.78rem;color:var(--muted);margin-top:2px;margin-bottom:20px}
+.price-divider{height:1px;background:var(--border);margin:20px 0}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:9px;flex:1}
+.price-features li{font-size:.825rem;color:var(--muted);display:flex;align-items:flex-start;gap:8px}
+.pf-check{color:var(--green);flex-shrink:0;margin-top:1px}
+.pf-x{color:var(--border);flex-shrink:0;margin-top:1px}
+.price-cta{
+  margin-top:24px;width:100%;padding:11px;border-radius:7px;
+  font-size:.875rem;font-weight:600;cursor:pointer;text-align:center;
+  text-decoration:none;display:block;transition:.2s;border:none;
+}
+.price-cta-primary{background:var(--blue);color:#fff}
+.price-cta-primary:hover{opacity:.88}
+.price-cta-secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+.price-cta-secondary:hover{border-color:var(--blue)}
+.price-cta-amber{background:var(--amber);color:#000}
+.price-cta-amber:hover{opacity:.88}
+.bundle-card{
+  background:var(--surface);border:2px solid var(--blue);border-radius:16px;
+  padding:36px;margin-top:20px;
+  display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;
+}
+@media(max-width:600px){.bundle-card{grid-template-columns:1fr}}
+.bundle-kits{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.bundle-kit{
+  background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);
+  color:var(--blue);font-family:var(--mono);font-size:.75rem;
+  padding:4px 12px;border-radius:4px;
+}
+.bundle-price-block{text-align:right}
+@media(max-width:600px){.bundle-price-block{text-align:left}}
+.bundle-orig{font-size:.85rem;color:var(--muted);text-decoration:line-through;margin-bottom:4px}
+.bundle-new{font-family:var(--mono);font-size:2.6rem;font-weight:700;color:var(--amber)}
+
+/* ═══ TESTIMONIALS ═══ */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:768px){.testi-grid{grid-template-columns:1fr}}
+.testi-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:24px;
+}
+.testi-quote{font-size:.9rem;color:var(--muted);line-height:1.65;margin-bottom:20px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:12px}
+.testi-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue-dim),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;
+}
+.testi-name{font-size:.875rem;font-weight:600;color:var(--text)}
+.testi-role{font-size:.75rem;color:var(--muted)}
+
+/* ═══ FAQ ═══ */
+.faq-list{max-width:720px;display:flex;flex-direction:column;gap:4px}
+.faq-item{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.faq-q{
+  width:100%;text-align:left;background:var(--surface);border:none;
+  color:var(--text);padding:18px 20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  font-family:var(--sans);font-size:.9rem;font-weight:500;
+}
+.faq-q:hover{background:var(--surface2)}
+.faq-chevron{color:var(--muted);transition:transform .2s;flex-shrink:0;font-size:.75rem}
+.faq-a{
+  max-height:0;overflow:hidden;transition:max-height .3s ease;
+  background:var(--surface);
+}
+.faq-a p{padding:0 20px 18px;font-size:.875rem;color:var(--muted);line-height:1.65;max-width:none}
+.faq-item.open .faq-chevron{transform:rotate(180deg)}
+.faq-item.open .faq-a{max-height:300px}
+
+/* ═══ FINAL CTA ═══ */
+.final-cta{
+  text-align:center;padding:100px 24px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.12) 0%,transparent 70%);
+  border-top:1px solid var(--border);
+}
+.final-cta .display{margin-bottom:16px}
+.final-cta .subhead{margin:0 auto 36px}
+.final-cta-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+
+/* ═══ FOOTER ═══ */
+footer{
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:48px 0 32px;
+}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr}}
+.footer-brand{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px}
+.footer-brand span{color:var(--blue)}
+.footer-desc{font-size:.825rem;color:var(--muted);max-width:28ch;line-height:1.6}
+.footer-col h4{font-family:var(--mono);font-size:.75rem;color:var(--muted);letter-spacing:.08em;margin-bottom:14px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:8px}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:.825rem;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-bottom{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.footer-legal{font-size:.75rem;color:var(--muted)}
+.footer-made{font-size:.75rem;color:var(--muted);font-family:var(--mono)}
+
+/* ═══ SECTION LABELS ═══ */
+.section-label{
+  font-family:var(--mono);font-size:.72rem;color:var(--blue);
+  letter-spacing:.12em;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-label::before{content:'';width:20px;height:1px;background:var(--blue)}
+
+/* ═══ UTILS ═══ */
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mt32{margin-top:32px}.mt40{margin-top:40px}
+.tag{
+  display:inline-block;background:var(--surface2);border:1px solid var(--border);
+  color:var(--muted);font-family:var(--mono);font-size:.7rem;
+  padding:3px 9px;border-radius:4px;
+}
+.tag.blue{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.2);color:var(--blue)}
+.tag.green{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--green)}
+.tag.amber{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);color:var(--amber)}
+
+/* Visibility animation — only entry, not scattered */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .5s, transform .5s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+</style>
+</head>
+
+<body>
+
+<!-- ═══════════════════════ NAV ═══════════════════════ -->
+<nav>
+  <a href="#" class="nav-logo"><span>//</span> ForgeArc</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#products">Products</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="https://thinkincloud.in" target="_blank">Blog</a></li>
+    <li><a href="#pricing" class="nav-cta">Buy Now</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">Production Architecture Starter Kits</div>
+    <div class="hero-grid">
+      <div>
+        <h1 class="display">Stop rewriting<br>the same<br><span class="blue">boilerplate.</span></h1>
+        <p class="subhead mt24">ForgeArc ships production-grade Node.js, Python FastAPI, and AI application scaffolds with Clean Architecture, Dependency Injection, RAG pipelines, and multi-cloud deployment — ready in one command.</p>
+        <div class="hero-actions">
+          <a href="#pricing" class="btn-primary">Get ForgeArc →</a>
+          <a href="#architecture" class="btn-secondary">See Architecture</a>
+        </div>
+        <div class="install-cmd" onclick="copyCmd(this)" title="Click to copy">
+          <span class="prompt">$</span>
+          <span>npx create-forgearc-app</span>
+          <span class="copy-badge" id="copyBadge">copy</span>
+        </div>
+        <p class="muted mt16" style="font-size:.8rem">Also available: <span class="mono blue">pip install forgearc-python</span></p>
+      </div>
+      <div>
+        <div class="terminal">
+          <div class="term-header">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+            <span class="term-title">forgearc setup</span>
+          </div>
+          <div class="term-body" id="termBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ PROOF BAR ═══════════════════════ -->
+<div class="proof-bar">
+  <div class="wrap">
+    <div class="proof-grid">
+      <div class="proof-item">
+        <div class="proof-val" data-count="300">0</div>
+        <div class="proof-label">Hours saved per dev / year</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-val" data-count="3">0</div>
+        <div class="proof-label">Production-ready kits</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-val" data-count="7">0</div>
+        <div class="proof-label">Cloud providers supported</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-val" data-suffix=" min" data-count="10">0</div>
+        <div class="proof-label">From clone to deployed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PROBLEM ═══════════════════════ -->
+<section id="problem" class="reveal">
+  <div class="wrap">
+    <div class="problem-grid">
+      <div>
+        <div class="section-label">The Real Cost</div>
+        <h2 class="headline">Every project starts<br>at zero.</h2>
+        <p class="muted mt16" style="max-width:46ch;line-height:1.7">LLM client setup. Vector store wiring. DI container. Event bus. CI/CD pipeline. Observability. You know how to build these — yet you rebuild them, project after project.</p>
+        <ul class="pain-list mt24">
+          <li class="pain-item">
+            <span class="pain-icon">⚠️</span>
+            <div class="pain-text"><strong>2–4 weeks lost to architecture setup</strong>Before you write one line of actual product code, the scaffold has consumed your sprint.</div>
+          </li>
+          <li class="pain-item">
+            <span class="pain-icon">⚠️</span>
+            <div class="pain-text"><strong>Spaghetti Lambda handlers</strong>No DI container. No layering. Direct DB calls from handlers. Untestable, unmaintainable, unfixable.</div>
+          </li>
+          <li class="pain-item">
+            <span class="pain-icon">⚠️</span>
+            <div class="pain-text"><strong>RAG pipeline from scratch, again</strong>Chunking strategy. Embedding model. Vector store. Hybrid search. Re-ranker. Every AI project. Every time.</div>
+          </li>
+          <li class="pain-item">
+            <span class="pain-icon">⚠️</span>
+            <div class="pain-text"><strong>Observability bolted on too late</strong>LangSmith tracing, cost metering, structured logging — always the last thing added. Always painful.</div>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="hours-wasted">
+          <div class="hw-title">HOURS WASTED PER PROJECT — PER DEVELOPER</div>
+          <div class="hw-row"><span class="hw-task">LLM client + retry + rate limiting</span><span class="hw-hrs">8 hrs</span></div>
+          <div class="hw-row"><span class="hw-task">RAG pipeline (chunk → embed → index → retrieve)</span><span class="hw-hrs">16 hrs</span></div>
+          <div class="hw-row"><span class="hw-task">LangGraph agent setup + state management</span><span class="hw-hrs">12 hrs</span></div>
+          <div class="hw-row"><span class="hw-task">DI container + CSR layer wiring</span><span class="hw-hrs">10 hrs</span></div>
+          <div class="hw-row"><span class="hw-task">Memory management (4 types)</span><span class="hw-hrs">8 hrs</span></div>
+          <div class="hw-row"><span class="hw-task">Async task queue + worker + retry</span><span class="hw-hrs">10 hrs</span></div>
+          <div class="hw-row"><span class="hw-task">LangSmith + OTel tracing</span><span class="hw-hrs">5 hrs</span></div>
+          <div class="hw-row"><span class="hw-task">CI/CD pipeline + multi-env deploy</span><span class="hw-hrs">8 hrs</span></div>
+          <div class="hw-total">
+            <div class="hw-total-val">77 hrs</div>
+            <div class="hw-total-label">wasted per project — ₹1.5L+ opportunity cost</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ PRODUCTS ═══════════════════════ -->
+<section id="products" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)" class="reveal">
+  <div class="wrap">
+    <div class="section-label">Three Kits</div>
+    <h2 class="headline">Pick your stack.<br>Get production architecture.</h2>
+    <p class="muted mt12" style="max-width:52ch;line-height:1.65">All three kits share the same Clean Architecture principles. Switch between them — your mental model carries over.</p>
+    <div class="mt40">
+      <div class="product-tabs">
+        <button class="ptab active" onclick="switchProduct('node',this)">Node.js</button>
+        <button class="ptab" onclick="switchProduct('python',this)">Python FastAPI</button>
+        <button class="ptab" onclick="switchProduct('ai',this)">ForgeArc AI</button>
+      </div>
+
+      <!-- NODE PANEL -->
+      <div class="product-panel active" id="panel-node">
+        <div>
+          <div class="product-badge">⚡ TypeScript + AWS/Multi-Cloud</div>
+          <h3 style="font-size:1.4rem">ForgeArc Node.js</h3>
+          <p class="product-desc">Production-grade TypeScript backend scaffold with Inversify DI, CSR architecture, AWS CDK, and support for 7 cloud providers — all from one config file.</p>
+          <ul class="feature-list">
+            <li class="feature-item"><strong>Inversify DI container</strong> — pre-wired, inject anything, mock everything in tests</li>
+            <li class="feature-item"><strong>CSR pattern enforced</strong> — Command · Service · Repository by project structure</li>
+            <li class="feature-item"><strong>Multi-CSR Lambda bundling</strong> — esbuild bundles multiple CSRs into one Lambda at build time</li>
+            <li class="feature-item"><strong>AWS CDK v2 + dynamic constructs</strong> — App Manifest pattern, fully dynamic</li>
+            <li class="feature-item"><strong>7 providers via config</strong> — AWS, GCP, Azure, Docker, DigitalOcean, Hetzner VPS, Vercel+Neon</li>
+            <li class="feature-item"><strong>Lambda Powertools</strong> — structured logging, X-Ray, custom metrics</li>
+            <li class="feature-item"><strong>EventBridge + Step Functions</strong> — event-driven and orchestration patterns</li>
+            <li class="feature-item"><strong>GitHub Actions CI/CD</strong> — dev / staging / prod pipeline ready</li>
+          </ul>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px">
+            <span class="tag">TypeScript 5.x</span>
+            <span class="tag">AWS CDK v2</span>
+            <span class="tag">Inversify</span>
+            <span class="tag">Vitest</span>
+            <span class="tag">esbuild</span>
+            <span class="tag">OpenTelemetry</span>
+          </div>
+        </div>
+        <div>
+          <div class="terminal">
+            <div class="term-header">
+              <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+              <span class="term-title">src/users/create-user.command.ts</span>
+            </div>
+            <div class="term-body" style="min-height:320px">
+<pre style="color:#6b84a8;font-size:.78rem;line-height:1.7;white-space:pre-wrap">@injectable()
+<span style="color:#3b82f6">export class</span> <span style="color:#10b981">CreateUserCommand</span> {
+  constructor(
+    <span style="color:#6b84a8">// DI — injected by Inversify</span>
+    @inject(UserService)
+    <span style="color:#e8f0ff">private users: UserService</span>,
+    @inject(Logger)
+    <span style="color:#e8f0ff">private logger: Logger</span>
+  ) {}
+
+  <span style="color:#3b82f6">async</span> <span style="color:#f59e0b">execute</span>(input: CreateUserInput) {
+    <span style="color:#6b84a8">// Business logic here</span>
+    <span style="color:#e8f0ff">const user = await</span>
+      <span style="color:#e8f0ff">this.users.create(input);</span>
+    <span style="color:#e8f0ff">this.logger.info</span>
+      <span style="color:#e8f0ff">({ user }, 'User created');</span>
+    <span style="color:#3b82f6">return</span> user;
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PYTHON PANEL -->
+      <div class="product-panel" id="panel-python">
+        <div>
+          <div class="product-badge" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.2);color:#a78bfa">🐍 Python + FastAPI + AI-Ready</div>
+          <h3 style="font-size:1.4rem">ForgeArc Python</h3>
+          <p class="product-desc">FastAPI with Clean Architecture, async SQLAlchemy, Pydantic v2, Celery task queue, and AI boilerplate baked in. Deploy on Lambda, Docker, or Cloud Run.</p>
+          <ul class="feature-list">
+            <li class="feature-item"><strong>FastAPI + async endpoints</strong> — native DI via FastAPI dependencies</li>
+            <li class="feature-item"><strong>Clean Architecture layers</strong> — domain / application / infrastructure / presentation</li>
+            <li class="feature-item"><strong>SQLAlchemy 2.0 async</strong> — repository pattern, swap DB without touching logic</li>
+            <li class="feature-item"><strong>Pydantic v2 schemas</strong> — request/response validation + domain models</li>
+            <li class="feature-item"><strong>Celery + Redis queue</strong> — background tasks and AI inference jobs</li>
+            <li class="feature-item"><strong>Lambda (Mangum) + Docker</strong> — one config change switches deployment target</li>
+            <li class="feature-item"><strong>AWS Bedrock + OpenAI clients</strong> — AI-ready from day one</li>
+            <li class="feature-item"><strong>Alembic migrations</strong> — environment-aware, pre-configured</li>
+          </ul>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px">
+            <span class="tag">Python 3.12</span>
+            <span class="tag">FastAPI</span>
+            <span class="tag">SQLAlchemy 2</span>
+            <span class="tag">Pydantic v2</span>
+            <span class="tag">Celery</span>
+            <span class="tag">Alembic</span>
+          </div>
+        </div>
+        <div>
+          <div class="terminal">
+            <div class="term-header">
+              <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+              <span class="term-title">src/domain/users/service.py</span>
+            </div>
+            <div class="term-body" style="min-height:320px">
+<pre style="color:#6b84a8;font-size:.78rem;line-height:1.7;white-space:pre-wrap"><span style="color:#3b82f6">class</span> <span style="color:#10b981">UserService</span>:
+  <span style="color:#3b82f6">def</span> <span style="color:#f59e0b">__init__</span>(
+    self,
+    repo: UserRepository,
+    <span style="color:#6b84a8"># Clean DI via FastAPI Depends</span>
+  ):
+    self.repo = repo
+
+  <span style="color:#3b82f6">async def</span> <span style="color:#f59e0b">create</span>(
+    self,
+    data: CreateUserSchema
+  ) -> UserModel:
+    user = UserModel(
+      <span style="color:#e8f0ff">**data.model_dump()</span>
+    )
+    <span style="color:#3b82f6">return await</span>
+      <span style="color:#e8f0ff">self.repo.save(user)</span>
+
+  <span style="color:#3b82f6">async def</span> <span style="color:#f59e0b">ai_summarise</span>(
+    self, user_id: str
+  ) -> str:
+    <span style="color:#6b84a8"># Bedrock pre-wired</span>
+    <span style="color:#3b82f6">return await</span>
+      <span style="color:#e8f0ff">self.bedrock.invoke(...)</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI PANEL -->
+      <div class="product-panel" id="panel-ai">
+        <div>
+          <div class="product-badge" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);color:#f59e0b">🤖 RAG + LangGraph + Multi-Agent</div>
+          <h3 style="font-size:1.4rem">ForgeArc AI</h3>
+          <p class="product-desc">Complete AI application scaffold: RAG pipeline, LangGraph stateful agents, multi-agent supervisor, memory management, LangSmith tracing, cost metering — AWS Bedrock or GCP Vertex AI.</p>
+          <ul class="feature-list">
+            <li class="feature-item"><strong>LLM Factory</strong> — Claude, Gemini, GPT-4o, Llama via one interface. Swap models in config.</li>
+            <li class="feature-item"><strong>RAG pipeline</strong> — hybrid search (vector + BM25), re-ranking, HyDE query expansion</li>
+            <li class="feature-item"><strong>LangGraph agents</strong> — stateful, with tools, memory, streaming, HITL gates</li>
+            <li class="feature-item"><strong>Multi-agent supervisor</strong> — route subtasks to specialist agents, aggregate results</li>
+            <li class="feature-item"><strong>4-type memory</strong> — short-term (Redis), long-term (vector), episodic (DB), working (state)</li>
+            <li class="feature-item"><strong>LangSmith tracing</strong> — zero-config, every chain and agent auto-traced</li>
+            <li class="feature-item"><strong>Cost metering</strong> — per-request token logging, budget gates, daily alerts</li>
+            <li class="feature-item"><strong>Async AI pipeline</strong> — SQS/Pub-Sub queue for heavy inference jobs</li>
+          </ul>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px">
+            <span class="tag">LangGraph</span>
+            <span class="tag">LangChain</span>
+            <span class="tag">LangSmith</span>
+            <span class="tag">AWS Bedrock</span>
+            <span class="tag">Vertex AI</span>
+            <span class="tag">RAGAS</span>
+          </div>
+        </div>
+        <div>
+          <div class="terminal">
+            <div class="term-header">
+              <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+              <span class="term-title">forgearc-ai.config.ts</span>
+            </div>
+            <div class="term-body" style="min-height:320px">
+<pre style="color:#6b84a8;font-size:.78rem;line-height:1.7;white-space:pre-wrap"><span style="color:#3b82f6">export default</span> {
+  <span style="color:#e8f0ff">provider</span>: <span style="color:#10b981">'aws'</span>,
+  <span style="color:#6b84a8">// or 'gcp' for Vertex AI</span>
+
+  <span style="color:#e8f0ff">llm</span>: {
+    <span style="color:#e8f0ff">primary</span>: <span style="color:#10b981">'claude-3-5-sonnet'</span>,
+    <span style="color:#e8f0ff">fallback</span>: <span style="color:#10b981">'claude-3-haiku'</span>,
+    <span style="color:#e8f0ff">promptCaching</span>: <span style="color:#f59e0b">true</span>,
+  },
+  <span style="color:#e8f0ff">rag</span>: {
+    <span style="color:#e8f0ff">chunking</span>: <span style="color:#10b981">'semantic'</span>,
+    <span style="color:#e8f0ff">hybridSearch</span>: <span style="color:#f59e0b">true</span>,
+    <span style="color:#e8f0ff">reranker</span>: <span style="color:#10b981">'cohere'</span>,
+  },
+  <span style="color:#e8f0ff">agents</span>: {
+    <span style="color:#e8f0ff">maxIterations</span>: <span style="color:#f59e0b">10</span>,
+    <span style="color:#e8f0ff">streaming</span>: <span style="color:#f59e0b">true</span>,
+    <span style="color:#e8f0ff">humanInLoop</span>: <span style="color:#f59e0b">false</span>,
+  },
+  <span style="color:#e8f0ff">observability</span>: {
+    <span style="color:#e8f0ff">langsmith</span>: <span style="color:#f59e0b">true</span>,
+    <span style="color:#e8f0ff">costAlerts</span>: <span style="color:#f59e0b">50</span>,<span style="color:#6b84a8">// USD/day</span>
+  },
+};</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ ARCHITECTURE ═══════════════════════ -->
+<section id="architecture" class="reveal">
+  <div class="wrap">
+    <div class="section-label">Under the Hood</div>
+    <h2 class="headline">8 layers.<br>Zero coupling.</h2>
+    <p class="muted mt12" style="max-width:52ch;line-height:1.65">Every ForgeArc kit uses the same layered architecture. Extending a layer never breaks the others. The provider adapter means your business logic never touches cloud SDKs directly.</p>
+    <div class="arch-wrap mt40">
+      <div class="arch-layer" style="border-color:rgba(59,130,246,.3)">
+        <div class="arch-label" style="background:rgba(59,130,246,.1);color:var(--blue)">PRESENTATION</div>
+        <div class="arch-content">
+          <span class="arch-chip">HTTP Handler</span>
+          <span class="arch-chip">Lambda Entry</span>
+          <span class="arch-chip">FastAPI Router</span>
+          <span class="arch-chip">Auth Middleware</span>
+          <span class="arch-chip">Rate Limiter</span>
+          <span class="arch-chip">SSE Streaming</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer" style="border-color:rgba(139,92,246,.3)">
+        <div class="arch-label" style="background:rgba(139,92,246,.1);color:#a78bfa">ORCHESTRATION</div>
+        <div class="arch-content">
+          <span class="arch-chip">LangGraph Agents</span>
+          <span class="arch-chip">LangChain Chains</span>
+          <span class="arch-chip">Supervisor Agent</span>
+          <span class="arch-chip">Human-in-the-Loop</span>
+          <span class="arch-chip">Step Functions</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer" style="border-color:rgba(245,158,11,.3)">
+        <div class="arch-label" style="background:rgba(245,158,11,.1);color:var(--amber)">INTELLIGENCE</div>
+        <div class="arch-content">
+          <span class="arch-chip">LLM Factory</span>
+          <span class="arch-chip">Prompt Registry</span>
+          <span class="arch-chip">Structured Output</span>
+          <span class="arch-chip">Prompt Cache</span>
+          <span class="arch-chip">Token Counter</span>
+          <span class="arch-chip">Model Fallback</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer" style="border-color:rgba(16,185,129,.3)">
+        <div class="arch-label" style="background:rgba(16,185,129,.1);color:var(--green)">APPLICATION</div>
+        <div class="arch-content">
+          <span class="arch-chip">Commands</span>
+          <span class="arch-chip">Services</span>
+          <span class="arch-chip">Use Cases</span>
+          <span class="arch-chip">Domain Events</span>
+          <span class="arch-chip">Validators</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer" style="border-color:rgba(96,165,250,.2)">
+        <div class="arch-label" style="background:rgba(96,165,250,.06);color:var(--muted)">RETRIEVAL</div>
+        <div class="arch-content">
+          <span class="arch-chip">RAG Pipeline</span>
+          <span class="arch-chip">Chunking</span>
+          <span class="arch-chip">Embedding</span>
+          <span class="arch-chip">Hybrid Search</span>
+          <span class="arch-chip">Re-ranking</span>
+          <span class="arch-chip">Citations</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer" style="border-color:rgba(96,165,250,.2)">
+        <div class="arch-label" style="background:rgba(96,165,250,.06);color:var(--muted)">MEMORY</div>
+        <div class="arch-content">
+          <span class="arch-chip">Short-term (Redis)</span>
+          <span class="arch-chip">Long-term (Vector)</span>
+          <span class="arch-chip">Episodic (DB)</span>
+          <span class="arch-chip">Working (State)</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer" style="border-color:rgba(239,68,68,.25)">
+        <div class="arch-label" style="background:rgba(239,68,68,.08);color:#f87171">INFRASTRUCTURE</div>
+        <div class="arch-content">
+          <span class="arch-chip">AWS Bedrock</span>
+          <span class="arch-chip">GCP Vertex AI</span>
+          <span class="arch-chip">OpenSearch / pgvector</span>
+          <span class="arch-chip">SQS / Pub-Sub</span>
+          <span class="arch-chip">S3 / GCS</span>
+          <span class="arch-chip">DynamoDB / Firestore</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer" style="border-color:rgba(107,132,168,.25)">
+        <div class="arch-label" style="background:rgba(107,132,168,.06);color:var(--muted)">OBSERVABILITY</div>
+        <div class="arch-content">
+          <span class="arch-chip">LangSmith Tracing</span>
+          <span class="arch-chip">OpenTelemetry</span>
+          <span class="arch-chip">Cost Metering</span>
+          <span class="arch-chip">RAGAS Evaluation</span>
+          <span class="arch-chip">Budget Alerts</span>
+        </div>
+      </div>
+    </div>
+    <p class="muted mt16" style="font-size:.8rem">Provider adapter sits at the infrastructure layer — swap AWS for GCP by changing one line in config. Application code is identical.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════ HOW IT WORKS ═══════════════════════ -->
+<section style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)" class="reveal">
+  <div class="wrap">
+    <div class="section-label">Getting Started</div>
+    <h2 class="headline">Three steps.<br>Production on Day 1.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Clone or install</h3>
+        <p style="font-size:.875rem;color:var(--muted);max-width:none">Run the CLI wizard. Choose your kit, cloud provider, database, and auth. Everything else generates automatically.</p>
+        <div class="step-code">$ npx create-forgearc-app<br><span style="color:#f59e0b">? Kit:</span> <span style="color:#e8f0ff">AI (RAG + Agents)</span><br><span style="color:#f59e0b">? Provider:</span> <span style="color:#e8f0ff">AWS</span><br><span style="color:#f59e0b">? Database:</span> <span style="color:#e8f0ff">DynamoDB</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Configure once</h3>
+        <p style="font-size:.875rem;color:var(--muted);max-width:none">Edit <span class="mono">forgearc.config.ts</span> — choose your LLM models, RAG settings, memory options, and cost budget. No boilerplate to write.</p>
+        <div class="step-code"><span style="color:#3b82f6">provider:</span> <span style="color:#10b981">'aws'</span>,<br><span style="color:#3b82f6">llm.primary:</span> <span style="color:#10b981">'claude-3-5-sonnet'</span>,<br><span style="color:#3b82f6">rag.hybridSearch:</span> <span style="color:#f59e0b">true</span>,</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Ship features</h3>
+        <p style="font-size:.875rem;color:var(--muted);max-width:none">CI/CD pipeline is ready. <span class="mono">npm run deploy</span> pushes to your cloud. Write product features from minute one — not boilerplate.</p>
+        <div class="step-code">$ npm run deploy<br><span style="color:#10b981">✔ CDK synth</span><br><span style="color:#10b981">✔ Lambda deployed</span><br><span style="color:#10b981">✔ Production live ✓</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ CALCULATOR ═══════════════════════ -->
+<section class="reveal">
+  <div class="wrap">
+    <div class="section-label">ROI Calculator</div>
+    <h2 class="headline">What does boilerplate<br>actually cost you?</h2>
+    <p class="muted mt12" style="max-width:48ch;line-height:1.65">Put in your numbers. See what you get back by never writing setup code again.</p>
+    <div class="calc-wrap mt32">
+      <div class="calc-grid">
+        <div>
+          <label class="calc-label">Projects per year</label>
+          <input class="calc-input" type="number" id="c-projects" value="4" min="1" max="20" oninput="calcROI()">
+        </div>
+        <div>
+          <label class="calc-label">Your hourly rate (₹)</label>
+          <input class="calc-input" type="number" id="c-rate" value="2000" min="500" oninput="calcROI()">
+        </div>
+        <div>
+          <label class="calc-label">Developers on team</label>
+          <input class="calc-input" type="number" id="c-devs" value="2" min="1" max="50" oninput="calcROI()">
+        </div>
+        <div>
+          <label class="calc-label">Avg boilerplate hours / project</label>
+          <input class="calc-input" type="number" id="c-hours" value="77" min="10" oninput="calcROI()">
+        </div>
+      </div>
+      <div class="calc-result mt24">
+        <div>
+          <div class="cr-val green" id="r-hours">616</div>
+          <div class="cr-label">Hours saved / year</div>
+        </div>
+        <div>
+          <div class="cr-val amber" id="r-money">₹12.3L</div>
+          <div class="cr-label">Value reclaimed / year</div>
+        </div>
+        <div>
+          <div class="cr-val blue" id="r-roi">4,110%</div>
+          <div class="cr-label">ROI on ForgeArc Suite</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ PRICING ═══════════════════════ -->
+<section id="pricing" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)" class="reveal">
+  <div class="wrap-wide">
+    <div class="section-label">Pricing</div>
+    <h2 class="headline">Pay once.<br>Ship forever.</h2>
+    <p class="muted mt12 mb0" style="max-width:50ch;line-height:1.65">One-time purchase. Lifetime access. Includes updates for the plan period. No subscriptions, no per-seat fees.</p>
+
+    <div class="pricing-controls mt32">
+      <div class="pricing-tabs">
+        <button class="pricing-tab active" onclick="switchPricing('node',this)">Node.js</button>
+        <button class="pricing-tab" onclick="switchPricing('python',this)">Python FastAPI</button>
+        <button class="pricing-tab" onclick="switchPricing('ai',this)">ForgeArc AI</button>
+      </div>
+      <div class="currency-toggle">
+        <span id="cur-inr" style="color:var(--text)">₹ INR</span>
+        <div class="toggle" id="currToggle" onclick="toggleCurrency()">
+          <div class="toggle-knob"></div>
+        </div>
+        <span id="cur-usd">$ USD</span>
+      </div>
+    </div>
+
+    <!-- PRICING PANELS -->
+    <div id="pricing-node">
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-tier">FREE</div>
+          <div class="price-name">CLI Lite</div>
+          <div class="price-amount"><span class="currency" id="p-n-0-sym">₹</span><span id="p-n-0">0</span></div>
+          <div class="price-period">Always free</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> npx CLI wizard</li>
+            <li><span class="pf-check">✓</span> Core scaffold (AWS only)</li>
+            <li><span class="pf-check">✓</span> Community patterns</li>
+            <li><span class="pf-x">✗</span> Multi-provider support</li>
+            <li><span class="pf-x">✗</span> Video walkthrough</li>
+            <li><span class="pf-x">✗</span> AI Copilot</li>
+          </ul>
+          <a href="#" class="price-cta price-cta-secondary">Get Free →</a>
+        </div>
+        <div class="price-card">
+          <div class="price-tier">TIER 1</div>
+          <div class="price-name">Starter</div>
+          <div class="price-amount"><span class="currency" id="p-n-1-sym">₹</span><span id="p-n-1">2,999</span></div>
+          <div class="price-period">One-time · 1 developer</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> Full Node.js scaffold</li>
+            <li><span class="pf-check">✓</span> 3 cloud providers</li>
+            <li><span class="pf-check">✓</span> Architecture visualiser</li>
+            <li><span class="pf-check">✓</span> Bronze certification</li>
+            <li><span class="pf-x">✗</span> Video walkthrough</li>
+            <li><span class="pf-x">✗</span> AI Copilot</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-secondary">Buy Starter →</a>
+        </div>
+        <div class="price-card featured">
+          <div class="popular-badge">Most Popular</div>
+          <div class="price-tier">TIER 2</div>
+          <div class="price-name">Professional</div>
+          <div class="price-amount"><span class="currency" id="p-n-2-sym">₹</span><span id="p-n-2">7,999</span></div>
+          <div class="price-period">One-time · lifetime updates</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> All 7 cloud providers</li>
+            <li><span class="pf-check">✓</span> VS Code extension</li>
+            <li><span class="pf-check">✓</span> Video walkthrough (2hrs)</li>
+            <li><span class="pf-check">✓</span> AI Copilot (50 msgs)</li>
+            <li><span class="pf-check">✓</span> Silver certification</li>
+            <li><span class="pf-check">✓</span> Lifetime updates</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-amber">Buy Professional →</a>
+        </div>
+        <div class="price-card">
+          <div class="price-tier">TIER 3</div>
+          <div class="price-name">Agency</div>
+          <div class="price-amount"><span class="currency" id="p-n-3-sym">₹</span><span id="p-n-3">19,999</span></div>
+          <div class="price-period">One-time · unlimited projects</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> Multi-project license</li>
+            <li><span class="pf-check">✓</span> Unlimited AI Copilot</li>
+            <li><span class="pf-check">✓</span> 60-min setup call</li>
+            <li><span class="pf-check">✓</span> 3 months Slack support</li>
+            <li><span class="pf-check">✓</span> Gold certification</li>
+            <li><span class="pf-check">✓</span> All future patterns</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-primary">Buy Agency →</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="pricing-python" style="display:none">
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-tier">FREE</div><div class="price-name">CLI Lite</div>
+          <div class="price-amount"><span class="currency" id="p-py-0-sym">₹</span><span id="p-py-0">0</span></div>
+          <div class="price-period">Always free</div><div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> pip install CLI</li><li><span class="pf-check">✓</span> Core scaffold</li><li><span class="pf-check">✓</span> Postgres adapter</li>
+            <li><span class="pf-x">✗</span> AI boilerplate</li><li><span class="pf-x">✗</span> Multi-provider</li><li><span class="pf-x">✗</span> Video walkthrough</li>
+          </ul>
+          <a href="#" class="price-cta price-cta-secondary">Get Free →</a>
+        </div>
+        <div class="price-card">
+          <div class="price-tier">TIER 1</div><div class="price-name">Starter</div>
+          <div class="price-amount"><span class="currency" id="p-py-1-sym">₹</span><span id="p-py-1">3,499</span></div>
+          <div class="price-period">One-time · 1 developer</div><div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> Full FastAPI scaffold</li><li><span class="pf-check">✓</span> AWS Lambda + Docker</li><li><span class="pf-check">✓</span> AI boilerplate (Bedrock)</li>
+            <li><span class="pf-check">✓</span> Architecture visualiser</li><li><span class="pf-x">✗</span> Video walkthrough</li><li><span class="pf-x">✗</span> AI Copilot</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-secondary">Buy Starter →</a>
+        </div>
+        <div class="price-card featured">
+          <div class="popular-badge">Most Popular</div>
+          <div class="price-tier">TIER 2</div><div class="price-name">Professional</div>
+          <div class="price-amount"><span class="currency" id="p-py-2-sym">₹</span><span id="p-py-2">8,999</span></div>
+          <div class="price-period">One-time · lifetime updates</div><div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> All providers incl. GCP</li><li><span class="pf-check">✓</span> VS Code extension</li><li><span class="pf-check">✓</span> AI RAG + Celery queue</li>
+            <li><span class="pf-check">✓</span> Video walkthrough (30min)</li><li><span class="pf-check">✓</span> AI Copilot (50 msgs)</li><li><span class="pf-check">✓</span> Lifetime updates</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-amber">Buy Professional →</a>
+        </div>
+        <div class="price-card">
+          <div class="price-tier">TIER 3</div><div class="price-name">Agency</div>
+          <div class="price-amount"><span class="currency" id="p-py-3-sym">₹</span><span id="p-py-3">22,999</span></div>
+          <div class="price-period">One-time · unlimited projects</div><div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> Multi-project license</li><li><span class="pf-check">✓</span> Unlimited AI Copilot</li><li><span class="pf-check">✓</span> 60-min setup call</li>
+            <li><span class="pf-check">✓</span> 3 months Slack support</li><li><span class="pf-check">✓</span> Gold certification</li><li><span class="pf-check">✓</span> All future patterns</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-primary">Buy Agency →</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="pricing-ai" style="display:none">
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-tier">FREE</div><div class="price-name">CLI Lite</div>
+          <div class="price-amount"><span class="currency" id="p-ai-0-sym">₹</span><span id="p-ai-0">0</span></div>
+          <div class="price-period">Always free</div><div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> Core AI scaffold</li><li><span class="pf-check">✓</span> OpenAI adapter</li><li><span class="pf-check">✓</span> ChromaDB (local)</li>
+            <li><span class="pf-x">✗</span> AWS Bedrock adapter</li><li><span class="pf-x">✗</span> GCP Vertex adapter</li><li><span class="pf-x">✗</span> LangSmith setup</li>
+          </ul>
+          <a href="#" class="price-cta price-cta-secondary">Get Free →</a>
+        </div>
+        <div class="price-card">
+          <div class="price-tier">TIER 1</div><div class="price-name">AWS Edition</div>
+          <div class="price-amount"><span class="currency" id="p-ai-1-sym">₹</span><span id="p-ai-1">3,999</span></div>
+          <div class="price-period">One-time · AWS Bedrock</div><div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> Full AI scaffold</li><li><span class="pf-check">✓</span> AWS Bedrock adapter</li><li><span class="pf-check">✓</span> OpenSearch vector</li>
+            <li><span class="pf-check">✓</span> LangGraph agents</li><li><span class="pf-check">✓</span> RAG pipeline</li><li><span class="pf-x">✗</span> GCP Vertex adapter</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-secondary">Buy AWS →</a>
+        </div>
+        <div class="price-card featured">
+          <div class="popular-badge">Best Value</div>
+          <div class="price-tier">TIER 2</div><div class="price-name">Professional</div>
+          <div class="price-amount"><span class="currency" id="p-ai-2-sym">₹</span><span id="p-ai-2">9,999</span></div>
+          <div class="price-period">One-time · AWS + GCP · lifetime updates</div><div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> AWS Bedrock + GCP Vertex</li><li><span class="pf-check">✓</span> Multi-agent supervisor</li><li><span class="pf-check">✓</span> LangSmith + RAGAS eval</li>
+            <li><span class="pf-check">✓</span> Cost metering dashboard</li><li><span class="pf-check">✓</span> Async AI pipeline</li><li><span class="pf-check">✓</span> Video walkthroughs</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-amber">Buy Professional →</a>
+        </div>
+        <div class="price-card">
+          <div class="price-tier">TIER 3</div><div class="price-name">Agency</div>
+          <div class="price-amount"><span class="currency" id="p-ai-3-sym">₹</span><span id="p-ai-3">24,999</span></div>
+          <div class="price-period">One-time · unlimited projects</div><div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> Multi-project license</li><li><span class="pf-check">✓</span> Custom model adapters</li><li><span class="pf-check">✓</span> 90-min setup call</li>
+            <li><span class="pf-check">✓</span> 3 months Slack support</li><li><span class="pf-check">✓</span> AI architecture review</li><li><span class="pf-check">✓</span> All future AI patterns</li>
+          </ul>
+          <a href="https://gumroad.com" target="_blank" class="price-cta price-cta-primary">Buy Agency →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUNDLE -->
+    <div class="bundle-card mt40 reveal">
+      <div>
+        <div class="section-label" style="margin-bottom:8px">The Complete Kit</div>
+        <h3 style="font-size:1.3rem;font-family:var(--mono)">ForgeArc Suite — All Three Kits</h3>
+        <p class="muted mt8" style="font-size:.875rem;max-width:46ch;line-height:1.6">Your TypeScript engineers, Python AI backend team, and AI feature builders all start from the same architectural principles. One bundle. One team. Zero boilerplate.</p>
+        <div class="bundle-kits mt16">
+          <span class="bundle-kit">⚡ Node.js Tier 2</span>
+          <span class="bundle-kit">🐍 Python Tier 2</span>
+          <span class="bundle-kit">🤖 AI Professional</span>
+        </div>
+      </div>
+      <div class="bundle-price-block">
+        <div class="bundle-orig" id="bundle-orig">₹26,997 separately</div>
+        <div class="bundle-new" id="bundle-price">₹29,999</div>
+        <p class="muted mt8" style="font-size:.78rem" id="bundle-save">Save ₹7,000</p>
+        <a href="https://gumroad.com" target="_blank" class="btn-primary" style="margin-top:16px;display:inline-flex">Get the Suite →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ TESTIMONIALS ═══════════════════════ -->
+<section class="reveal">
+  <div class="wrap">
+    <div class="section-label">Early Users</div>
+    <h2 class="headline">From the engineers<br>who use it.</h2>
+    <div class="testi-grid mt40">
+      <div class="testi-card">
+        <p class="testi-quote">"We used to spend the first two weeks of every new microservice just wiring DI and setting up CDK stacks. ForgeArc Node cut that to a morning. The CSR pattern makes onboarding junior devs surprisingly fast."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">RK</div>
+          <div><div class="testi-name">Rahul K.</div><div class="testi-role">Tech Lead · Series A Fintech, Bengaluru</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <p class="testi-quote">"The FastAPI kit with Bedrock client already wired in saved me at least a week on our healthcare AI project. The Clean Architecture meant our domain logic stayed completely separate from the LLM calls."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">PS</div>
+          <div><div class="testi-name">Priya S.</div><div class="testi-role">Senior Engineer · Healthcare AI startup, Pune</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <p class="testi-quote">"ForgeArc AI's LangGraph setup with LangSmith tracing pre-wired is the difference between knowing your agent works and proving it. We caught three hallucination patterns in week one because the tracing was already there."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">AJ</div>
+          <div><div class="testi-name">Arjun J.</div><div class="testi-role">Founder · AI SaaS, Delhi NCR</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FAQ ═══════════════════════ -->
+<section id="faq" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)" class="reveal">
+  <div class="wrap">
+    <div class="section-label">FAQ</div>
+    <h2 class="headline">Before you decide.</h2>
+    <div class="faq-list mt40">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">Is this AWS-only, or can I use other clouds? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><p>ForgeArc Node supports 7 providers: AWS, GCP, Azure, Docker, DigitalOcean, Hetzner VPS, and Vercel+Neon — switched via one config file. ForgeArc Python supports AWS Lambda, Docker, and GCP Cloud Run. ForgeArc AI supports AWS Bedrock and GCP Vertex AI. Your application code never changes between providers.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">Do I need Inversify or LangGraph experience first? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><p>No. Every pattern comes pre-wired with examples. The architecture walkthrough video (Tier 2+) covers the reasoning behind every decision. Most buyers are senior developers who understand the concepts — they just don't want to set them up from scratch again.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">What exactly is in the ZIP download? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><p>Full source code (TypeScript or Python), README with setup guide, architecture decision records explaining why each pattern was chosen, CI/CD pipeline templates, environment config examples, and for Tier 2+ a Loom video walkthrough link. Tier 3 adds a private GitHub repo invite and a Calendly link for your setup call.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">Can I use this for client projects? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><p>Tier 1 and 2 cover one developer across personal and commercial projects. The Agency license (Tier 3) covers unlimited projects for one company or freelancer. If you are a consulting firm running multiple client engagements, the Agency license is designed for you — it pays back on the first project.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">Does ForgeArc AI work with OpenAI or just AWS/GCP? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><p>Yes. The LLM Factory supports OpenAI GPT-4o, Anthropic Claude (direct API), Mistral, and Groq in addition to AWS Bedrock and GCP Vertex AI. The free CLI tier ships with the OpenAI adapter so you can develop locally without cloud costs. The paid adapters add native Bedrock and Vertex integrations.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">What does lifetime updates mean? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><p>Tier 2 and above receive all future updates to the kit: new provider adapters, CDK version upgrades, new LangGraph patterns, new official community patterns. One purchase, updated forever. There are no annual renewal fees.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">What is the refund policy? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><p>7-day no-questions-asked refund via Gumroad. If the kit does not work for your stack or you are not satisfied, email hardik@thinkincloud.in within 7 days of purchase. Digital products mean you keep the code regardless — the refund is a trust signal, not a loophole.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFAQ(this)">Is there a difference between INR and USD pricing? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><p>Yes, intentionally. Indian buyers pay in INR at purchasing-power-parity-adjusted prices via Razorpay (UPI, cards, EMI available). International buyers pay in USD via Stripe or Gumroad. The content delivered is identical — only the currency and payment gateway differ.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FINAL CTA ═══════════════════════ -->
+<section class="final-cta reveal">
+  <div class="wrap">
+    <h2 class="display">Your next project starts<br>on Day 1.</h2>
+    <p class="subhead">Stop rebuilding what you already know how to build. Get the scaffold. Ship the product.</p>
+    <div class="final-cta-actions">
+      <a href="#pricing" class="btn-primary" style="font-size:1rem;padding:15px 32px">Get ForgeArc Suite — ₹29,999 →</a>
+      <a href="#products" class="btn-secondary" style="font-size:1rem;padding:15px 32px">Compare Kits</a>
+    </div>
+    <p class="muted mt24" style="font-size:.8rem">One-time purchase · 7-day refund guarantee · Gumroad secure checkout</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><span>//</span> ForgeArc</div>
+        <p class="footer-desc">Production backend starter kits for Node.js, Python FastAPI, and AI applications. Built by a senior engineer. Used in production.</p>
+        <p class="footer-desc mt16" style="color:var(--blue)">thinkincloud.in</p>
+      </div>
+      <div>
+        <h4>Products</h4>
+        <ul class="footer-links">
+          <li><a href="#products">ForgeArc Node.js</a></li>
+          <li><a href="#products">ForgeArc Python</a></li>
+          <li><a href="#products">ForgeArc AI</a></li>
+          <li><a href="#pricing">ForgeArc Suite</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Resources</h4>
+        <ul class="footer-links">
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Architecture Guide</a></li>
+          <li><a href="#">Pattern Library</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul class="footer-links">
+          <li><a href="https://thinkincloud.in" target="_blank">thinkincloud.in</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="mailto:hardik@thinkincloud.in">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-legal">© 2026 ForgeArc · thinkincloud.in · All rights reserved</span>
+      <span class="footer-made mono">Built by Hardik · Pune, India</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════ JS ═══════════════════════ -->
+<script>
+/* NAV */
+function toggleNav(){
+  const nl=document.getElementById('navLinks');
+  nl.classList.toggle('open');
+}
+
+/* COPY CMD */
+function copyCmd(el){
+  navigator.clipboard.writeText('npx create-forgearc-app').then(()=>{
+    const b=document.getElementById('copyBadge');
+    b.textContent='copied!';b.style.color='var(--green)';
+    setTimeout(()=>{b.textContent='copy';b.style.color=''},2000);
+  });
+}
+
+/* TERMINAL ANIMATION */
+const lines=[
+  {type:'cmd',text:'npx create-forgearc-app'},
+  {type:'out green',text:'◆ ForgeArc Setup Wizard'},
+  {type:'out dim',text:''},
+  {type:'out',text:'? Select kit:  ❯ AI (RAG + Agents)'},
+  {type:'out',text:'  Node.js'},
+  {type:'out',text:'  Python FastAPI'},
+  {type:'out dim',text:''},
+  {type:'out',text:'? Cloud provider:  ❯ AWS'},
+  {type:'out',text:'  GCP  Docker  VPS'},
+  {type:'out dim',text:''},
+  {type:'out',text:'? LLM:  ❯ Claude 3.5 Sonnet'},
+  {type:'out dim',text:''},
+  {type:'out blue',text:'◆ Creating project...'},
+  {type:'out green',text:'✔ RAG pipeline ready'},
+  {type:'out green',text:'✔ LangGraph agents ready'},
+  {type:'out green',text:'✔ LangSmith tracing ready'},
+  {type:'out green',text:'✔ CDK stacks ready'},
+  {type:'out green',text:'✔ CI/CD pipeline ready'},
+  {type:'out dim',text:''},
+  {type:'out amber',text:'→ cd my-ai-app && npm run deploy'},
+];
+let li=0,ci=0,typing=false;
+const tb=document.getElementById('termBody');
+function addLine(l){
+  const d=document.createElement('div');
+  d.className='term-line';
+  if(l.type==='cmd'){
+    d.innerHTML='<span class="term-ps">$</span><span class="term-cmd"></span>';
+  } else {
+    const cls=l.type.includes('out')?'term-out '+l.type.replace('out','').trim():'term-out';
+    d.innerHTML=`<span class="${cls}"></span>`;
+  }
+  tb.appendChild(d);
+  return d;
+}
+function typeWriter(){
+  if(li>=lines.length){
+    // restart after delay
+    setTimeout(()=>{tb.innerHTML='';li=0;ci=0;typeWriter();},3000);
+    return;
+  }
+  const l=lines[li];
+  if(!typing){
+    addLine(l);typing=true;ci=0;
+  }
+  const spans=tb.lastElementChild.querySelectorAll('span');
+  const target=spans[spans.length-1];
+  if(ci<l.text.length){
+    target.textContent+=l.text[ci++];
+    setTimeout(typeWriter,l.type==='cmd'?55:12);
+  } else {
+    typing=false;li++;
+    setTimeout(typeWriter,l.type==='out dim'?50:90);
+  }
+}
+setTimeout(typeWriter,600);
+
+/* PRODUCT TABS */
+function switchProduct(kit,btn){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.product-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+kit).classList.add('active');
+}
+
+/* PRICING */
+let curProduct='node',curUSD=false;
+const prices={
+  node:{inr:['0','2,999','7,999','19,999'],usd:['0','35','95','240'],sym:['₹','₹','₹','₹'],symusd:['$','$','$','$']},
+  python:{inr:['0','3,499','8,999','22,999'],usd:['0','42','109','275'],sym:['₹','₹','₹','₹'],symusd:['$','$','$','$']},
+  ai:{inr:['0','3,999','9,999','24,999'],usd:['0','48','120','299'],sym:['₹','₹','₹','₹'],symusd:['$','$','$','$']},
+};
+const bundleINR={orig:'₹26,997 separately',price:'₹29,999',save:'Save ₹7,000 (26%)'};
+const bundleUSD={orig:'$324 separately',price:'$299',save:'Save $25 (8%)'};
+function updatePrices(){
+  ['node','python','ai'].forEach(k=>{
+    const key=k==='python'?'py':k;
+    const pr=prices[k];
+    [0,1,2,3].forEach(i=>{
+      const el=document.getElementById(`p-${key}-${i}`);
+      const sym=document.getElementById(`p-${key}-${i}-sym`);
+      if(el)el.textContent=curUSD?pr.usd[i]:pr.inr[i];
+      if(sym)sym.textContent=curUSD?'$':'₹';
+    });
+  });
+  const b=curUSD?bundleUSD:bundleINR;
+  document.getElementById('bundle-orig').textContent=b.orig;
+  document.getElementById('bundle-price').textContent=b.price;
+  document.getElementById('bundle-save').textContent=b.save;
+  document.getElementById('cur-inr').style.color=curUSD?'var(--muted)':'var(--text)';
+  document.getElementById('cur-usd').style.color=curUSD?'var(--text)':'var(--muted)';
+  document.getElementById('currToggle').classList.toggle('on',curUSD);
+}
+function switchPricing(product,btn){
+  curProduct=product;
+  document.querySelectorAll('.pricing-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  ['node','python','ai'].forEach(k=>{
+    document.getElementById('pricing-'+k).style.display=k===product?'block':'none';
+  });
+  updatePrices();
+}
+function toggleCurrency(){
+  curUSD=!curUSD;
+  updatePrices();
+}
+
+/* CALCULATOR */
+function calcROI(){
+  const projects=parseFloat(document.getElementById('c-projects').value)||4;
+  const rate=parseFloat(document.getElementById('c-rate').value)||2000;
+  const devs=parseFloat(document.getElementById('c-devs').value)||2;
+  const hours=parseFloat(document.getElementById('c-hours').value)||77;
+  const totalHrs=projects*devs*hours;
+  const money=totalHrs*rate;
+  const kitCost=29999;
+  const roi=((money-kitCost)/kitCost*100).toFixed(0);
+  document.getElementById('r-hours').textContent=totalHrs.toLocaleString('en-IN');
+  const m=money>=100000?`₹${(money/100000).toFixed(1)}L`:`₹${money.toLocaleString('en-IN')}`;
+  document.getElementById('r-money').textContent=m;
+  document.getElementById('r-roi').textContent=`${parseInt(roi).toLocaleString('en-IN')}%`;
+}
+
+/* FAQ */
+function toggleFAQ(btn){
+  const item=btn.parentElement;
+  const isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!isOpen)item.classList.add('open');
+}
+
+/* COUNTER ANIMATION */
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const target=parseInt(el.dataset.count);
+    const suffix=el.dataset.suffix||'';
+    let current=0;
+    const step=Math.ceil(target/40);
+    const timer=setInterval(()=>{
+      current=Math.min(current+step,target);
+      el.textContent=current+suffix;
+      if(current>=target)clearInterval(timer);
+    },40);
+  });
+}
+
+/* REVEAL ON SCROLL */
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      if(e.target.querySelector('[data-count]'))animateCounters();
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// Also animate proof bar
+const proofObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)animateCounters();});
+},{threshold:0.5});
+const pb2=document.querySelector('.proof-bar');
+if(pb2)proofObserver.observe(pb2);
+</script>
+
+</body>
+</html>

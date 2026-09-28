@@ -10,9 +10,9 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
-    "lint": "turbo run lint && uv run ruff check services/commerce products/forgearc-python",
+    "lint": "turbo run lint && uv run ruff check services/commerce products/forgearc-python products/forgearc-ai",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test && uv run pytest services/commerce/tests products/forgearc-python/apps/api/tests",
+    "test": "turbo run test && uv run pytest services/commerce/tests products/forgearc-python/apps/api/tests products/forgearc-ai/apps/api/tests",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "docs:dev": "pnpm --filter @forgearc/docs dev",
     "docs:build": "pnpm --filter @forgearc/docs build",
@@ -21,7 +21,8 @@
     "commerce:dev": "COMMERCE_TEST_MODE=true uv run --package forgearc-commerce uvicorn app.main:app --app-dir services/commerce --port 4100",
     "commerce:test": "uv run --package forgearc-commerce pytest services/commerce/tests",
     "pack:node": "bash tooling/release/export-node.sh",
-    "pack:python": "bash tooling/release/export-python.sh"
+    "pack:python": "bash tooling/release/export-python.sh",
+    "pack:ai": "bash tooling/release/export-ai.sh"
   },
   "devDependencies": {
     "esbuild": "^0.25.12",

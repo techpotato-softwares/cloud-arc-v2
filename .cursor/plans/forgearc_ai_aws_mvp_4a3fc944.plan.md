@@ -13,7 +13,10 @@ todos:
     status: completed
   - id: phase-3-ai-aws-mvp
     content: Build the separate Python-first forgearc-ai AWS MVP using the hardened CloudArc patterns.
-    status: pending
+    status: completed
+  - id: phase-3-jev-decision-model
+    content: Add TypeSafe AI Jev as a decision-model provider with typed Choice, Score, and Boolean outputs, version pinning, confidence calibration, evaluation, budget tracking, and human-review thresholds.
+    status: completed
   - id: phase-4-gcp
     content: Add the GCP adapter, Terraform, and GCP documentation after the AWS product is sellable.
     status: pending

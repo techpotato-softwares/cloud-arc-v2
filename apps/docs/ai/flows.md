@@ -1,6 +1,6 @@
 # Chat, ingest, and jobs
 
-These sequences are the ForgeArc AI design. The current `POST /api/ai/chat` stub does not do this.
+These sequences are the ForgeArc AI request path. The stream route writes model tokens as server-sent events, then sends citations and the usage row. If the budget is already spent, the API returns 429 and does not call the model.
 
 ## Buffered chat
 

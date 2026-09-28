@@ -3,6 +3,7 @@
 ```bash
 pnpm pack:node
 pnpm pack:python
+pnpm pack:ai
 ```
 
 Exporters first build and test source, stage only one product, generate its

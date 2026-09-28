@@ -1,0 +1,9 @@
+pyproject.toml
+src/forgearc_ai_aws/__init__.py
+src/forgearc_ai_aws/aws.py
+src/forgearc_ai_aws/bedrock.py
+src/forgearc_ai_aws.egg-info/PKG-INFO
+src/forgearc_ai_aws.egg-info/SOURCES.txt
+src/forgearc_ai_aws.egg-info/dependency_links.txt
+src/forgearc_ai_aws.egg-info/requires.txt
+src/forgearc_ai_aws.egg-info/top_level.txt

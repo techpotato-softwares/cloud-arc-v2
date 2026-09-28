@@ -1,0 +1,12 @@
+pyproject.toml
+src/forgearc_ai_api/__init__.py
+src/forgearc_ai_api/app.py
+src/forgearc_ai_api/controllers.py
+src/forgearc_ai_api/wiring.py
+src/forgearc_ai_api/worker.py
+src/forgearc_ai_api.egg-info/PKG-INFO
+src/forgearc_ai_api.egg-info/SOURCES.txt
+src/forgearc_ai_api.egg-info/dependency_links.txt
+src/forgearc_ai_api.egg-info/requires.txt
+src/forgearc_ai_api.egg-info/top_level.txt
+tests/test_ai.py

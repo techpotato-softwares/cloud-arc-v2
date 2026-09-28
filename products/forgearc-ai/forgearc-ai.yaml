@@ -1,0 +1,58 @@
+environment: local
+auth:
+  jwt_secret: ${JWT_SECRET}
+  issuer: forgearc-ai
+  audience: forgearc-ai-client
+  expires_minutes: 720
+local_users:
+  - email: admin@forgearc.dev
+    password: change-me
+    tenant_id: demo
+    permissions: [ai:chat, ai:ingest, ai:read, ai:delete, ai:decide]
+    modules: [ai]
+chat:
+  provider: openai
+  model: gpt-4o-mini
+  allowlist: [gpt-4o-mini]
+embeddings:
+  provider: openai
+  model: text-embedding-3-small
+  allowlist: [text-embedding-3-small]
+documents_provider: memory
+vector_provider: memory
+jobs_provider: inline
+bucket: forgearc-ai-docs
+queue_url: ${FORGEARC_AI_QUEUE_URL}
+secret_id: ${FORGEARC_AI_SECRET_ID}
+database_url: ${DATABASE_URL}
+aws_region: ${AWS_REGION}
+openai_api_key: ${OPENAI_API_KEY}
+pricing:
+  gpt-4o-mini:
+    input_per_million: 0.15
+    output_per_million: 0.60
+  text-embedding-3-small:
+    input_per_million: 0.02
+    output_per_million: 0
+  jev-1.13.0:
+    input_per_million: 0.042
+    output_per_million: 0
+moderation_terms: []
+tool_allowlist: [retrieve_documents]
+limits:
+  prompt_chars: 8000
+  requests_per_minute: 60
+  job_attempts: 3
+budget:
+  monthly_usd: 25
+jev:
+  enabled: true
+  model: jev-1.13.0
+  base_url: https://api.typesafe.ai
+  review_confidence: 0.8
+  api_key: ${JEV_API_KEY}
+webhook:
+  url: ${FORGEARC_AI_WEBHOOK_URL}
+  secret: ${FORGEARC_AI_WEBHOOK_SECRET}
+chunk_chars: 800
+top_k: 4

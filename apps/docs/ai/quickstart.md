@@ -1,26 +1,27 @@
-# Planned quickstart
+# Quickstart
 
-These commands describe the first run of `forgearc-ai`. They are not executable until that folder exists.
+Run these commands from `products/forgearc-ai`.
 
 ```bash
-docker compose up -d          # PostgreSQL with pgvector
-cp .env.example .env          # OPENAI_API_KEY for local, or Bedrock config for AWS
+docker compose up -d
+cp .env.example .env
 uv sync --all-packages --frozen
-uv run --package forgearc-ai-api alembic upgrade head
-uv run --package forgearc-ai-api uvicorn --app-dir apps/api src.dev_server:app --reload --port 4020
+uv run --package forgearc-ai-api alembic -c migrations/alembic.ini upgrade head
+uv run --package forgearc-ai-api uvicorn forgearc_ai_api.app:app --port 4020
 ```
 
 ## What you do on day one
 
-1. `POST /api/login` against the platform auth route. The token must include the AI module.
-2. Upload a PDF, DOCX, HTML, or Markdown file. The API stores the object and returns `{ "job_id", "status": "queued" }`.
+1. `POST /api/auth/login` with the local user in `forgearc-ai.yaml`. The token includes the `ai` module and `ai:*` permissions.
+2. Upload a PDF, DOCX, HTML, or Markdown file. The API stores the object and returns `{ "jobId", "status" }`.
 3. Poll `GET /api/jobs/{job_id}`. The worker chunks the file, embeds it, and writes tenant-scoped rows.
-4. `POST /api/ai/chat` or the stream route. The answer includes citations pointing at those chunks.
-5. Delete the corpus for a user. That deletes their chunks and embeddings.
+4. `POST /api/ai/chat/stream`. The answer includes citations and token cost.
+5. `GET /api/usage` reports the tenant ledger. Delete a corpus with `DELETE /api/corpora/{corpus_id}`.
+6. `POST /api/decisions/evaluate` sends state to Jev and returns typed answers. Low confidence is marked for review.
 
 ## Configuration
 
-`forgearc-ai.yaml` is the source of truth, with environment overrides for secrets. The process exits if a production provider is selected and its credential is missing. The current stub's silent fallback is not part of this kit.
+`forgearc-ai.yaml` is the source of truth, with environment overrides for secrets. The process exits if a production provider is selected and its credential is missing.
 
 Local development uses OpenAI and pgvector. AWS uses Bedrock, S3, SQS, and Secrets Manager. The application calls the core interfaces, not the vendor SDK, so the same chat route runs in both places.
 

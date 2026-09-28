@@ -43,9 +43,9 @@ const products = [
   {
     icon: "spark",
     name: "ForgeArc AI",
-    pill: "Coming next",
-    muted: true,
-    text: "An AWS-first AI product for Bedrock, retrieval, streaming chat, and queued document ingestion.",
+    pill: "AWS starter open",
+    muted: false,
+    text: "Chat, retrieval, streaming, and Jev decisions. OpenAI locally, Bedrock on AWS, with source you deploy yourself.",
     meta: "Bedrock · RAG · SSE · SQS"
   }
 ];

@@ -1,0 +1,7 @@
+alembic>=1.13.0
+fastapi>=0.115.0
+forgearc-ai-aws
+forgearc-ai-core
+httpx>=0.27.0
+python-multipart>=0.0.9
+uvicorn[standard]>=0.30.0

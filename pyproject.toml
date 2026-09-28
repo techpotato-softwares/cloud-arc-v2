@@ -17,6 +17,10 @@ members = [
   "products/forgearc-python/modules/ai",
   "products/forgearc-python/modules/files",
   "products/forgearc-python/infra/cdk",
+  "products/forgearc-ai/apps/api",
+  "products/forgearc-ai/packages/core",
+  "products/forgearc-ai/packages/aws_adapter",
+  "products/forgearc-ai/infra/cdk",
 ]
 
 [dependency-groups]
@@ -41,4 +45,7 @@ pythonpath = [
   "products/forgearc-python",
   "products/forgearc-python/apps/api",
   "products/forgearc-python/packages/shared/src",
+  "products/forgearc-ai/apps/api/src",
+  "products/forgearc-ai/packages/core/src",
+  "products/forgearc-ai/packages/aws_adapter/src",
 ]

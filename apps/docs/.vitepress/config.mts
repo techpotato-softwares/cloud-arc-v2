@@ -59,7 +59,7 @@ export default defineConfig({
           text: "ForgeArc AI",
           items: [
             { text: "Overview", link: "/ai/" },
-            { text: "Planned quickstart", link: "/ai/quickstart" },
+            { text: "Quickstart", link: "/ai/quickstart" },
             { text: "AWS and GCP", link: "/ai/aws-architecture" },
             { text: "Chat and ingest flows", link: "/ai/flows" }
           ]

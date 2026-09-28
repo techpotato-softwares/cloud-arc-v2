@@ -79,7 +79,7 @@ onMounted(async () => {
     <template v-if="upcoming.length">
       <div class="group-title">
         <h2>ForgeArc AI</h2>
-        <p>Launch pricing · checkout opens at release</p>
+        <p>GCP and suite plans stay closed until that adapter ships</p>
       </div>
       <section class="plans" style="margin-bottom: 96px">
         <article v-for="plan in upcoming" :key="plan.id" class="card plan closed">
@@ -93,7 +93,7 @@ onMounted(async () => {
           <ul>
             <li v-for="item in plan.includes" :key="item"><Icon name="check" :size="16" />{{ item }}</li>
           </ul>
-          <p class="plan-note">Opens with the ForgeArc AI release</p>
+          <p class="plan-note">Checkout stays closed until this plan ships</p>
         </article>
       </section>
     </template>

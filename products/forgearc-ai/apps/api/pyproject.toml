@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "forgearc-ai-api"
+version = "1.0.0"
+description = "ForgeArc AI API host"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic>=1.13.0",
+  "fastapi>=0.115.0",
+  "forgearc-ai-aws",
+  "forgearc-ai-core",
+  "httpx>=0.27.0",
+  "python-multipart>=0.0.9",
+  "uvicorn[standard]>=0.30.0",
+]
+
+[tool.uv.sources]
+forgearc-ai-core = { workspace = true }
+forgearc-ai-aws = { workspace = true }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["forgearc_ai_api*"]

@@ -1,5 +1,6 @@
 # Commercial catalog.
-# AI tiers match the ForgeArc AI requirement document and stay closed until that kit ships.
+# AI tiers that depend on GCP stay closed until that adapter ships.
+# The AWS starter plan opens with the ForgeArc AI AWS MVP.
 # ForgeArc Node, Python, and the bundle match docs/PRICING.md and can be purchased now.
 # INR amounts for those three SKUs are the India checkout prices for the current kits.
 
@@ -52,7 +53,7 @@ plans:
     price_inr: 0
     price_usd: 0
     checkout_enabled: false
-    badge: Coming with AI
+    badge: Local evaluation
     artifacts: [cli-core]
     includes:
       - CLI and provider-agnostic core
@@ -63,8 +64,8 @@ plans:
     summary: ForgeArc AI with the AWS adapter.
     price_inr: 3999
     price_usd: 48
-    checkout_enabled: false
-    badge: Coming with AI
+    checkout_enabled: true
+    badge: Available
     artifacts: [ai-core, aws-adapter, ai-setup]
     includes:
       - ForgeArc AI core
@@ -89,7 +90,7 @@ plans:
     price_inr: 9999
     price_usd: 120
     checkout_enabled: false
-    badge: Coming with AI
+    badge: Coming with GCP
     artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, support-allowance]
     includes:
       - AWS and GCP adapters
@@ -102,7 +103,7 @@ plans:
     price_inr: 24999
     price_usd: 299
     checkout_enabled: false
-    badge: Coming with AI
+    badge: Coming with GCP
     artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, agency-license]
     includes:
       - Multi-project use
@@ -115,7 +116,7 @@ plans:
     price_inr: 79999
     price_usd: 960
     checkout_enabled: false
-    badge: Coming with AI
+    badge: Coming with GCP
     artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, enterprise-sla]
     includes:
       - Team license
@@ -128,7 +129,7 @@ plans:
     price_inr: 29999
     price_usd: 360
     checkout_enabled: false
-    badge: Coming with AI
+    badge: Coming with GCP
     artifacts: [node-kit, python-kit, ai-core, aws-adapter, gcp-adapter, suite-setup]
     includes:
       - ForgeArc Node

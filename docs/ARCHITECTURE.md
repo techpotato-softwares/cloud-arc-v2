@@ -24,6 +24,8 @@ pnpm and Turborepo govern JavaScript packages. A single root uv workspace
 governs commerce and the Python product packages. Node and Python implement the
 same product contract independently; neither runtime imports the other.
 
-Within each product, `apps/api` is the host, `packages/shared` is reusable
+Within ForgeArc Node and ForgeArc Python, `apps/api` is the host, `packages/shared` is reusable
 runtime infrastructure, `modules` contains sellable capabilities, and
-`infra/cdk` deploys generated contracts and assets.
+`infra/cdk` deploys generated contracts and assets. ForgeArc AI uses the same
+host and CDK split, with `packages/core` and `packages/aws_adapter` instead of
+shared modules.

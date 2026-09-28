@@ -53,10 +53,11 @@ jobs:
           version: "0.12.13"
       - run: uv lock --check
       - run: uv sync --all-packages --frozen
-      - run: uv run ruff check services/commerce products/forgearc-python
-      - run: uv run pytest services/commerce/tests products/forgearc-python/apps/api/tests
+      - run: uv run ruff check services/commerce products/forgearc-python products/forgearc-ai
+      - run: uv run pytest services/commerce/tests products/forgearc-python/apps/api/tests products/forgearc-ai/apps/api/tests
       - run: uv run --package forgearc-python-api python products/forgearc-python/packages/shared/scripts/build_layer.py
       - run: cd products/forgearc-python/infra/cdk && pnpm dlx aws-cdk@2 synth ApiStack-dev
+      - run: cd products/forgearc-ai/infra/cdk && pnpm dlx aws-cdk@2 synth AiStack-dev
 
   standalone-products:
     runs-on: ubuntu-latest
@@ -78,3 +79,4 @@ jobs:
       - run: uv sync --all-packages --frozen
       - run: bash tooling/release/export-node.sh
       - run: bash tooling/release/export-python.sh
+      - run: bash tooling/release/export-ai.sh

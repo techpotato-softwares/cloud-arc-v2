@@ -46,7 +46,7 @@ def test_closed_plan_cannot_be_purchased(tmp_path):
     response = client.post(
         "/api/checkout",
         json={
-            "planId": "starter-aws",
+            "planId": "starter-gcp",
             "provider": "stripe",
             "email": "buyer@example.com",
             "name": "Asha",
@@ -54,6 +54,22 @@ def test_closed_plan_cannot_be_purchased(tmp_path):
         },
     )
     assert response.status_code == 409
+
+
+def test_aws_starter_checkout_is_open(tmp_path):
+    client = build_client(tmp_path, catalog_path())
+    response = client.post(
+        "/api/checkout",
+        json={
+            "planId": "starter-aws",
+            "provider": "stripe",
+            "email": "buyer@example.com",
+            "name": "Asha",
+            "country": "US",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["mode"] == "test"
 
 
 def test_stripe_payment_grants_only_python_artifacts(tmp_path):

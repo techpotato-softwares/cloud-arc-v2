@@ -39,6 +39,7 @@ packages. Build isolated buyer artifacts with:
 ```bash
 pnpm pack:node
 pnpm pack:python
+pnpm pack:ai
 ```
 
 Each exporter generates a product-local lock and reruns installation and tests
