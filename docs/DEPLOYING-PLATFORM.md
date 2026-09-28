@@ -73,6 +73,17 @@ Lambda permission to send. New AWS accounts remain in the SES sandbox until AWS
 approves production access. Request production access before launch so purchase
 mail can be sent to arbitrary buyers.
 
+## AWS Free Tier
+
+`databaseBackupRetentionDays` is 1 because an AWS Free Tier account rejects a
+longer RDS backup window. Raise it after the account is upgraded. API access
+logs use a log group owned by this stack, so a retry does not try to recreate
+the API Gateway account log group left behind by a failed deployment.
+
+If `forgearc-prod` is in `ROLLBACK_COMPLETE`, delete that stack in
+CloudFormation and run the workflow again. Keep `forgearc-dns-prod` when its
+nameservers are already set at the registrar.
+
 ## Costs and operations
 
 The production stack intentionally uses one NAT gateway, a private RDS instance,

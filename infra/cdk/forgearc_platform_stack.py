@@ -108,7 +108,7 @@ class ForgeArcPlatformStack(Stack):
             allocated_storage=20,
             max_allocated_storage=100,
             storage_encrypted=True,
-            backup_retention=Duration.days(14),
+            backup_retention=Duration.days(int(config["databaseBackupRetentionDays"])),
             deletion_protection=True,
             removal_policy=RemovalPolicy.SNAPSHOT,
             cloudwatch_logs_exports=["postgresql"],
@@ -174,17 +174,35 @@ class ForgeArcPlatformStack(Stack):
             )
         )
 
+        api_access_logs = logs.LogGroup(
+            self,
+            "CommerceApiAccessLogs",
+            retention=logs.RetentionDays.ONE_MONTH,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
         api = apigateway.LambdaRestApi(
             self,
             "CommerceGateway",
             handler=commerce,
             proxy=True,
+            cloud_watch_role=False,
             deploy_options=apigateway.StageOptions(
                 stage_name=self.stage,
                 tracing_enabled=True,
                 metrics_enabled=True,
-                logging_level=apigateway.MethodLoggingLevel.INFO,
                 data_trace_enabled=False,
+                access_log_destination=apigateway.LogGroupLogDestination(api_access_logs),
+                access_log_format=apigateway.AccessLogFormat.json_with_standard_fields(
+                    caller=True,
+                    http_method=True,
+                    ip=True,
+                    protocol=True,
+                    request_time=True,
+                    resource_path=True,
+                    response_length=True,
+                    status=True,
+                    user=True,
+                ),
             ),
         )
         api_domain = api.add_domain_name(
