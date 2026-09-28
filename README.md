@@ -15,7 +15,7 @@ infra/cdk/            Production AWS platform infrastructure
 
 ## Prerequisites and setup
 
-- Node.js 20+, pnpm 11.0.9
+- Node.js 22.13+, pnpm 11.0.9
 - Python 3.12+, uv 0.12+
 
 ```bash

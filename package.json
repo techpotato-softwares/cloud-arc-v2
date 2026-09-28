@@ -5,7 +5,7 @@
   "description": "ForgeArc polyglot product workspace",
   "packageManager": "pnpm@11.0.9",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "dev": "turbo run dev --parallel",

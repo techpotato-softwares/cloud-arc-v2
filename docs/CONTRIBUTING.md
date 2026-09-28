@@ -1,6 +1,6 @@
 # Contributing
 
-Install Node 20+, pnpm 11.0.9, Python 3.12+, and uv.
+Install Node 22.13+, pnpm 11.0.9, Python 3.12+, and uv.
 
 ```bash
 pnpm install

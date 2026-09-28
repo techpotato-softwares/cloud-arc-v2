@@ -27,7 +27,7 @@ infra/cdk/
 ## Prerequisites
 
 - Python 3.12+
-- Node.js 20+ (CDK CLI only: `npm i -g aws-cdk` or `pnpm exec cdk`)
+- Node.js 22.13+ (CDK CLI only: `npm i -g aws-cdk` or `pnpm exec cdk`)
 - AWS credentials configured
 
 ```bash

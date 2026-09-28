@@ -42,13 +42,17 @@ jobs:
           echo "region=$(jq -r '.region' infra/cdk/config.json)" >> "$GITHUB_OUTPUT"
           echo "docs_url=https://$(jq -r '.docsDomainName' infra/cdk/config.json)" >> "$GITHUB_OUTPUT"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - uses: pnpm/action-setup@v4
         with:
           version: 11.0.9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - uses: astral-sh/setup-uv@v7
