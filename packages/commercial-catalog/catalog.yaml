@@ -1,6 +1,6 @@
 # Commercial catalog.
-# AI tiers that depend on GCP stay closed until that adapter ships.
-# The AWS starter plan opens with the ForgeArc AI AWS MVP.
+# The AWS and GCP starter plans are open.
+# Higher AI tiers stay closed until their support and license terms ship.
 # ForgeArc Node, Python, and the bundle match docs/PRICING.md and can be purchased now.
 # INR amounts for those three SKUs are the India checkout prices for the current kits.
 
@@ -102,16 +102,17 @@ plans:
     family: ai
     tier: GCP source
     license_scope: One organization and its products
-    updates: Opens with GCP adapter
+    updates: Current GCP edition updates
     summary: ForgeArc AI with the GCP adapter.
     price_inr: 3999
     price_usd: 48
-    checkout_enabled: false
-    badge: Coming with GCP
+    checkout_enabled: true
+    badge: Available
     artifacts: [ai-core, gcp-adapter, ai-setup]
     includes:
       - ForgeArc AI core
-      - GCP adapter and docs
+      - GCP adapter, Terraform, and docs
+      - Vertex AI, Cloud Storage, Pub/Sub, Firestore, and AlloyDB
 
   - id: professional
     name: Professional

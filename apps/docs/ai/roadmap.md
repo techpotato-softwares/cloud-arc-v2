@@ -2,7 +2,8 @@
 
 ## Shipped in the AWS MVP
 
-- OpenAI local provider and Amazon Bedrock AWS provider
+- OpenAI local provider, Amazon Bedrock, and Vertex AI
+- GCP adapter for Cloud Storage, Pub/Sub, Firestore, Secret Manager, and AlloyDB Terraform
 - Buffered and SSE chat with structured output
 - PDF, DOCX, HTML, and Markdown ingestion
 - Tenant-scoped chunks, pgvector migration, citations, and corpus deletion
@@ -12,9 +13,8 @@
 
 ## Roadmap—not included today
 
-- GCP adapter, Vertex AI, Cloud Storage, Pub/Sub, AlloyDB, and Terraform
 - LangGraph agents, multi-agent supervision, and human approval APIs
 - RAGAS evaluation and richer cost dashboards
 - Voice, copilots, deep agents, subscriptions, and custom commercial adapters
 
-Roadmap architecture diagrams communicate interface boundaries, not current entitlement. Checkout remains disabled for plans requiring unshipped adapters.
+The Starter AWS and Starter GCP plans are available. Professional, Agency, Enterprise, and Suite stay closed until their support and license terms ship.

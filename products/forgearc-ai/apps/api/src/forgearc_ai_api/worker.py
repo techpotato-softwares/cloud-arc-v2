@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from forgearc_ai_api.app import create_app
 
 
@@ -10,9 +12,13 @@ def handler(event, _context):
     ingestion = container.get("IngestionService")
     failures = []
     for record in event.get("Records", []):
-        job_id = record.get("body")
+        body = record.get("body") or ""
         try:
-            ingestion.process(job_id)
+            payload = json.loads(body)
+        except json.JSONDecodeError:
+            payload = body
+        try:
+            ingestion.process_message(payload)
         except Exception:
             failures.append({"itemIdentifier": record.get("messageId")})
     return {"batchItemFailures": failures}

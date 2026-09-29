@@ -17,7 +17,7 @@ Audit records store actor, action, resource, prompt hash, and character count—
 
 ## Ingestion reliability
 
-SQS retries an ingestion job three times before its dead-letter queue. A CloudWatch alarm publishes to SNS when a job reaches the DLQ. Signed webhooks report completed or dead jobs.
+SQS retries an ingestion job three times before its dead-letter queue. A CloudWatch alarm publishes to SNS when a job reaches the DLQ. On GCP, Pub/Sub delivers to the dead-letter topic after five attempts, and the worker still marks the job dead after three application attempts. Signed webhooks report completed or dead jobs.
 
 ## Incident checklist
 

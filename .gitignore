@@ -15,6 +15,7 @@ node_modules/
 **/__pycache__/
 **/dist/
 **/cdk.out/
+**/.terraform/
 **/.vitepress/cache/
 **/.vitepress/dist/
 services/commerce/data/

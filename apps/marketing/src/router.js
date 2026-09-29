@@ -15,7 +15,7 @@ export const router = createRouter({
       component: Home,
       meta: {
         title: "ForgeArc — Production Backend Source Kits for Node and Python",
-        description: "Own production-oriented Node and Python backend source kits with auth, modular architecture, OpenAPI, tests, and AWS CDK."
+        description: "Own production-oriented Node, Python, and AI source kits with auth, modular architecture, OpenAPI, tests, AWS CDK, and GCP Terraform."
       }
     },
     {

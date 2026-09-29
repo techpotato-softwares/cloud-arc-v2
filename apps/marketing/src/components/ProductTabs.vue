@@ -32,9 +32,9 @@ class InvoiceController:
   },
   ai: {
     name: "ForgeArc AI",
-    badge: "AWS Starter available",
-    description: "OpenAI locally, Bedrock on AWS, tenant-scoped RAG, SSE streaming, SQS ingestion, and Jev decisions.",
-    features: ["Citations and token-cost ledger", "Budget, rate, and moderation gates", "Typed Choice, Score, Boolean decisions"],
+    badge: "AWS and GCP starters available",
+    description: "OpenAI locally, Bedrock on AWS, Vertex AI on GCP, tenant-scoped RAG, streaming, and Jev decisions.",
+    features: ["AWS CDK or GCP Terraform", "Citations and token-cost ledger", "Typed Choice, Score, Boolean decisions"],
     code: `POST /api/ai/chat/stream
 {
   "message": "Summarize this policy",

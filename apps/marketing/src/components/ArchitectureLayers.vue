@@ -1,14 +1,25 @@
 <script setup>
-const layers = [
+import { computed } from "vue";
+
+const props = defineProps({
+  cloud: { type: String, default: "aws" }
+});
+
+const layers = computed(() => [
   ["Presentation", ["REST", "SSE", "OpenAPI"]],
   ["Routing & identity", ["Decorator routes", "JWT", "RBAC", "Module gates"]],
   ["Application", ["Controllers", "Services", "Repositories"]],
-  ["Intelligence", ["OpenAI", "Bedrock", "Jev decisions"]],
+  ["Intelligence", props.cloud === "gcp" ? ["OpenAI", "Vertex AI", "Jev decisions"] : ["OpenAI", "Bedrock", "Jev decisions"]],
   ["Retrieval", ["Loaders", "Chunking", "Embeddings", "Citations"]],
   ["Data & memory", ["Prisma", "SQLAlchemy", "Alembic", "pgvector"]],
-  ["Infrastructure", ["API Gateway", "Lambda", "S3", "SQS", "RDS"]],
-  ["Operations", ["Tests", "Budgets", "Audit", "DLQ alarms"]]
-];
+  [
+    "Infrastructure",
+    props.cloud === "gcp"
+      ? ["Cloud Run", "Cloud Storage", "Pub/Sub", "Firestore", "AlloyDB", "Terraform"]
+      : ["API Gateway", "Lambda", "S3", "SQS", "RDS", "CDK"]
+  ],
+  ["Operations", ["Tests", "Budgets", "Audit", "Dead-letter jobs"]]
+]);
 </script>
 
 <template>

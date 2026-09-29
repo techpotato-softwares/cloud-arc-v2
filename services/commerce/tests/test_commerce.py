@@ -46,7 +46,7 @@ def test_closed_plan_cannot_be_purchased(tmp_path):
     response = client.post(
         "/api/checkout",
         json={
-            "planId": "starter-gcp",
+            "planId": "professional",
             "provider": "stripe",
             "email": "buyer@example.com",
             "name": "Asha",
@@ -65,7 +65,8 @@ def test_catalog_groups_pricing_without_changing_checkout_ids(tmp_path):
     assert {"node", "python", "ai", "bundle"} <= set(families)
     assert plans["forgearc-node"]["family"] == "node"
     assert plans["starter-aws"]["checkoutEnabled"] is True
-    assert plans["starter-gcp"]["checkoutEnabled"] is False
+    assert plans["starter-gcp"]["checkoutEnabled"] is True
+    assert plans["professional"]["checkoutEnabled"] is False
     assert plans["forgearc-bundle"]["recommended"] is True
     assert plans["forgearc-node"]["priceInr"] == 28999
 

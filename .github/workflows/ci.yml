@@ -61,6 +61,8 @@ jobs:
       - run: uv run --package forgearc-python-api python products/forgearc-python/packages/shared/scripts/build_layer.py
       - run: cd products/forgearc-python/infra/cdk && pnpm dlx aws-cdk@2 synth ApiStack-dev
       - run: cd products/forgearc-ai/infra/cdk && pnpm dlx aws-cdk@2 synth AiStack-dev
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=products/forgearc-ai/infra/terraform init -backend=false && terraform -chdir=products/forgearc-ai/infra/terraform validate
 
   standalone-products:
     runs-on: ubuntu-latest

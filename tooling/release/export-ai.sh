@@ -35,12 +35,14 @@ forgearc-ai-api = { workspace = true }
 forgearc-ai-cdk = { workspace = true }
 forgearc-ai-core = { workspace = true }
 forgearc-ai-aws = { workspace = true }
+forgearc-ai-gcp = { workspace = true }
 
 [tool.uv.workspace]
 members = [
   "apps/api",
   "packages/core",
   "packages/aws_adapter",
+  "packages/gcp_adapter",
   "infra/cdk",
 ]
 
@@ -49,7 +51,7 @@ dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.5"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-pythonpath = ["apps/api/src", "packages/core/src", "packages/aws_adapter/src"]
+pythonpath = ["apps/api/src", "packages/core/src", "packages/aws_adapter/src", "packages/gcp_adapter/src"]
 EOF
 
 (

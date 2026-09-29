@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 
 import pytest
@@ -248,7 +249,7 @@ def test_worker_reports_failed_records(monkeypatch):
     from forgearc_ai_api.worker import handler
 
     class Broken:
-        def process(self, _job_id):
+        def process_message(self, _payload):
             raise RuntimeError("failed")
 
     class Graph:
@@ -262,11 +263,253 @@ def test_worker_reports_failed_records(monkeypatch):
     assert handler({"Records": [{"body": "job-1", "messageId": "abc"}]}, None) == {"batchItemFailures": [{"itemIdentifier": "abc"}]}
 
 
-def load_settings_from(text: str):
+def test_vertex_documents_and_jobs_use_the_gcp_interfaces():
+    from forgearc_ai.errors import PolicyError
+    from forgearc_ai_gcp.gcp import FirestoreJobs, GcsDocuments, PubSubQueue, load_secret
+    from forgearc_ai_gcp.vertex import VertexProvider
+
+    class Storage:
+        def __init__(self):
+            self.objects = {}
+
+        def upload(self, bucket, key, content):
+            self.objects[(bucket, key)] = content
+
+        def download(self, bucket, key):
+            return self.objects[(bucket, key)]
+
+    class Jobs:
+        def __init__(self):
+            self.rows = {}
+
+        def put(self, job_id, fields):
+            self.rows[job_id] = fields
+
+        def get(self, job_id):
+            return self.rows.get(job_id)
+
+    class Publisher:
+        def __init__(self):
+            self.messages = []
+
+        def publish(self, topic, data):
+            self.messages.append((topic, data))
+
+            class Done:
+                def result(self):
+                    return "published"
+
+            return Done()
+
+    class Vertex:
+        def generate(self, model, prompt):
+            assert model == "gemini-2.0-flash"
+            return {"text": "cited", "input_tokens": 3, "output_tokens": 2}
+
+        def stream(self, model, prompt):
+            yield "cit"
+            yield {"input_tokens": 3, "output_tokens": 1}
+
+        def embed(self, model, texts):
+            assert model == "text-embedding-004"
+            return [[0.1, 0.2] for _ in texts]
+
+    storage = Storage()
+    documents = GcsDocuments(storage)
+    documents.put("docs", "one", b"hello")
+    assert documents.get("docs", "one") == b"hello"
+
+    jobs = FirestoreJobs(Jobs())
+    publisher = Publisher()
+    queue = PubSubQueue(publisher, "projects/demo/topics/ingest", jobs)
+    queue.send("job-1")
+    assert publisher.messages == [("projects/demo/topics/ingest", b"job-1")]
+    assert jobs.get("job-1") == {"status": "queued"}
+    queue.record_status("job-1", "completed")
+    assert jobs.get("job-1") == {"status": "completed", "error": ""}
+
+    class Secrets:
+        def access(self, _secret_id):
+            return '{"openai":"hidden"}'
+
+    assert load_secret(Secrets(), "projects/demo/secrets/forgearc/versions/latest")["openai"] == "hidden"
+
+    provider = VertexProvider(
+        "gemini-2.0-flash",
+        "text-embedding-004",
+        ["gemini-2.0-flash", "text-embedding-004"],
+        "demo",
+        "us-central1",
+        Vertex(),
+    )
+    assert provider.complete("hello").text == "cited"
+    assert list(provider.stream("hello"))[-1][1].output_tokens == 1
+    assert provider.embed(["a"]) == [[0.1, 0.2]]
+    blocked = VertexProvider("gemini-2.0-flash", "other", ["gemini-2.0-flash"], "demo", "us-central1", Vertex())
+    with pytest.raises(PolicyError):
+        blocked.embed(["a"])
+
+    config = settings(
+        chat={"provider": "vertex", "model": "gemini-2.0-flash", "allowlist": ["gemini-2.0-flash"]},
+        embeddings={"provider": "vertex", "model": "text-embedding-004", "allowlist": ["text-embedding-004"]},
+        documents_provider="gcs",
+        jobs_provider="pubsub",
+        gcp_project="demo",
+        gcp_location="us-central1",
+        queue_url="projects/demo/topics/ingest",
+    )
+    container = build_container(config, vertex_client=Vertex(), gcs_client=storage, pubsub_publisher=publisher, firestore_client=Jobs())
+    assert container.get("ChatService").provider.complete("hello").text == "cited"
+
+
+def test_cloud_presets_select_adapters_without_repeating_provider_yaml():
+    from forgearc_ai_gcp.gcp import GcsDocuments, PubSubQueue
+    from forgearc_ai_gcp.vertex import VertexProvider
+    from forgearc_ai_aws.aws import S3Documents, SqsQueue
+    from forgearc_ai_aws.bedrock import BedrockProvider
+
+    aws = Settings.model_validate(
+        {
+            "environment": "test",
+            "cloud": "aws",
+            "jev": {"enabled": False},
+        }
+    )
+    assert aws.chat.provider == "bedrock"
+    assert aws.documents_provider == "s3"
+    assert aws.jobs_provider == "sqs"
+    aws_container = build_container(aws)
+    assert isinstance(aws_container.get("ChatService").provider, BedrockProvider)
+    assert isinstance(aws_container.get("IngestionService").documents, S3Documents)
+    assert isinstance(aws_container.get("IngestionService").queue, SqsQueue)
+
+    gcp = Settings.model_validate(
+        {
+            "environment": "test",
+            "cloud": "gcp",
+            "gcp_project": "demo",
+            "gcp_location": "us-central1",
+            "queue_url": "projects/demo/topics/ingest",
+            "jev": {"enabled": False},
+        }
+    )
+    assert gcp.chat.provider == "vertex"
+    assert gcp.documents_provider == "gcs"
+    assert gcp.jobs_provider == "pubsub"
+    gcp_container = build_container(gcp)
+    assert isinstance(gcp_container.get("ChatService").provider, VertexProvider)
+    assert isinstance(gcp_container.get("IngestionService").documents, GcsDocuments)
+    assert isinstance(gcp_container.get("IngestionService").queue, PubSubQueue)
+
+
+def test_deployment_environment_selects_cloud_and_generated_resources():
+    config = load_settings_from(
+        "environment: local\ncloud: local\njev: {enabled: false}\n",
+        {
+            "FORGEARC_AI_ENVIRONMENT": "test",
+            "FORGEARC_AI_CLOUD": "gcp",
+            "FORGEARC_AI_BUCKET": "generated-documents",
+            "FORGEARC_AI_QUEUE_URL": "projects/demo/topics/generated-ingest",
+            "FORGEARC_AI_FIRESTORE_DATABASE": "forgearc-ai-dev",
+            "GCP_PROJECT": "demo",
+            "GCP_LOCATION": "us-central1",
+        },
+    )
+    assert config.cloud == "gcp"
+    assert config.chat.provider == "vertex"
+    assert config.bucket == "generated-documents"
+    assert config.queue_url == "projects/demo/topics/generated-ingest"
+    assert config.firestore_database == "forgearc-ai-dev"
+
+
+def test_pubsub_push_endpoint_decodes_job_id():
+    config = settings()
+    container = build_container(config, jev_transport=jev_transport)
+
+    class Ingestion:
+        def __init__(self):
+            self.jobs = []
+
+        def process_message(self, payload):
+            self.jobs.append(payload)
+
+    ingestion = Ingestion()
+    container.bind_constant("IngestionService", ingestion)
+    client = TestClient(create_app(config, container))
+    encoded = base64.b64encode(b"job-gcp-1").decode()
+    response = client.post(
+        "/internal/pubsub",
+        json={"message": {"data": encoded, "messageId": "message-1"}},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"ok": True, "jobId": "job-gcp-1"}
+    assert ingestion.jobs == ["job-gcp-1"]
+    assert client.post("/internal/pubsub", json={"message": {}}).status_code == 400
+
+
+def test_queued_job_restores_in_a_fresh_worker_process():
+    from forgearc_ai.providers.fake import FakeChatProvider
+    from forgearc_ai.services import IngestionService
+    from forgearc_ai.stores import MemoryGraph
+
+    class Documents:
+        def __init__(self):
+            self.values = {}
+
+        def put(self, bucket, key, content):
+            self.values[(bucket, key)] = content
+
+        def get(self, bucket, key):
+            return self.values[(bucket, key)]
+
+    class Queue:
+        def __init__(self):
+            self.payload = None
+
+        def send(self, _job_id, payload=None):
+            self.payload = payload
+
+    config = settings(documents_provider="gcs", jobs_provider="pubsub")
+    provider = FakeChatProvider("fake-chat", ["fake-chat", "fake-embed"])
+    documents = Documents()
+    queue = Queue()
+    submitter = IngestionService(
+        config,
+        provider,
+        MemoryGraph(),
+        documents,
+        queue,
+    )
+    submitted = submitter.submit(
+        Principal(
+            email="ada@example.com",
+            tenant_id="tenant-a",
+            permissions=["ai:ingest"],
+            modules=["ai"],
+        ),
+        "policy.md",
+        b"Cloud-independent worker payload.",
+        "policies",
+        "request-1",
+    )
+    assert queue.payload["jobId"] == submitted["jobId"]
+
+    worker = IngestionService(
+        config,
+        provider,
+        MemoryGraph(),
+        documents,
+    )
+    completed = worker.process_message(queue.payload)
+    assert completed.status == "completed"
+    assert worker.store.chunks[0].tenant_id == "tenant-a"
+
+
+def load_settings_from(text: str, environ: dict[str, str] | None = None):
     from pathlib import Path
     import tempfile
 
     handle = tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False)
     handle.write(text)
     handle.close()
-    return load_settings(Path(handle.name), {})
+    return load_settings(Path(handle.name), environ or {})

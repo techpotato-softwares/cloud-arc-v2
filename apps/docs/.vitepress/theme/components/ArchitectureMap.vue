@@ -20,6 +20,7 @@ const catalog: Record<string, NodeSpec> = {
   run: { id: "run", label: "Cloud Run", group: "GCP", mark: "run", note: "API and workers", icon: "/icons/gcp/cloud-run.svg" },
   gcs: { id: "gcs", label: "Cloud Storage", group: "GCP", mark: "bucket", note: "Source documents", icon: "/icons/gcp/cloud-storage.svg" },
   pubsub: { id: "pubsub", label: "Pub/Sub", group: "GCP", mark: "queue", note: "Ingestion jobs" },
+  firestore: { id: "firestore", label: "Firestore", group: "GCP", mark: "db", note: "Job status" },
   secretmgr: { id: "secretmgr", label: "Secret Manager", group: "GCP", mark: "lock", note: "Provider credentials" },
   alloydb: { id: "alloydb", label: "AlloyDB", group: "GCP", mark: "db", note: "pgvector retrieval", icon: "/icons/gcp/alloydb.svg" },
   vertex: { id: "vertex", label: "Vertex AI", group: "GCP", mark: "model", note: "Gemini and embeddings", icon: "/icons/gcp/vertex-ai.svg" }
@@ -62,7 +63,7 @@ const layouts: Record<string, { caption: string; lanes: Lane[] }> = {
       { label: "Caller", nodes: ["client"] },
       { label: "API", nodes: ["run", "vertex"] },
       { label: "Async", nodes: ["pubsub"] },
-      { label: "State", nodes: ["gcs", "alloydb", "secretmgr"] }
+      { label: "State", nodes: ["gcs", "firestore", "alloydb", "secretmgr"] }
     ]
   }
 };

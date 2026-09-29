@@ -7,6 +7,7 @@ from collections.abc import Iterator
 
 from forgearc_ai.auth import Principal
 from forgearc_ai.config import Settings
+from forgearc_ai.contracts import DocumentStore, JobQueue, ModelProvider
 from forgearc_ai.errors import NotFound, ProviderError
 from forgearc_ai.policy import PolicyGate
 from forgearc_ai.providers.jev import DecisionAnswer, JevProvider
@@ -15,7 +16,13 @@ from forgearc_ai.stores import AuditRecord, DocumentRecord, JobRecord, MemoryGra
 
 
 class ChatService:
-    def __init__(self, settings: Settings, provider, gate: PolicyGate, store: MemoryGraph):
+    def __init__(
+        self,
+        settings: Settings,
+        provider: ModelProvider,
+        gate: PolicyGate,
+        store: MemoryGraph,
+    ):
         self.settings = settings
         self.provider = provider
         self.gate = gate
@@ -89,7 +96,14 @@ class ChatService:
 
 
 class IngestionService:
-    def __init__(self, settings: Settings, provider, store: MemoryGraph, documents=None, queue=None):
+    def __init__(
+        self,
+        settings: Settings,
+        provider: ModelProvider,
+        store: MemoryGraph,
+        documents: DocumentStore | None = None,
+        queue: JobQueue | None = None,
+    ):
         self.settings = settings
         self.provider = provider
         self.store = store
@@ -109,10 +123,47 @@ class IngestionService:
         self.store.add_document(record)
         job = self.store.enqueue(principal.tenant_id, document_id, idempotency_key)
         if self.queue is not None:
-            self.queue.send(job.id)
+            self.queue.send(
+                job.id,
+                {
+                    "jobId": job.id,
+                    "tenantId": principal.tenant_id,
+                    "documentId": document_id,
+                    "corpusId": record.corpus_id,
+                    "filename": filename,
+                    "idempotencyKey": idempotency_key,
+                },
+            )
         elif self.settings.jobs_provider == "inline":
             self.process(job.id)
         return {"jobId": job.id, "status": self.store.jobs[job.id].status, "documentId": document_id}
+
+    def process_message(self, payload: str | dict) -> JobRecord:
+        if isinstance(payload, str):
+            return self.process(payload)
+        job_id = str(payload["jobId"])
+        if job_id not in self.store.jobs:
+            document_id = str(payload["documentId"])
+            tenant_id = str(payload["tenantId"])
+            idempotency_key = str(payload.get("idempotencyKey") or job_id)
+            self.store.add_document(
+                DocumentRecord(
+                    document_id,
+                    tenant_id,
+                    str(payload.get("corpusId") or document_id),
+                    str(payload["filename"]),
+                    "",
+                )
+            )
+            job = JobRecord(
+                id=job_id,
+                tenant_id=tenant_id,
+                document_id=document_id,
+                idempotency_key=idempotency_key,
+            )
+            self.store.jobs[job_id] = job
+            self.store.jobs_by_key[(tenant_id, idempotency_key)] = job_id
+        return self.process(job_id)
 
     def process(self, job_id: str) -> JobRecord:
         job = self.store.jobs.get(job_id)
@@ -145,10 +196,14 @@ class IngestionService:
                 )
             job.status = "completed"
             job.error = ""
+            if self.queue is not None:
+                self.queue.record_status(job.id, job.status)
             self._notify(job)
         except Exception as exc:
             job.error = exc.__class__.__name__
             job.status = "dead" if job.attempts >= self.settings.limits.job_attempts else "retry"
+            if self.queue is not None:
+                self.queue.record_status(job.id, job.status, job.error)
             if job.status == "dead":
                 self._notify(job)
             raise

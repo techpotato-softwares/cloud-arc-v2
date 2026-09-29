@@ -22,10 +22,16 @@ const scenes = [
     code: "$ pnpm check\n✓ lint\n✓ typecheck\n✓ tests\n✓ build"
   },
   {
-    label: "04 · Deploy to your account",
+    label: "04 · Deploy to AWS",
     title: "CDK consumes the same manifest",
     body: "API Gateway, Lambda, permissions, secrets, storage, and database resources stay reproducible.",
     code: "$ pnpm synth\n✓ ApiStack-dev\n✓ assets staged\n✓ template generated"
+  },
+  {
+    label: "05 · Or deploy to GCP",
+    title: "Terraform uses the same interfaces",
+    body: "Cloud Run, Vertex AI, Cloud Storage, Pub/Sub, Firestore, and AlloyDB sit behind the GCP adapter.",
+    code: "$ terraform validate\n✓ Cloud Run\n✓ Vertex AI\n✓ AlloyDB pgvector"
   }
 ];
 

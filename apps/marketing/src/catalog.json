@@ -111,17 +111,18 @@
       "summary": "ForgeArc AI with the GCP adapter.",
       "priceInr": 3999,
       "priceUsd": 48,
-      "checkoutEnabled": false,
-      "badge": "Coming with GCP",
+      "checkoutEnabled": true,
+      "badge": "Available",
       "includes": [
         "ForgeArc AI core",
-        "GCP adapter and docs"
+        "GCP adapter, Terraform, and docs",
+        "Vertex AI, Cloud Storage, Pub/Sub, Firestore, and AlloyDB"
       ],
       "family": "ai",
       "tier": "GCP source",
       "recommended": false,
       "licenseScope": "One organization and its products",
-      "updates": "Opens with GCP adapter",
+      "updates": "Current GCP edition updates",
       "excludes": []
     },
     {

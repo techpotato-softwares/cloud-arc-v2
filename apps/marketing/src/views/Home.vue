@@ -13,6 +13,7 @@ import { DOCS_URL, getCatalog, money } from "../api";
 import catalogSnapshot from "../catalog.json";
 
 const activeCode = ref("node");
+const cloud = ref("aws");
 const country = ref(Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Kolkata" ? "IN" : "US");
 const plans = ref(catalogSnapshot.plans);
 const openPlans = computed(() => plans.value.filter((plan) => plan.checkoutEnabled));
@@ -55,24 +56,24 @@ const products = [
   {
     icon: "spark",
     name: "ForgeArc AI",
-    pill: "AWS starter open",
+    pill: "AWS and GCP open",
     muted: false,
-    text: "Chat, retrieval, streaming, and Jev decisions. OpenAI locally, Bedrock on AWS, with source you deploy yourself.",
-    meta: "Bedrock · RAG · SSE · SQS"
+    text: "Chat, retrieval, streaming, and Jev decisions. OpenAI locally, Bedrock on AWS, and Vertex AI on GCP.",
+    meta: "Bedrock · Vertex AI · RAG · Terraform"
   }
 ];
 
 const features = [
   { icon: "shield", title: "Identity is already wired", text: "JWT login, refresh, roles, permissions, tenant-aware claims, and route guards are included." },
   { icon: "layers", title: "A structure teams can extend", text: "Controllers, services, repositories, schemas, modules, and infrastructure have explicit boundaries." },
-  { icon: "cloud", title: "Infrastructure follows code", text: "A generated manifest drives API Gateway and Lambda, keeping deployment aligned with your routes." },
+  { icon: "cloud", title: "Infrastructure follows code", text: "AWS uses a generated manifest with CDK. GCP uses Terraform for Cloud Run, Vertex AI, storage, and queues." },
   { icon: "book", title: "Contracts generate with builds", text: "Route metadata and request schemas produce OpenAPI documents for clients and integrations." },
   { icon: "bolt", title: "Local feedback stays fast", text: "Run the same handlers locally, test modules in isolation, then synthesize and deploy with CDK." },
   { icon: "lock", title: "Delivery remains private", text: "Paid source is delivered as a licensed product artifact with plan-specific setup instructions." }
 ];
 
 const outcomes = [
-  { value: "2", label: "production-ready runtime choices", detail: "Choose Node or Python without changing the architecture." },
+  { value: "2", label: "cloud editions for ForgeArc AI", detail: "Deploy the same AI interfaces on AWS or GCP." },
   { value: "1", label: "generated API contract", detail: "Manifest and OpenAPI stay part of the build." },
   { value: "0", label: "manual Python environments", detail: "ForgeArc Python is governed end-to-end by uv." },
   { value: "12 mo", label: "included updates", detail: "Keep the source forever; updates are included for one year." }
@@ -94,6 +95,7 @@ const faqs = [
   { q: "What exactly do I receive?", a: "A licensed source artifact for the product in your plan, its frozen dependency lock, generated contracts, infrastructure code, tests, and a setup guide by email." },
   { q: "Can I use it for client projects?", a: "Single-product and bundle licenses cover your own products. Agency and Enterprise plans cover client work and multiple projects." },
   { q: "Will my application depend on ForgeArc servers?", a: "No. You receive source code and deploy it into infrastructure you control. Checkout and delivery are the only ForgeArc-hosted parts." },
+  { q: "Can I deploy on GCP as well as AWS?", a: "Yes. ForgeArc Node and Python deploy with AWS CDK. ForgeArc AI also has a GCP starter: Vertex AI, Cloud Run, Cloud Storage, Pub/Sub, Firestore, AlloyDB, and Terraform. The application code stays on the same interfaces." },
   { q: "How do payments work?", a: "India billing uses Razorpay in rupees. International billing uses Stripe in US dollars. Delivery starts after verified payment confirmation." },
   { q: "Do I get updates?", a: "ForgeArc Node and ForgeArc Python include 12 months of updates. Renewal is optional and your licensed source keeps working." }
 ];
@@ -102,7 +104,7 @@ const baselineWork = [
   ["Authentication and RBAC", "16–28h"],
   ["Module and data boundaries", "12–20h"],
   ["API contracts and validation", "10–16h"],
-  ["AWS infrastructure and delivery", "24–40h"],
+  ["AWS or GCP infrastructure and delivery", "24–40h"],
   ["Tests, logging, and hardening", "15–24h"]
 ];
 </script>
@@ -116,7 +118,7 @@ const baselineWork = [
           <h1>Build the product.<br /><span class="gradient-text">Not the backend baseline.</span></h1>
           <p class="lede">
             Own a production-oriented serverless foundation with authentication, modular architecture,
-            generated API contracts, tests, and AWS CDK—delivered as source code your team controls.
+            generated API contracts, tests, and deployment code for AWS or GCP—delivered as source your team controls.
           </p>
           <div class="actions">
             <RouterLink class="btn btn-brand" to="/pricing">Choose your product <Icon name="arrow" :size="18" /></RouterLink>
@@ -167,8 +169,8 @@ const baselineWork = [
       <div class="container">
         <div class="section-head" v-reveal>
           <span class="kicker">Choose your runtime</span>
-          <h2>One product architecture. Two production stacks.</h2>
-          <p>Pick the language your team already knows. The request path, module boundaries, contracts, and deployment model stay consistent.</p>
+          <h2>One product architecture. Node, Python, AWS, and GCP.</h2>
+          <p>Pick the language your team already knows. ForgeArc AI can deploy to AWS with CDK or GCP with Terraform without changing the application interfaces.</p>
         </div>
         <ProductTabs v-reveal />
       </div>
@@ -181,8 +183,8 @@ const baselineWork = [
           <h2>Layered enough to scale. Familiar enough to own.</h2>
           <p>The same boundaries appear in the source, generated contracts, tests, and deployment. Cloud-specific services stay behind adapters.</p>
         </div>
-        <ArchitectureDiagram v-reveal />
-        <ArchitectureLayers v-reveal />
+        <ArchitectureDiagram v-model:cloud="cloud" v-reveal />
+        <ArchitectureLayers :cloud="cloud" v-reveal />
         <div style="text-align: center; margin-top: 28px"><a class="text-link" :href="DOCS_URL">See deployment diagrams <Icon name="arrow" :size="16" /></a></div>
       </div>
     </section>
@@ -208,7 +210,7 @@ const baselineWork = [
           <ul class="check-list">
             <li><Icon name="check" :size="17" /> Product code remains framework-native</li>
             <li><Icon name="check" :size="17" /> Infrastructure reads generated metadata</li>
-            <li><Icon name="check" :size="17" /> Buyers deploy into their own AWS account</li>
+            <li><Icon name="check" :size="17" /> Buyers deploy into their own AWS or GCP account</li>
           </ul>
         </div>
         <ProductTour v-reveal />
@@ -341,7 +343,7 @@ const baselineWork = [
           </div>
           <div class="step" v-reveal>
             <h3>Run, inspect, and deploy</h3>
-            <p>Start locally, review the generated contract, synthesize CDK, and deploy into infrastructure you own.</p>
+            <p>Start locally, review the generated contract, then synthesize CDK or validate Terraform and deploy into infrastructure you own.</p>
           </div>
         </div>
       </div>
@@ -368,7 +370,7 @@ const baselineWork = [
           <div>
             <span class="kicker kicker-light">Start today</span>
             <h2>Turn your next sprint into product work.</h2>
-            <p>Choose ForgeArc Node, ForgeArc Python, or the bundle. Keep the code and deploy it on your terms.</p>
+            <p>Choose ForgeArc Node, Python, or an AI starter for AWS or GCP. Keep the code and deploy it on your terms.</p>
             <div class="actions" style="margin-top: 28px">
               <RouterLink class="btn btn-brand" to="/pricing">Compare plans <Icon name="arrow" :size="18" /></RouterLink>
               <a class="btn btn-ghost-light" :href="DOCS_URL">Read documentation</a>

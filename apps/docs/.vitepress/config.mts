@@ -67,6 +67,7 @@ export default defineConfig({
             { text: "AWS and GCP", link: "/ai/aws-architecture" },
             { text: "Chat and ingest flows", link: "/ai/flows" },
             { text: "AWS deployment", link: "/ai/deploy" },
+            { text: "GCP deployment", link: "/ai/deploy-gcp" },
             { text: "Security and operations", link: "/ai/security" },
             { text: "Shipped scope and roadmap", link: "/ai/roadmap" }
           ]

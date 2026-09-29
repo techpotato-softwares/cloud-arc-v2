@@ -103,7 +103,7 @@ onUnmounted(() => {
     <div class="container footer-inner">
       <div class="footer-brand">
         <RouterLink class="brand" to="/"><img src="/logo.svg" alt="" />ForgeArc</RouterLink>
-        <p>Production-oriented source products for teams building on Node, Python, AWS, and AI.</p>
+        <p>Production-oriented source products for teams building on Node, Python, AWS, GCP, and AI.</p>
         <span>© 2026 TechPotato Softwares LLP</span>
       </div>
       <div class="footer-column">

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import base64
 import json
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from forgearc_ai.auth import read_token, require_access
@@ -25,6 +26,26 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     @app.get("/health")
     def health():
         return {"status": "ok", "product": "forgearc-ai"}
+
+    @app.post("/internal/pubsub", include_in_schema=False)
+    async def pubsub_worker(request: Request):
+        envelope = await request.json()
+        encoded = ((envelope.get("message") or {}).get("data") or "").strip()
+        if not encoded:
+            raise HTTPException(400, "Pub/Sub message data is required.")
+        try:
+            decoded = base64.b64decode(encoded, validate=True).decode().strip()
+        except (ValueError, UnicodeDecodeError) as exc:
+            raise HTTPException(400, "Pub/Sub message data is invalid.") from exc
+        try:
+            payload = json.loads(decoded)
+        except json.JSONDecodeError:
+            payload = decoded
+        job_id = payload.get("jobId", "") if isinstance(payload, dict) else payload
+        if not job_id:
+            raise HTTPException(400, "Pub/Sub job id is required.")
+        graph.get("IngestionService").process_message(payload)
+        return {"ok": True, "jobId": job_id}
 
     @app.exception_handler(ForgeArcError)
     async def handle_error(_, exc: ForgeArcError):

@@ -23,4 +23,6 @@ jobs:
       - run: uv run ruff check apps packages infra
       - run: uv run --package forgearc-ai-api pytest apps/api/tests
       - run: cd infra/cdk && pnpm dlx aws-cdk@2 synth AiStack-dev
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=infra/terraform init -backend=false && terraform -chdir=infra/terraform validate
       - run: bash scripts/smoke_aws.sh

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "forgearc-ai-gcp"
+version = "1.0.0"
+description = "ForgeArc AI GCP adapter. Licensed to the purchasing organization."
+requires-python = ">=3.12"
+dependencies = [
+  "forgearc-ai-core",
+  "google-cloud-aiplatform>=1.70.0",
+  "google-cloud-firestore>=2.19.0",
+  "google-cloud-pubsub>=2.26.0",
+  "google-cloud-secret-manager>=2.21.0",
+  "google-cloud-storage>=2.18.0",
+]
+
+[tool.uv.sources]
+forgearc-ai-core = { workspace = true }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["forgearc_ai_gcp*"]

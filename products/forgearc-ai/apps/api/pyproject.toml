@@ -12,6 +12,7 @@ dependencies = [
   "fastapi>=0.115.0",
   "forgearc-ai-aws",
   "forgearc-ai-core",
+  "forgearc-ai-gcp",
   "httpx>=0.27.0",
   "python-multipart>=0.0.9",
   "uvicorn[standard]>=0.30.0",
@@ -20,6 +21,7 @@ dependencies = [
 [tool.uv.sources]
 forgearc-ai-core = { workspace = true }
 forgearc-ai-aws = { workspace = true }
+forgearc-ai-gcp = { workspace = true }
 
 [tool.setuptools.packages.find]
 where = ["src"]

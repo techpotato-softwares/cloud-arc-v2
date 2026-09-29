@@ -36,6 +36,16 @@ class AiStack(Stack):
         )
         secret = secrets.Secret(self, "ProviderSecrets", secret_name=f"forgearc-ai/{environment_name}")
         code = lambda_.Code.from_asset("assets")
+        runtime_environment = {
+            "APP_NAME": "forgearc-ai",
+            "FORGEARC_AI_ENVIRONMENT": (
+                "prod" if environment_name == "prod" else "local"
+            ),
+            "FORGEARC_AI_CLOUD": "aws",
+            "FORGEARC_AI_BUCKET": documents.bucket_name,
+            "FORGEARC_AI_QUEUE_URL": queue.queue_url,
+            "FORGEARC_AI_SECRET_ID": secret.secret_name,
+        }
         api_function = lambda_.Function(
             self,
             "ApiFunction",
@@ -44,7 +54,7 @@ class AiStack(Stack):
             code=code,
             timeout=Duration.seconds(30),
             memory_size=512,
-            environment={"FORGEARC_AI_SECRET_ID": secret.secret_name, "APP_NAME": "forgearc-ai"},
+            environment=runtime_environment,
         )
         worker = lambda_.Function(
             self,
@@ -54,7 +64,7 @@ class AiStack(Stack):
             code=code,
             timeout=Duration.seconds(120),
             memory_size=1024,
-            environment={"FORGEARC_AI_SECRET_ID": secret.secret_name, "APP_NAME": "forgearc-ai"},
+            environment=runtime_environment,
         )
         worker.add_event_source(sources.SqsEventSource(queue, batch_size=1, report_batch_item_failures=True))
         self._grant(api_function, api_statements(documents.bucket_arn, queue.queue_arn, secret.secret_arn, region))

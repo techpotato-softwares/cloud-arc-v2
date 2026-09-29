@@ -595,7 +595,15 @@ html.dark .error { color: #f87171; }
     var(--bg-elv);
   box-shadow: var(--shadow);
 }
-.diagram-card figcaption { display: grid; gap: 4px; margin-bottom: 18px; }
+.diagram-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.diagram-card figcaption { display: grid; gap: 4px; margin: 0; }
+.cloud-switch { display: flex; flex: none; gap: 4px; padding: 4px; border: 1px solid var(--divider); border-radius: 10px; background: var(--bg-soft); }
+.cloud-switch button { padding: 7px 12px; border: 0; border-radius: 7px; color: var(--text-2); background: transparent; font: 600 12px var(--mono); cursor: pointer; }
+.cloud-switch button.active { color: #fff; background: var(--brand-2); }
+.diagram-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 10px; color: var(--brand-1); background: var(--brand-soft); font: 700 12px var(--mono); }
+.cloud-choices { display: inline-flex; gap: 6px; }
+.cloud-choices button { padding: 1px 7px; border: 1px solid transparent; border-radius: 6px; color: #8f878f; background: transparent; font: inherit; cursor: pointer; }
+.cloud-choices button.chosen { color: var(--success); border-color: color-mix(in srgb, var(--success) 45%, transparent); }
 .diagram-card figcaption span, .diagram-node span, .diagram-service span { color: var(--text-2); }
 .diagram-flow, .diagram-services { display: flex; align-items: center; gap: 10px; }
 .diagram-flow { overflow-x: auto; padding-bottom: 4px; }
@@ -646,6 +654,7 @@ html.dark .diagram-arrow { color: #f2c14e; }
   .architecture-layer { grid-template-columns: 1fr; }
   .architecture-layer > strong { border-right: 0; border-bottom: 1px solid var(--divider); }
   .product-tabs { width: 100%; overflow-x: auto; justify-content: flex-start; }
+  .diagram-head { flex-direction: column; }
   .roi-results { grid-template-columns: 1fr; }
 }
 

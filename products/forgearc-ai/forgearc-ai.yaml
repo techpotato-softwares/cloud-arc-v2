@@ -1,4 +1,5 @@
 environment: local
+cloud: local
 auth:
   jwt_secret: ${JWT_SECRET}
   issuer: forgearc-ai
@@ -10,22 +11,8 @@ local_users:
     tenant_id: demo
     permissions: [ai:chat, ai:ingest, ai:read, ai:delete, ai:decide]
     modules: [ai]
-chat:
-  provider: openai
-  model: gpt-4o-mini
-  allowlist: [gpt-4o-mini]
-embeddings:
-  provider: openai
-  model: text-embedding-3-small
-  allowlist: [text-embedding-3-small]
-documents_provider: memory
 vector_provider: memory
-jobs_provider: inline
-bucket: forgearc-ai-docs
-queue_url: ${FORGEARC_AI_QUEUE_URL}
-secret_id: ${FORGEARC_AI_SECRET_ID}
 database_url: ${DATABASE_URL}
-aws_region: ${AWS_REGION}
 openai_api_key: ${OPENAI_API_KEY}
 pricing:
   gpt-4o-mini:

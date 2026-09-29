@@ -49,6 +49,6 @@ Dev keeps the database in Docker. The dev CDK stack does not have to create RDS.
 | AlloyDB with pgvector | RDS |
 | Secret Manager | Secrets Manager |
 
-The GCP adapter is phase 4. The Starter GCP plan stays closed until it exists.
+The GCP adapter is `products/forgearc-ai/packages/gcp_adapter`. Terraform for that edition is in `products/forgearc-ai/infra/terraform`, and the Starter GCP plan includes it. See [GCP deployment](./deploy-gcp).
 
 Service marks in the diagrams are original glyphs with the product name. See [Icon policy](/architecture/icons).

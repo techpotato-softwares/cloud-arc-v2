@@ -21,6 +21,7 @@ members = [
   "products/forgearc-ai/apps/api",
   "products/forgearc-ai/packages/core",
   "products/forgearc-ai/packages/aws_adapter",
+  "products/forgearc-ai/packages/gcp_adapter",
   "products/forgearc-ai/infra/cdk",
 ]
 
@@ -49,4 +50,5 @@ pythonpath = [
   "products/forgearc-ai/apps/api/src",
   "products/forgearc-ai/packages/core/src",
   "products/forgearc-ai/packages/aws_adapter/src",
+  "products/forgearc-ai/packages/gcp_adapter/src",
 ]
