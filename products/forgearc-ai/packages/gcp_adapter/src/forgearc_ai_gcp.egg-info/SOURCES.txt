@@ -1,0 +1,9 @@
+pyproject.toml
+src/forgearc_ai_gcp/__init__.py
+src/forgearc_ai_gcp/gcp.py
+src/forgearc_ai_gcp/vertex.py
+src/forgearc_ai_gcp.egg-info/PKG-INFO
+src/forgearc_ai_gcp.egg-info/SOURCES.txt
+src/forgearc_ai_gcp.egg-info/dependency_links.txt
+src/forgearc_ai_gcp.egg-info/requires.txt
+src/forgearc_ai_gcp.egg-info/top_level.txt

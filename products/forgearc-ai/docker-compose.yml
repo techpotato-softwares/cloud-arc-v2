@@ -1,9 +1,89 @@
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    ports:
-      - "5433:5432"
     environment:
       POSTGRES_USER: forgearc
       POSTGRES_PASSWORD: forgearc
       POSTGRES_DB: forgearc_ai
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forgearc -d forgearc_ai"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build: .
+    image: forgearc-ai:local
+    command: ["migrate"]
+    restart: "no"
+    environment: &app-env
+      DATABASE_URL: postgresql+psycopg://forgearc:forgearc@postgres:5432/forgearc_ai
+      FORGEARC_AI_ENVIRONMENT: local
+      FORGEARC_AI_CLOUD: local
+      JWT_SECRET: local-dev-secret
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      JEV_API_KEY: ${JEV_API_KEY:-}
+    read_only: true
+    tmpfs:
+      - /tmp
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    image: forgearc-ai:local
+    command: ["api"]
+    ports:
+      - "4020:8080"
+    environment:
+      <<: *app-env
+    read_only: true
+    tmpfs:
+      - /tmp
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  worker:
+    image: forgearc-ai:local
+    command: ["worker"]
+    environment:
+      <<: *app-env
+      WORKER_CONCURRENCY: "2"
+    read_only: true
+    tmpfs:
+      - /tmp
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import os,time; assert time.time()-os.path.getmtime('/tmp/worker-heartbeat')<90",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  postgres: {}

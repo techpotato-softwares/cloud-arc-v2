@@ -20,6 +20,7 @@ Keep this green before each release.
 | `utils/jwt-secrets.ts` | `utils/jwt_secrets.py` | OK |
 | `utils/webtoken.ts` | `utils/webtoken.py` | OK |
 | `utils/s3.ts` | `utils/s3.py` | OK |
+| `utils/cache.ts` | `utils/cache.py` | OK |
 | `layers/shared/DI.md` | `layers/shared/DI.md` | OK |
 | `@RequirePermission` / `@RequireModule` | `auth_decorators.py` | OK |
 | Express `src/dev-server.ts` | FastAPI `src/dev_server.py` | OK |

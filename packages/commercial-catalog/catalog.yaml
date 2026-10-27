@@ -1,8 +1,7 @@
-# Commercial catalog.
-# The AWS and GCP starter plans are open.
-# Higher AI tiers stay closed until their support and license terms ship.
-# ForgeArc Node, Python, and the bundle match docs/PRICING.md and can be purchased now.
-# INR amounts for those three SKUs are the India checkout prices for the current kits.
+# Commercial catalog. Every plan is a one-time source license with 12 months of updates.
+# ForgeArc AI is priced above Node and Python: it includes the Python platform patterns
+# plus model providers, RAG, two cloud adapters, and AI cost and safety controls.
+# apps/marketing/src/catalog.json is generated from this file with tooling/scripts/sync-catalog.py.
 
 plans:
   - id: forgearc-node
@@ -62,122 +61,61 @@ plans:
       - Shared API contract
       - 12 months of updates
 
-  - id: free
-    name: Free
+  - id: forgearc-ai
+    name: ForgeArc AI
     family: ai
-    tier: Evaluate
-    license_scope: Local evaluation
-    updates: Public core updates
-    summary: Public CLI and core for local evaluation.
-    price_inr: 0
-    price_usd: 0
-    checkout_enabled: false
-    badge: Local evaluation
-    artifacts: [cli-core]
+    tier: AWS + GCP source
+    recommended: false
+    license_scope: One organization and its products
+    updates: 12 months included
+    summary: Production AI backend with chat, RAG, and decisions on AWS or GCP.
+    price_inr: 44999
+    price_usd: 549
+    checkout_enabled: true
+    badge: Available
+    artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup]
     includes:
-      - CLI and provider-agnostic core
-      - Local development with the OpenAI path
+      - Streaming chat, RAG ingestion, and citations
+      - Jev typed decisions with human-review thresholds
+      - AWS adapter with CDK and GCP adapter with Terraform
+      - Budgets, rate limits, moderation, and audit logs
+      - 12 months of updates
 
-  - id: starter-aws
-    name: Starter AWS
+  - id: forgearc-ai-pro
+    name: ForgeArc AI Pro
     family: ai
-    tier: AWS source
+    tier: Agents + evaluation
     recommended: true
     license_scope: One organization and its products
-    updates: Current AWS MVP updates
-    excludes: [GCP adapter, Multi-project agency license]
-    summary: ForgeArc AI with the AWS adapter.
-    price_inr: 3999
-    price_usd: 48
+    updates: 12 months included
+    summary: Everything in ForgeArc AI plus agents, approvals, and evaluation.
+    price_inr: 69999
+    price_usd: 849
     checkout_enabled: true
     badge: Available
-    artifacts: [ai-core, aws-adapter, ai-setup]
+    artifacts: [ai-core, aws-adapter, gcp-adapter, ai-agents, ai-setup]
     includes:
-      - ForgeArc AI core
-      - AWS adapter and docs
-      - Bedrock, S3, and SQS path
-
-  - id: starter-gcp
-    name: Starter GCP
-    family: ai
-    tier: GCP source
-    license_scope: One organization and its products
-    updates: Current GCP edition updates
-    summary: ForgeArc AI with the GCP adapter.
-    price_inr: 3999
-    price_usd: 48
-    checkout_enabled: true
-    badge: Available
-    artifacts: [ai-core, gcp-adapter, ai-setup]
-    includes:
-      - ForgeArc AI core
-      - GCP adapter, Terraform, and docs
-      - Vertex AI, Cloud Storage, Pub/Sub, Firestore, and AlloyDB
-
-  - id: professional
-    name: Professional
-    family: ai
-    tier: Multi-cloud
-    license_scope: One organization and its products
-    updates: Lifetime updates
-    summary: Both cloud adapters, updates, and support allowance.
-    price_inr: 9999
-    price_usd: 120
-    checkout_enabled: false
-    badge: Coming with GCP
-    artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, support-allowance]
-    includes:
-      - AWS and GCP adapters
-      - Lifetime updates
-      - Documented support allowance
-
-  - id: agency
-    name: Agency
-    family: ai
-    tier: Multi-project
-    license_scope: Client and multi-project use
-    updates: Lifetime updates
-    summary: Multi-project license and setup support.
-    price_inr: 24999
-    price_usd: 299
-    checkout_enabled: false
-    badge: Coming with GCP
-    artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, agency-license]
-    includes:
-      - Multi-project use
-      - Setup support
-      - Both adapters
-
-  - id: enterprise
-    name: Enterprise
-    family: ai
-    tier: Team + SLA
-    license_scope: Team license
-    updates: Contract SLA
-    summary: Team license, SLA, and workshop.
-    price_inr: 79999
-    price_usd: 960
-    checkout_enabled: false
-    badge: Coming with GCP
-    artifacts: [ai-core, aws-adapter, gcp-adapter, ai-setup, enterprise-sla]
-    includes:
-      - Team license
-      - Custom adapter engagement
-      - SLA and workshop
+      - Everything in ForgeArc AI
+      - Tool-calling agents on a LangGraph-compatible graph
+      - Human-approval APIs for risky tool calls
+      - Multi-agent supervisor
+      - RAG evaluation with a RAGAS bridge and a cost dashboard API
 
   - id: suite
     name: ForgeArc Suite
     family: bundle
-    tier: Node + Python + AI
+    tier: Node + Python + AI Pro
+    recommended: false
     license_scope: One organization and its products
-    updates: Plan-specific
-    summary: Node, Python, and ForgeArc AI together.
-    price_inr: 29999
-    price_usd: 360
-    checkout_enabled: false
-    badge: Coming with GCP
-    artifacts: [node-kit, python-kit, ai-core, aws-adapter, gcp-adapter, suite-setup]
+    updates: 12 months included
+    summary: Every ForgeArc kit under one license.
+    price_inr: 99999
+    price_usd: 1199
+    checkout_enabled: true
+    badge: Available
+    artifacts: [node-kit, node-setup, python-kit, python-setup, ai-core, aws-adapter, gcp-adapter, ai-agents, ai-setup]
     includes:
       - ForgeArc Node
       - ForgeArc Python
-      - ForgeArc AI and both adapters
+      - ForgeArc AI Pro
+      - 12 months of updates

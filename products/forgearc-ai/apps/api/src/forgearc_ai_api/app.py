@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
 from forgearc_ai.auth import read_token, require_access
 from forgearc_ai.config import Settings, load_settings, validate_settings
@@ -16,16 +17,50 @@ from forgearc_ai_api.wiring import build_container
 
 import forgearc_ai_api.controllers  # noqa: F401
 
+DASHBOARD = Path(__file__).with_name("static") / "dashboard.html"
+
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
     resolved = validate_settings(settings) if settings is not None else load_settings()
     graph = container or build_container(resolved)
     app = FastAPI(title="ForgeArc AI", version="1.0.0")
     app.state.container = graph
+    if resolved.cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=resolved.cors_origins,
+            allow_credentials=False,
+            allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+            allow_headers=["authorization", "content-type"],
+        )
+
+    @app.middleware("http")
+    async def enforce_request_size(request: Request, call_next):
+        length = request.headers.get("content-length")
+        if length and int(length) > resolved.max_request_bytes and not request.url.path.startswith("/api/documents"):
+            return JSONResponse(
+                {"error": "request_too_large", "message": "Request body exceeds the configured limit."},
+                status_code=413,
+            )
+        return await call_next(request)
 
     @app.get("/health")
     def health():
         return {"status": "ok", "product": "forgearc-ai"}
+
+    @app.get("/ready")
+    def ready():
+        try:
+            ok = bool(graph.get("Repository").healthcheck())
+        except Exception:
+            ok = False
+        if not ok:
+            raise HTTPException(503, "Repository is not ready.")
+        return {"status": "ready", "product": "forgearc-ai"}
+
+    @app.get("/dashboard", include_in_schema=False)
+    def dashboard():
+        return HTMLResponse(DASHBOARD.read_text(encoding="utf-8"))
 
     @app.post("/internal/pubsub", include_in_schema=False)
     async def pubsub_worker(request: Request):
@@ -75,6 +110,8 @@ def _endpoint(container: Container, settings: Settings, cls: type, spec):
         body = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
         if spec.stream:
             return StreamingResponse(method(principal, body), media_type="text/event-stream")
+        if request.path_params:
+            return method(principal, request.path_params, body)
         return method(principal, body)
 
     names = [part[1:-1] for part in spec.path.split("/") if part.startswith("{") and part.endswith("}")]

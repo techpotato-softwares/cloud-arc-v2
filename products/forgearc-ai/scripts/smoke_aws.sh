@@ -10,4 +10,5 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 aws sts get-caller-identity >/dev/null
 cd "$ROOT/infra/cdk"
 pnpm dlx aws-cdk@2 synth AiStack-dev >/dev/null
-echo "ForgeArc AI CDK stack synthesized."
+pnpm dlx aws-cdk@2 synth -c runtime=fargate AiStack-dev >/dev/null
+echo "ForgeArc AI Lambda and Fargate stacks synthesized."

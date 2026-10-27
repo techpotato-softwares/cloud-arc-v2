@@ -6,13 +6,15 @@ from forgearc_ai.policy import PolicyGate
 from forgearc_ai.providers.fake import FakeChatProvider
 from forgearc_ai.providers.jev import JevProvider
 from forgearc_ai.providers.openai import OpenAIProvider
+from forgearc_ai.repositories import MemoryRepository, PostgresRepository
 from forgearc_ai.services import (
+    AgentService,
     ChatService,
     DecisionService,
+    EvaluationService,
     IngestionService,
     UsageService,
 )
-from forgearc_ai.stores import MemoryGraph
 from forgearc_ai_aws.aws import S3Documents, SqsQueue
 from forgearc_ai_aws.bedrock import BedrockProvider
 
@@ -31,7 +33,11 @@ def build_container(
     firestore_client=None,
 ) -> Container:
     container = Container()
-    store = MemoryGraph()
+    repository = (
+        PostgresRepository(settings.database_url)
+        if settings.database_url
+        else MemoryRepository()
+    )
     gate = PolicyGate(settings)
     provider = _chat_provider(settings, openai_transport, bedrock_client, vertex_client)
     documents = _documents(settings, s3_client, gcs_client)
@@ -44,11 +50,39 @@ def build_container(
         jev_transport,
     )
     container.bind_constant("Settings", settings)
-    container.bind_constant("Store", store)
-    container.bind_constant("ChatService", ChatService(settings, provider, gate, store))
-    container.bind_constant("IngestionService", IngestionService(settings, provider, store, documents, queue))
-    container.bind_constant("DecisionService", DecisionService(settings, jev, gate, store))
-    container.bind_constant("UsageService", UsageService(store))
+    container.bind_constant("Repository", repository)
+    # Compatibility symbol for integrations built against ForgeArc AI 1.0.
+    container.bind_constant("Store", repository)
+    container.bind_constant(
+        "ChatService",
+        ChatService(settings, provider, gate, repository),
+    )
+    container.bind_constant(
+        "IngestionService",
+        IngestionService(
+            settings,
+            provider,
+            repository,
+            documents,
+            queue,
+        ),
+    )
+    container.bind_constant(
+        "DecisionService",
+        DecisionService(settings, jev, gate, repository),
+    )
+    container.bind_constant(
+        "UsageService",
+        UsageService(repository, settings),
+    )
+    container.bind_constant(
+        "AgentService",
+        AgentService(settings, provider, gate, repository),
+    )
+    container.bind_constant(
+        "EvaluationService",
+        EvaluationService(settings, provider, gate, repository),
+    )
     return container
 
 

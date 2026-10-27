@@ -61,6 +61,10 @@ EOF
   uv run --package forgearc-ai-api pytest apps/api/tests
 )
 
+if [[ "${FORGEARC_AI_BUILD_IMAGE:-}" == "1" ]]; then
+  bash "$STAGE/scripts/verify_image.sh"
+fi
+
 rm -rf "$STAGE/.venv"
 find "$STAGE" -type d \( -name __pycache__ -o -name .pytest_cache -o -name .ruff_cache \) -prune -exec rm -rf {} +
 find "$STAGE" -name '*.pyc' -delete

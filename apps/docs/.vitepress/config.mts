@@ -31,6 +31,7 @@ export default defineConfig({
           text: "Shared",
           items: [
             { text: "Request path", link: "/architecture/request-path" },
+            { text: "Caching patterns", link: "/architecture/caching" },
             { text: "Deploy", link: "/architecture/deploy" },
             { text: "Security", link: "/architecture/security" }
           ]
@@ -51,6 +52,7 @@ export default defineConfig({
           text: "Shared",
           items: [
             { text: "Request path", link: "/architecture/request-path" },
+            { text: "Caching patterns", link: "/architecture/caching" },
             { text: "Deploy", link: "/architecture/deploy" },
             { text: "Security", link: "/architecture/security" }
           ]
@@ -66,9 +68,16 @@ export default defineConfig({
             { text: "API routes", link: "/ai/api" },
             { text: "AWS and GCP", link: "/ai/aws-architecture" },
             { text: "Chat and ingest flows", link: "/ai/flows" },
+            { text: "Agents and evaluation", link: "/ai/agents" },
+            { text: "Durable state", link: "/ai/durable-state" },
+            { text: "Caching patterns", link: "/ai/caching" },
+            { text: "Production runtimes", link: "/ai/production" },
+            { text: "Portable container", link: "/ai/container" },
             { text: "AWS deployment", link: "/ai/deploy" },
             { text: "GCP deployment", link: "/ai/deploy-gcp" },
             { text: "Security and operations", link: "/ai/security" },
+            { text: "Production implementation", link: "/ai/production-implementation" },
+            { text: "Strategy", link: "/ai/strategy" },
             { text: "Shipped scope and roadmap", link: "/ai/roadmap" }
           ]
         }
@@ -80,6 +89,7 @@ export default defineConfig({
             { text: "Product map", link: "/architecture/" },
             { text: "Architecture layers", link: "/architecture/layers" },
             { text: "Request path", link: "/architecture/request-path" },
+            { text: "Caching patterns", link: "/architecture/caching" },
             { text: "Modules", link: "/architecture/modules" },
             { text: "Deploy", link: "/architecture/deploy" },
             { text: "Security", link: "/architecture/security" },

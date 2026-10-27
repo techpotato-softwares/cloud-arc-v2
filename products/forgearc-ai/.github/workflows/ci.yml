@@ -21,8 +21,21 @@ jobs:
       - run: uv lock --check
       - run: uv sync --all-packages --frozen
       - run: uv run ruff check apps packages infra
-      - run: uv run --package forgearc-ai-api pytest apps/api/tests
+      - run: uv run pytest apps/api/tests infra/cdk/tests
       - run: cd infra/cdk && pnpm dlx aws-cdk@2 synth AiStack-dev
+      - run: cd infra/cdk && pnpm dlx aws-cdk@2 synth -c runtime=fargate AiStack-dev
       - uses: hashicorp/setup-terraform@v3
-      - run: terraform -chdir=infra/terraform init -backend=false && terraform -chdir=infra/terraform validate
+      - run: terraform -chdir=infra/terraform init -backend=false
+      - run: terraform -chdir=infra/terraform validate
+      - run: terraform -chdir=infra/terraform test
+      - run: bash scripts/verify_image.sh
+        env:
+          FORGEARC_AI_IMAGE: forgearc-ai:ci
+      - uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: forgearc-ai:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: 1
+          trivyignores: .trivyignore
       - run: bash scripts/smoke_aws.sh

@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: forgearc-ai-gcp
+Version: 1.0.0
+Summary: ForgeArc AI GCP adapter. Licensed to the purchasing organization.
+Requires-Python: >=3.12
+Requires-Dist: forgearc-ai-core
+Requires-Dist: google-cloud-aiplatform>=1.70.0
+Requires-Dist: google-cloud-firestore>=2.19.0
+Requires-Dist: google-cloud-pubsub>=2.26.0
+Requires-Dist: google-cloud-secret-manager>=2.21.0
+Requires-Dist: google-cloud-storage>=2.18.0

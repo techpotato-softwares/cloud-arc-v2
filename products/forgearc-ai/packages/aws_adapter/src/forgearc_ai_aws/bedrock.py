@@ -6,6 +6,7 @@ import json
 
 from forgearc_ai.errors import PolicyError, ProviderError
 from forgearc_ai.providers.fake import ModelResult
+from forgearc_ai.structured import parse_structured
 
 
 class BedrockProvider:
@@ -24,7 +25,7 @@ class BedrockProvider:
         )
         text = response["output"]["message"]["content"][0]["text"]
         usage = response.get("usage") or {}
-        structured = json.loads(text) if response_schema else None
+        structured = parse_structured(text) if response_schema else None
         return ModelResult(text, int(usage.get("inputTokens", 0)), int(usage.get("outputTokens", 0)), structured)
 
     def stream(self, prompt: str):

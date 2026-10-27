@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import json
 from pathlib import Path
 from typing import Any, Literal
 
@@ -59,10 +60,18 @@ CLOUD_DEFAULTS = {
 
 
 class AuthConfig(BaseModel):
+    mode: Literal["local", "oidc"] = "local"
     jwt_secret: str = ""
     issuer: str = "forgearc-ai"
     audience: str = "forgearc-ai-client"
     expires_minutes: int = 720
+    jwks_url: str = ""
+    tenant_claim: str = "custom:tenant_id"
+    permissions_claim: str = "permissions"
+    modules_claim: str = "modules"
+    groups_claim: str = "cognito:groups"
+    group_permissions: dict[str, list[str]] = Field(default_factory=dict)
+    default_modules: list[str] = Field(default_factory=lambda: ["ai"])
 
 
 class LocalUser(BaseModel):
@@ -107,6 +116,39 @@ class WebhookConfig(BaseModel):
     secret: str = ""
 
 
+class AgentProfile(BaseModel):
+    description: str
+    tools: list[str] = Field(default_factory=list)
+
+
+def _default_profiles() -> dict[str, AgentProfile]:
+    return {
+        "researcher": AgentProfile(
+            description="Finds and cites facts from the tenant's documents.",
+            tools=["retrieve_documents", "list_documents"],
+        ),
+        "operator": AgentProfile(
+            description="Sends notifications to connected systems after human approval.",
+            tools=["notify_webhook"],
+        ),
+    }
+
+
+class AgentConfig(BaseModel):
+    max_steps: int = 4
+    max_delegations: int = 3
+    approval_tools: list[str] = Field(default_factory=lambda: ["notify_webhook"])
+    allow_self_approval: bool = False
+    profiles: dict[str, AgentProfile] = Field(default_factory=_default_profiles)
+
+
+class EvaluationConfig(BaseModel):
+    thresholds: dict[str, float] = Field(
+        default_factory=lambda: {"faithfulness": 0.7, "answerRelevancy": 0.5}
+    )
+    max_samples: int = 50
+
+
 class Settings(BaseModel):
     environment: Literal["local", "test", "prod"] = "local"
     cloud: Literal["local", "aws", "gcp"] = "local"
@@ -128,11 +170,18 @@ class Settings(BaseModel):
     openai_api_key: str = ""
     pricing: dict[str, ModelPricing] = Field(default_factory=dict)
     moderation_terms: list[str] = Field(default_factory=list)
-    tool_allowlist: list[str] = Field(default_factory=lambda: ["retrieve_documents"])
+    tool_allowlist: list[str] = Field(
+        default_factory=lambda: ["retrieve_documents", "list_documents", "notify_webhook"]
+    )
     limits: LimitConfig = Field(default_factory=LimitConfig)
     budget: BudgetConfig = Field(default_factory=BudgetConfig)
     jev: JevConfig = Field(default_factory=JevConfig)
     webhook: WebhookConfig = Field(default_factory=WebhookConfig)
+    agents: AgentConfig = Field(default_factory=AgentConfig)
+    evaluation: EvaluationConfig = Field(default_factory=EvaluationConfig)
+    cors_origins: list[str] = Field(default_factory=list)
+    max_request_bytes: int = 1_048_576
+    max_upload_bytes: int = 10_485_760
     chunk_chars: int = 800
     top_k: int = 4
 
@@ -181,22 +230,61 @@ def load_settings(path: Path | None = None, environ: dict[str, str] | None = Non
     return validate_settings(settings)
 
 
-def _environment_overrides(environ: dict[str, str]) -> dict[str, str]:
+def _environment_overrides(environ: dict[str, str]) -> dict[str, Any]:
     names = {
         "FORGEARC_AI_ENVIRONMENT": "environment",
         "FORGEARC_AI_CLOUD": "cloud",
         "FORGEARC_AI_BUCKET": "bucket",
         "FORGEARC_AI_QUEUE_URL": "queue_url",
+        "DATABASE_URL": "database_url",
         "AWS_REGION": "aws_region",
         "GCP_PROJECT": "gcp_project",
         "GCP_LOCATION": "gcp_location",
         "FORGEARC_AI_FIRESTORE_DATABASE": "firestore_database",
     }
-    return {
+    overrides = {
         setting: environ[name]
         for name, setting in names.items()
         if environ.get(name)
     }
+    auth_names = {
+        "FORGEARC_AI_AUTH_MODE": "mode",
+        "FORGEARC_AI_OIDC_ISSUER": "issuer",
+        "FORGEARC_AI_OIDC_AUDIENCE": "audience",
+        "FORGEARC_AI_OIDC_JWKS_URL": "jwks_url",
+        "FORGEARC_AI_OIDC_TENANT_CLAIM": "tenant_claim",
+        "FORGEARC_AI_OIDC_PERMISSIONS_CLAIM": "permissions_claim",
+        "FORGEARC_AI_OIDC_MODULES_CLAIM": "modules_claim",
+        "FORGEARC_AI_OIDC_GROUPS_CLAIM": "groups_claim",
+    }
+    auth = {
+        setting: environ[name]
+        for name, setting in auth_names.items()
+        if environ.get(name)
+    }
+    if environ.get("FORGEARC_AI_GROUP_PERMISSIONS"):
+        auth["group_permissions"] = json.loads(
+            environ["FORGEARC_AI_GROUP_PERMISSIONS"]
+        )
+    if environ.get("FORGEARC_AI_OIDC_DEFAULT_MODULES"):
+        auth["default_modules"] = [
+            module.strip()
+            for module in environ["FORGEARC_AI_OIDC_DEFAULT_MODULES"].split(",")
+            if module.strip()
+        ]
+    if auth:
+        overrides["auth"] = auth
+    if environ.get("FORGEARC_AI_ENVIRONMENT") == "prod":
+        # Local demo identities are configuration examples only and must never
+        # cross into a managed production runtime.
+        overrides["local_users"] = []
+    if environ.get("FORGEARC_AI_CORS_ORIGINS"):
+        overrides["cors_origins"] = [
+            origin.strip()
+            for origin in environ["FORGEARC_AI_CORS_ORIGINS"].split(",")
+            if origin.strip()
+        ]
+    return overrides
 
 
 def validate_settings(settings: Settings) -> Settings:
@@ -212,13 +300,33 @@ def validate_settings(settings: Settings) -> Settings:
         raise ConfigError(f"Chat model {settings.chat.model} is not in the allowlist.")
     if settings.embeddings.model not in settings.embeddings.allowlist:
         raise ConfigError(f"Embedding model {settings.embeddings.model} is not in the allowlist.")
+    for name, profile in settings.agents.profiles.items():
+        blocked = [tool for tool in profile.tools if tool not in settings.tool_allowlist]
+        if blocked:
+            raise ConfigError(f"Agent {name} uses tools outside tool_allowlist: {', '.join(blocked)}.")
+    if settings.environment == "prod" and not settings.database_url:
+        raise ConfigError(
+            "DATABASE_URL is required in production; in-memory state is not durable."
+        )
+    if settings.environment == "prod" and settings.auth.mode != "oidc":
+        raise ConfigError("Production authentication must use OIDC.")
+    if settings.environment == "prod" and "*" in settings.cors_origins:
+        raise ConfigError("Wildcard CORS origins are not allowed in production.")
     if settings.environment != "prod":
         if not settings.auth.jwt_secret:
-            settings.auth.jwt_secret = "local-dev-secret"
+            settings.auth.jwt_secret = "forgearc-local-dev-secret-not-for-production"
         return settings
     missing = []
     if not settings.auth.jwt_secret:
-        missing.append("JWT_SECRET")
+        if settings.auth.mode == "local":
+            missing.append("JWT_SECRET")
+    if settings.auth.mode == "oidc":
+        if not settings.auth.issuer:
+            missing.append("FORGEARC_AI_OIDC_ISSUER")
+        if not settings.auth.audience:
+            missing.append("FORGEARC_AI_OIDC_AUDIENCE")
+        if not settings.auth.jwks_url:
+            missing.append("FORGEARC_AI_OIDC_JWKS_URL")
     if settings.chat.provider == "openai" and not settings.openai_api_key:
         missing.append("OPENAI_API_KEY")
     if settings.chat.provider == "bedrock" and not settings.aws_region:

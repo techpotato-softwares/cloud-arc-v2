@@ -1,0 +1,17 @@
+.git
+**/.venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+**/*.egg-info
+**/cdk.out
+**/.cache
+**/.env
+**/.env.*
+**/node_modules
+**/.DS_Store
+infra/terraform/.terraform
+infra/cdk/tests
+apps/api/tests

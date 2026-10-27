@@ -17,6 +17,20 @@ const cloud = ref("aws");
 const country = ref(Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Kolkata" ? "IN" : "US");
 const plans = ref(catalogSnapshot.plans);
 const openPlans = computed(() => plans.value.filter((plan) => plan.checkoutEnabled));
+const runtime = computed(() => ({
+  aws: {
+    serverless: "Lambda",
+    alwaysOn: "ECS Fargate",
+    database: "Aurora Serverless v2 + pgvector",
+    identity: "Cognito"
+  },
+  gcp: {
+    serverless: "Cloud Run · scale to zero",
+    alwaysOn: "Cloud Run · always on",
+    database: "AlloyDB + pgvector",
+    identity: "Identity Platform"
+  }
+}[cloud.value]));
 getCatalog().then((payload) => {
   if (payload.plans?.length) plans.value = payload.plans;
 });
@@ -56,10 +70,10 @@ const products = [
   {
     icon: "spark",
     name: "ForgeArc AI",
-    pill: "AWS and GCP open",
+    pill: "Available now",
     muted: false,
-    text: "Chat, retrieval, streaming, and Jev decisions. OpenAI locally, Bedrock on AWS, and Vertex AI on GCP.",
-    meta: "Bedrock · Vertex AI · RAG · Terraform"
+    text: "Chat, retrieval, streaming, and Jev decisions on AWS or GCP. AI Pro adds agents, human approval, a supervisor, and evaluation.",
+    meta: "Bedrock · Vertex AI · RAG · Agents"
   }
 ];
 
@@ -93,11 +107,12 @@ const proof = [
 
 const faqs = [
   { q: "What exactly do I receive?", a: "A licensed source artifact for the product in your plan, its frozen dependency lock, generated contracts, infrastructure code, tests, and a setup guide by email." },
-  { q: "Can I use it for client projects?", a: "Single-product and bundle licenses cover your own products. Agency and Enterprise plans cover client work and multiple projects." },
+  { q: "Can I use it for client projects?", a: "Every license covers one organization and its own products. For client work across several companies, or a team license with an SLA, contact us for a custom quote." },
   { q: "Will my application depend on ForgeArc servers?", a: "No. You receive source code and deploy it into infrastructure you control. Checkout and delivery are the only ForgeArc-hosted parts." },
-  { q: "Can I deploy on GCP as well as AWS?", a: "Yes. ForgeArc Node and Python deploy with AWS CDK. ForgeArc AI also has a GCP starter: Vertex AI, Cloud Run, Cloud Storage, Pub/Sub, Firestore, AlloyDB, and Terraform. The application code stays on the same interfaces." },
+  { q: "Can I deploy on GCP as well as AWS?", a: "Yes. ForgeArc Node and Python deploy with AWS CDK. ForgeArc AI includes both cloud adapters in every plan: Bedrock, S3, and SQS with CDK, or Vertex AI, Cloud Run, Cloud Storage, Pub/Sub, Firestore, and AlloyDB with Terraform. The application code stays on the same interfaces." },
+  { q: "Do I need an always-on server for AI agents?", a: "No. Choose scale-to-zero for lower idle cost or an always-on container for predictable latency. Both use PostgreSQL with pgvector because containers and functions can restart or scale at any time." },
   { q: "How do payments work?", a: "India billing uses Razorpay in rupees. International billing uses Stripe in US dollars. Delivery starts after verified payment confirmation." },
-  { q: "Do I get updates?", a: "ForgeArc Node and ForgeArc Python include 12 months of updates. Renewal is optional and your licensed source keeps working." }
+  { q: "Do I get updates?", a: "Every ForgeArc plan includes 12 months of updates. Renewal is optional and your licensed source keeps working." }
 ];
 
 const baselineWork = [
@@ -186,6 +201,62 @@ const baselineWork = [
         <ArchitectureDiagram v-model:cloud="cloud" v-reveal />
         <ArchitectureLayers :cloud="cloud" v-reveal />
         <div style="text-align: center; margin-top: 28px"><a class="text-link" :href="DOCS_URL">See deployment diagrams <Icon name="arrow" :size="16" /></a></div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container runtime-showcase">
+        <div class="section-head" v-reveal>
+          <span class="kicker">Choose the operating model</span>
+          <h2>Scale to zero or stay warm. Keep the same application.</h2>
+          <p>Runtime is a deployment choice, not an application rewrite. Durable state keeps jobs, vectors, agent runs, and human approvals safe across restarts in either mode.</p>
+        </div>
+        <div class="runtime-grid">
+          <article class="runtime-card" v-reveal>
+            <span class="runtime-number">01</span>
+            <span class="pill">Lower idle cost</span>
+            <h3>{{ runtime.serverless }}</h3>
+            <p>Scale down when traffic is quiet. Best for variable workloads and early production environments.</p>
+          </article>
+          <article class="runtime-card featured" v-reveal>
+            <span class="runtime-number">02</span>
+            <span class="pill">Predictable latency</span>
+            <h3>{{ runtime.alwaysOn }}</h3>
+            <p>Keep capacity ready for latency-sensitive APIs, long-running workers, and steady traffic.</p>
+          </article>
+          <article class="runtime-card" v-reveal>
+            <span class="runtime-number">03</span>
+            <span class="pill">Restart safe</span>
+            <h3>{{ runtime.database }}</h3>
+            <p>{{ runtime.identity }} protects entry while PostgreSQL transactions prevent duplicate approval execution.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dashboard-showcase">
+      <div class="container dashboard-grid">
+        <div class="dashboard-copy" v-reveal>
+          <span class="kicker">AI operations included</span>
+          <h2>See model spend and human approvals in one place.</h2>
+          <p class="section-copy">Track monthly budget, projected spend, calls and tokens by model, costs by feature, agent runs, and every tool call waiting for a reviewer.</p>
+          <ul class="check-list">
+            <li><Icon name="check" :size="17" /> Model and feature cost breakdowns</li>
+            <li><Icon name="check" :size="17" /> Daily spend and month-end projection</li>
+            <li><Icon name="check" :size="17" /> Approve or reject risky agent tools</li>
+          </ul>
+          <small class="muted">Screenshot uses sample data. The dashboard ships with ForgeArc AI Pro.</small>
+        </div>
+        <figure class="dashboard-frame" v-reveal>
+          <img
+            src="/images/forgearc-ai-cost-dashboard.webp"
+            alt="ForgeArc AI cost dashboard with monthly spend, model usage, feature costs, and pending human approvals using sample data"
+            width="1150"
+            height="1376"
+            loading="lazy"
+          />
+          <figcaption>Real ForgeArc AI dashboard · Sample data</figcaption>
+        </figure>
       </div>
     </section>
 
@@ -370,7 +441,7 @@ const baselineWork = [
           <div>
             <span class="kicker kicker-light">Start today</span>
             <h2>Turn your next sprint into product work.</h2>
-            <p>Choose ForgeArc Node, Python, or an AI starter for AWS or GCP. Keep the code and deploy it on your terms.</p>
+            <p>Choose ForgeArc Node, Python, or ForgeArc AI for AWS and GCP. Keep the code and deploy it on your terms.</p>
             <div class="actions" style="margin-top: 28px">
               <RouterLink class="btn btn-brand" to="/pricing">Compare plans <Icon name="arrow" :size="18" /></RouterLink>
               <a class="btn btn-ghost-light" :href="DOCS_URL">Read documentation</a>

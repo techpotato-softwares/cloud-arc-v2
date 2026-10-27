@@ -6,6 +6,8 @@ import json
 
 from forgearc_ai_api.app import create_app
 
+_mangum = None
+
 
 def handler(event, _context):
     container = create_app().state.container
@@ -25,8 +27,10 @@ def handler(event, _context):
 
 
 def api_handler(event, context):
-    return {
-        "statusCode": 200,
-        "headers": {"content-type": "application/json"},
-        "body": '{"service":"forgearc-ai"}',
-    }
+    global _mangum
+    if _mangum is None:
+        from mangum import Mangum
+        from forgearc_ai_api.app import app as asgi_app
+
+        _mangum = Mangum(asgi_app, lifespan="off")
+    return _mangum(event, context)

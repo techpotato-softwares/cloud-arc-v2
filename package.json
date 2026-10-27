@@ -20,6 +20,7 @@
     "marketing:build": "pnpm --filter @forgearc/marketing build",
     "commerce:dev": "COMMERCE_TEST_MODE=true uv run --package forgearc-commerce uvicorn app.main:app --app-dir services/commerce --port 4100",
     "commerce:test": "uv run --package forgearc-commerce pytest services/commerce/tests",
+    "catalog:sync": "uv run --package forgearc-commerce python tooling/scripts/sync-catalog.py",
     "pack:node": "bash tooling/release/export-node.sh",
     "pack:python": "bash tooling/release/export-python.sh",
     "pack:ai": "bash tooling/release/export-ai.sh"

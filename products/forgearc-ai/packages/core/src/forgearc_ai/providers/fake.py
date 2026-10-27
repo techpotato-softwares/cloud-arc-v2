@@ -24,7 +24,7 @@ class FakeChatProvider:
         self._check()
         if response_schema:
             properties = response_schema.get("properties", {})
-            payload = {key: "ok" for key in properties}
+            payload = {key: (spec.get("enum") or ["ok"])[0] for key, spec in properties.items()}
             text = json.dumps(payload)
             return ModelResult(text, _tokens(prompt), _tokens(text), payload)
         text = "Answer grounded in the supplied sources."

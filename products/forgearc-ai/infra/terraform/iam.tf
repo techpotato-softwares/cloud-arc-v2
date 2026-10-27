@@ -82,3 +82,66 @@ resource "google_project_iam_member" "worker_alloydb" {
   role    = "roles/alloydb.client"
   member  = "serviceAccount:${google_service_account.worker.email}"
 }
+
+resource "google_project_iam_member" "api_alloydb" {
+  count   = var.enable_alloydb ? 1 : 0
+  project = var.project_id
+  role    = "roles/alloydb.client"
+  member  = "serviceAccount:${google_service_account.api.email}"
+}
+
+resource "google_project_iam_member" "migrate_alloydb" {
+  count   = var.enable_alloydb ? 1 : 0
+  project = var.project_id
+  role    = "roles/alloydb.client"
+  member  = "serviceAccount:${google_service_account.migrate[0].email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "api_jwt" {
+  secret_id = google_secret_manager_secret.jwt.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.api.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "worker_jwt" {
+  secret_id = google_secret_manager_secret.jwt.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.worker.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "api_database" {
+  count     = var.enable_alloydb ? 1 : 0
+  secret_id = google_secret_manager_secret.database_url[0].id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.api.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "worker_database" {
+  count     = var.enable_alloydb ? 1 : 0
+  secret_id = google_secret_manager_secret.database_url[0].id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.worker.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "migrate_database" {
+  count     = var.enable_alloydb ? 1 : 0
+  secret_id = google_secret_manager_secret.database_url[0].id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.migrate[0].email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "migrate_providers" {
+  count     = var.enable_alloydb ? 1 : 0
+  secret_id = google_secret_manager_secret.providers.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.migrate[0].email}"
+}
+
+resource "google_compute_subnetwork_iam_member" "serverless" {
+  count      = var.enable_alloydb ? 1 : 0
+  project    = var.project_id
+  region     = var.region
+  subnetwork = google_compute_subnetwork.runtime[0].name
+  role       = "roles/compute.networkUser"
+  member     = "serviceAccount:service-${data.google_project.current.number}@serverless-robot-prod.iam.gserviceaccount.com"
+}

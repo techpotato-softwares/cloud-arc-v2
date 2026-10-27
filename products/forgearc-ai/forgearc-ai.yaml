@@ -9,7 +9,12 @@ local_users:
   - email: admin@forgearc.dev
     password: change-me
     tenant_id: demo
-    permissions: [ai:chat, ai:ingest, ai:read, ai:delete, ai:decide]
+    permissions: [ai:chat, ai:ingest, ai:read, ai:delete, ai:decide, ai:agent, ai:evaluate]
+    modules: [ai]
+  - email: reviewer@forgearc.dev
+    password: change-me
+    tenant_id: demo
+    permissions: [ai:read, ai:approve]
     modules: [ai]
 vector_provider: memory
 database_url: ${DATABASE_URL}
@@ -25,7 +30,6 @@ pricing:
     input_per_million: 0.042
     output_per_million: 0
 moderation_terms: []
-tool_allowlist: [retrieve_documents]
 limits:
   prompt_chars: 8000
   requests_per_minute: 60

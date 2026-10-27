@@ -41,19 +41,19 @@ def catalog_path():
     )
 
 
-def test_closed_plan_cannot_be_purchased(tmp_path):
+def test_retired_and_closed_plans_cannot_be_purchased(tmp_path):
+    order = {"provider": "stripe", "email": "buyer@example.com", "name": "Asha", "country": "US"}
     client = build_client(tmp_path, catalog_path())
-    response = client.post(
-        "/api/checkout",
-        json={
-            "planId": "professional",
-            "provider": "stripe",
-            "email": "buyer@example.com",
-            "name": "Asha",
-            "country": "US",
-        },
-    )
-    assert response.status_code == 409
+    assert client.post("/api/checkout", json={"planId": "starter-aws", **order}).status_code == 404
+
+    source = catalog_path()
+    closed = source.parent / f"catalog-closed-{tmp_path.name}.yaml"
+    closed.write_text(source.read_text().replace("checkout_enabled: true", "checkout_enabled: false"))
+    try:
+        client = build_client(tmp_path, closed)
+        assert client.post("/api/checkout", json={"planId": "forgearc-ai", **order}).status_code == 409
+    finally:
+        closed.unlink()
 
 
 def test_catalog_groups_pricing_without_changing_checkout_ids(tmp_path):
@@ -64,19 +64,29 @@ def test_catalog_groups_pricing_without_changing_checkout_ids(tmp_path):
 
     assert {"node", "python", "ai", "bundle"} <= set(families)
     assert plans["forgearc-node"]["family"] == "node"
-    assert plans["starter-aws"]["checkoutEnabled"] is True
-    assert plans["starter-gcp"]["checkoutEnabled"] is True
-    assert plans["professional"]["checkoutEnabled"] is False
+    assert set(plan["id"] for plan in families["ai"]["plans"]) == {"forgearc-ai", "forgearc-ai-pro"}
     assert plans["forgearc-bundle"]["recommended"] is True
     assert plans["forgearc-node"]["priceInr"] == 28999
 
 
-def test_aws_starter_checkout_is_open(tmp_path):
+def test_ai_is_priced_above_the_language_kits(tmp_path):
+    client = build_client(tmp_path, catalog_path())
+    plans = {plan["id"]: plan for plan in client.get("/api/catalog").json()["plans"]}
+    kit_ceiling = max(plans["forgearc-node"]["priceInr"], plans["forgearc-python"]["priceInr"])
+    assert plans["forgearc-ai"]["priceInr"] > kit_ceiling
+    assert plans["forgearc-ai-pro"]["priceInr"] > plans["forgearc-ai"]["priceInr"]
+    separate = plans["forgearc-node"]["priceInr"] + plans["forgearc-python"]["priceInr"] + plans["forgearc-ai-pro"]["priceInr"]
+    assert plans["forgearc-ai-pro"]["priceInr"] < plans["suite"]["priceInr"] < separate
+    for currency in ("priceInr", "priceUsd"):
+        assert plans["forgearc-ai"][currency] > plans["forgearc-python"][currency]
+
+
+def test_ai_checkout_is_open(tmp_path):
     client = build_client(tmp_path, catalog_path())
     response = client.post(
         "/api/checkout",
         json={
-            "planId": "starter-aws",
+            "planId": "forgearc-ai",
             "provider": "stripe",
             "email": "buyer@example.com",
             "name": "Asha",

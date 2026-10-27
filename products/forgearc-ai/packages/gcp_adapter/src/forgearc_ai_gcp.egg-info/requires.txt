@@ -1,0 +1,6 @@
+forgearc-ai-core
+google-cloud-aiplatform>=1.70.0
+google-cloud-firestore>=2.19.0
+google-cloud-pubsub>=2.26.0
+google-cloud-secret-manager>=2.21.0
+google-cloud-storage>=2.18.0

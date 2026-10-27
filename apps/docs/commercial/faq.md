@@ -18,7 +18,7 @@ The checkout catalog is authoritative. Documentation does not duplicate price co
 
 ## What is available today?
 
-ForgeArc Node, ForgeArc Python, their bundle, and ForgeArc AI Starter AWS. GCP and plans depending on GCP remain visibly marked as roadmap and cannot be checked out.
+ForgeArc Node, ForgeArc Python, their bundle, ForgeArc AI, ForgeArc AI Pro, and the Suite. Every ForgeArc AI plan includes both the AWS and GCP adapters.
 
 ## Are testimonials fabricated?
 

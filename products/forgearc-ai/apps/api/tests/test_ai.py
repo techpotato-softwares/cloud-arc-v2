@@ -12,7 +12,7 @@ from forgearc_ai.models import Base
 from forgearc_ai.providers.jev import calibrate
 from forgearc_ai.rag import postgres_search_sql
 from forgearc_ai.routing import route_registry
-from forgearc_ai.stores import sign_webhook
+from forgearc_ai.repositories import sign_webhook
 from forgearc_ai_api.app import create_app
 from forgearc_ai_api.wiring import build_container
 from forgearc_ai_aws.aws import api_statements
@@ -30,9 +30,16 @@ def settings(**overrides) -> Settings:
                 "email": "ada@example.com",
                 "password": "secret",
                 "tenant_id": "tenant-a",
-                "permissions": ["ai:chat", "ai:ingest", "ai:read", "ai:delete", "ai:decide"],
+                "permissions": ["ai:chat", "ai:ingest", "ai:read", "ai:delete", "ai:decide", "ai:agent", "ai:evaluate"],
                 "modules": ["ai"],
-            }
+            },
+            {
+                "email": "rita@example.com",
+                "password": "review",
+                "tenant_id": "tenant-a",
+                "permissions": ["ai:read", "ai:approve"],
+                "modules": ["ai"],
+            },
         ],
         "chat": {"provider": "fake", "model": "fake-chat", "allowlist": ["fake-chat"]},
         "embeddings": {"provider": "fake", "model": "fake-embed", "allowlist": ["fake-embed"]},
@@ -71,8 +78,8 @@ def api(config: Settings | None = None):
     return TestClient(create_app(config, container)), container
 
 
-def login(client: TestClient) -> dict:
-    response = client.post("/api/auth/login", json={"email": "ada@example.com", "password": "secret"})
+def login(client: TestClient, email: str = "ada@example.com", password: str = "secret") -> dict:
+    response = client.post("/api/auth/login", json={"email": email, "password": password})
     assert response.status_code == 200
     return {"Authorization": f"Bearer {response.json()['token']}"}
 
@@ -174,6 +181,21 @@ chat: {provider: openai, model: gpt-4o-mini, allowlist: [gpt-4o-mini]}
 embeddings: {provider: openai, model: text-embedding-3-small, allowlist: [text-embedding-3-small]}
 """
         )
+    with pytest.raises(ConfigError, match="DATABASE_URL"):
+        settings(
+            environment="prod",
+            local_users=[],
+            auth={
+                "mode": "oidc",
+                "issuer": "https://identity.example.test",
+                "audience": "forgearc",
+                "jwks_url": "https://identity.example.test/jwks",
+            },
+            chat={"provider": "bedrock", "model": "amazon.titan", "allowlist": ["amazon.titan"]},
+            embeddings={"provider": "bedrock", "model": "amazon.embed", "allowlist": ["amazon.embed"]},
+            aws_region="us-east-1",
+            jev={"enabled": False},
+        )
     with pytest.raises(ConfigError, match="Pin a Jev"):
         settings(
             environment="prod",
@@ -186,13 +208,102 @@ embeddings: {provider: openai, model: text-embedding-3-small, allowlist: [text-e
         )
 
 
+@pytest.mark.parametrize(
+    ("auth_claims", "token_claims", "expected_permissions"),
+    [
+        (
+            {},
+            {
+                "custom:tenant_id": "tenant-a",
+                "client_id": "forgearc-client",
+                "scope": "ai:read ai:agent",
+                "cognito:groups": ["reviewers"],
+            },
+            ["ai:read", "ai:agent", "ai:approve"],
+        ),
+        (
+            {
+                "tenant_claim": "tenant_id",
+                "groups_claim": "groups",
+            },
+            {
+                "tenant_id": "tenant-a",
+                "aud": "forgearc-client",
+                "permissions": ["ai:read", "ai:agent"],
+                "groups": ["reviewers"],
+            },
+            ["ai:read", "ai:agent", "ai:approve"],
+        ),
+    ],
+)
+def test_oidc_token_maps_cognito_and_identity_platform_claims(
+    monkeypatch,
+    auth_claims,
+    token_claims,
+    expected_permissions,
+):
+    from datetime import UTC, datetime, timedelta
+
+    import jwt
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from forgearc_ai import auth
+
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
+    config = settings(
+        auth={
+            "mode": "oidc",
+            "issuer": "https://identity.example.test",
+            "audience": "forgearc-client",
+            "jwks_url": "https://identity.example.test/.well-known/jwks.json",
+            "group_permissions": {"reviewers": ["ai:approve"]},
+            **auth_claims,
+        }
+    )
+    now = datetime.now(UTC)
+    token = jwt.encode(
+        {
+            "sub": "oidc-user",
+            "email": "reviewer@example.com",
+            "iss": config.auth.issuer,
+            "iat": now,
+            "exp": now + timedelta(minutes=5),
+            **token_claims,
+        },
+        private_key,
+        algorithm="RS256",
+        headers={"kid": "test"},
+    )
+
+    class Client:
+        def get_signing_key_from_jwt(self, _token):
+            return type("Key", (), {"key": private_key.public_key()})()
+
+    monkeypatch.setitem(auth._JWKS_CLIENTS, config.auth.jwks_url, Client())
+    principal = auth.read_token(config, f"Bearer {token}")
+    assert principal.tenant_id == "tenant-a"
+    assert principal.modules == ["ai"]
+    assert principal.permissions == expected_permissions
+
+
 def test_manifest_matches_the_chat_route():
     import forgearc_ai_api.controllers  # noqa: F401
+    from forgearc_ai.repositories import MemoryRepository
+    from forgearc_ai.services import ChatService, IngestionService
+    from forgearc_ai_api.controllers import ChatController, DocumentController
 
     paths = [route["path"] for route in route_registry.manifest()["lambdas"]["api"]["routes"]]
     assert "/api/ai/chat" in paths
     assert "/api/ai/chat/stream" in paths
     assert "/api/decisions/evaluate" in paths
+    assert {"/api/agents/run", "/api/agents/supervise", "/api/approvals/{approval_id}", "/api/evaluations", "/api/usage/dashboard"} <= set(paths)
+    assert ChatController.__module__.endswith("controllers.chat_controller")
+    assert DocumentController.__module__.endswith("controllers.document_controller")
+    assert ChatService.__module__.endswith("services.chat_service")
+    assert IngestionService.__module__.endswith("services.ingestion_service")
+    assert MemoryRepository.__module__.endswith("repositories.memory_repository")
 
 
 def test_schema_and_pgvector_query_are_tenant_scoped():
@@ -411,6 +522,9 @@ def test_deployment_environment_selects_cloud_and_generated_resources():
             "FORGEARC_AI_BUCKET": "generated-documents",
             "FORGEARC_AI_QUEUE_URL": "projects/demo/topics/generated-ingest",
             "FORGEARC_AI_FIRESTORE_DATABASE": "forgearc-ai-dev",
+            "FORGEARC_AI_OIDC_TENANT_CLAIM": "tenant_id",
+            "FORGEARC_AI_OIDC_GROUPS_CLAIM": "groups",
+            "FORGEARC_AI_OIDC_DEFAULT_MODULES": "ai,reporting",
             "GCP_PROJECT": "demo",
             "GCP_LOCATION": "us-central1",
         },
@@ -420,6 +534,9 @@ def test_deployment_environment_selects_cloud_and_generated_resources():
     assert config.bucket == "generated-documents"
     assert config.queue_url == "projects/demo/topics/generated-ingest"
     assert config.firestore_database == "forgearc-ai-dev"
+    assert config.auth.tenant_claim == "tenant_id"
+    assert config.auth.groups_claim == "groups"
+    assert config.auth.default_modules == ["ai", "reporting"]
 
 
 def test_pubsub_push_endpoint_decodes_job_id():
@@ -450,7 +567,7 @@ def test_pubsub_push_endpoint_decodes_job_id():
 def test_queued_job_restores_in_a_fresh_worker_process():
     from forgearc_ai.providers.fake import FakeChatProvider
     from forgearc_ai.services import IngestionService
-    from forgearc_ai.stores import MemoryGraph
+    from forgearc_ai.repositories import MemoryRepository
 
     class Documents:
         def __init__(self):
@@ -476,7 +593,7 @@ def test_queued_job_restores_in_a_fresh_worker_process():
     submitter = IngestionService(
         config,
         provider,
-        MemoryGraph(),
+        MemoryRepository(),
         documents,
         queue,
     )
@@ -497,12 +614,12 @@ def test_queued_job_restores_in_a_fresh_worker_process():
     worker = IngestionService(
         config,
         provider,
-        MemoryGraph(),
+        MemoryRepository(),
         documents,
     )
     completed = worker.process_message(queue.payload)
     assert completed.status == "completed"
-    assert worker.store.chunks[0].tenant_id == "tenant-a"
+    assert worker.repository.chunks[0].tenant_id == "tenant-a"
 
 
 def load_settings_from(text: str, environ: dict[str, str] | None = None):

@@ -7,16 +7,16 @@ const props = defineProps({
 
 const layers = computed(() => [
   ["Presentation", ["REST", "SSE", "OpenAPI"]],
-  ["Routing & identity", ["Decorator routes", "JWT", "RBAC", "Module gates"]],
+  ["Routing & identity", props.cloud === "gcp" ? ["Decorator routes", "Identity Platform", "OIDC", "RBAC"] : ["Decorator routes", "Cognito", "OIDC", "RBAC"]],
   ["Application", ["Controllers", "Services", "Repositories"]],
   ["Intelligence", props.cloud === "gcp" ? ["OpenAI", "Vertex AI", "Jev decisions"] : ["OpenAI", "Bedrock", "Jev decisions"]],
   ["Retrieval", ["Loaders", "Chunking", "Embeddings", "Citations"]],
-  ["Data & memory", ["Prisma", "SQLAlchemy", "Alembic", "pgvector"]],
+  ["Durable data", props.cloud === "gcp" ? ["AlloyDB", "SQLAlchemy", "Alembic", "pgvector"] : ["Aurora Serverless v2", "SQLAlchemy", "Alembic", "pgvector"]],
   [
     "Infrastructure",
     props.cloud === "gcp"
-      ? ["Cloud Run", "Cloud Storage", "Pub/Sub", "Firestore", "AlloyDB", "Terraform"]
-      : ["API Gateway", "Lambda", "S3", "SQS", "RDS", "CDK"]
+      ? ["Cloud Run scale-to-zero", "Cloud Run always-on", "Cloud Storage", "Pub/Sub", "Terraform"]
+      : ["API Gateway", "Lambda", "ECS Fargate", "S3", "SQS", "CDK"]
   ],
   ["Operations", ["Tests", "Budgets", "Audit", "Dead-letter jobs"]]
 ]);

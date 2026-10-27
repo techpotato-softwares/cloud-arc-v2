@@ -1,0 +1,9 @@
+# Trivy 0.67 reads stale Red Hat pcre2 metadata (10.32-3.el8_6) from the
+# upstream multi-architecture Python image attestation. The runtime is Debian
+# 12 and dpkg reports fixed libpcre2 10.42-1+deb12u1.
+CVE-2019-20454
+CVE-2022-1586
+CVE-2022-1587
+CVE-2026-86145
+CVE-2026-89157
+CVE-2026-89161

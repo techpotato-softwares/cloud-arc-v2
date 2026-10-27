@@ -15,17 +15,23 @@ class PolicyGate:
         self.spent: dict[str, float] = defaultdict(float)
 
     def check_prompt(self, principal: Principal, prompt: str, tools: list[str] | None) -> None:
+        self.check_text(prompt)
+        for tool in tools or []:
+            if tool not in self.settings.tool_allowlist:
+                raise PolicyError(f"Tool {tool} is not on the allowlist.")
+        self._rate_limit(principal.tenant_id)
+        self.check_budget(principal.tenant_id)
+
+    def check_text(self, prompt: str) -> None:
         if len(prompt) > self.settings.limits.prompt_chars:
             raise PolicyError("The prompt is longer than the configured limit.")
         lowered = prompt.lower()
         blocked = next((term for term in self.settings.moderation_terms if term.lower() in lowered), None)
         if blocked:
             raise PolicyError("The prompt was rejected by the moderation list.")
-        for tool in tools or []:
-            if tool not in self.settings.tool_allowlist:
-                raise PolicyError(f"Tool {tool} is not on the allowlist.")
-        self._rate_limit(principal.tenant_id)
-        if self.settings.budget.monthly_usd <= 0 or self.spent[principal.tenant_id] >= self.settings.budget.monthly_usd:
+
+    def check_budget(self, tenant_id: str) -> None:
+        if self.settings.budget.monthly_usd <= 0 or self.spent[tenant_id] >= self.settings.budget.monthly_usd:
             raise BudgetExceeded("The tenant budget is exhausted.")
 
     def record_cost(self, tenant_id: str, cost: float) -> None:

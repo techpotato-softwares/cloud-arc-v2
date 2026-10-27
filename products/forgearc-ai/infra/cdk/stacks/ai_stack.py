@@ -1,92 +1,98 @@
+"""ForgeArc AI stack. Select the compute path with context runtime=lambda|fargate."""
+
 from __future__ import annotations
 
-from aws_cdk import Duration, Stack
-from aws_cdk import aws_apigateway as apigw
-from aws_cdk import aws_cloudwatch as cloudwatch
-from aws_cdk import aws_cloudwatch_actions as actions
-from aws_cdk import aws_iam as iam
-from aws_cdk import aws_lambda as lambda_
-from aws_cdk import aws_lambda_event_sources as sources
-from aws_cdk import aws_s3 as s3
-from aws_cdk import aws_secretsmanager as secrets
-from aws_cdk import aws_sns as sns
-from aws_cdk import aws_sqs as sqs
+from aws_cdk import CfnOutput, Stack, Tags
 from constructs import Construct
 
-from forgearc_ai_aws.aws import api_statements, worker_statements
+from constructs.alarms import Monitoring
+from constructs.data import DataPlane
+from constructs.network import Network
+from constructs.platform import Platform
+from constructs.runtime_fargate import FargateRuntime
+from constructs.runtime_lambda import LambdaRuntime
+from constructs.security import Security
 
 
 class AiStack(Stack):
-    def __init__(self, scope: Construct, stack_id: str, environment_name: str, **kwargs):
+    def __init__(
+        self,
+        scope: Construct,
+        stack_id: str,
+        *,
+        environment_name: str,
+        runtime: str | None = None,
+        **kwargs,
+    ):
         super().__init__(scope, stack_id, **kwargs)
-        region = self.region
-        documents = s3.Bucket(
+        selected = str(runtime or self.node.try_get_context("runtime") or "lambda").lower()
+        if selected not in {"lambda", "fargate"}:
+            raise ValueError("runtime must be lambda or fargate")
+        is_prod = environment_name == "prod"
+        Tags.of(self).add("product", "forgearc-ai")
+        Tags.of(self).add("environment", environment_name)
+        Tags.of(self).add("runtime", selected)
+        network = Network(self, "Network", environment_name=environment_name, is_prod=is_prod)
+        security = Security(self, "Security", environment_name=environment_name, is_prod=is_prod)
+        data = DataPlane(
             self,
-            "Documents",
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
-            encryption=s3.BucketEncryption.S3_MANAGED,
-            enforce_ssl=True,
+            "Data",
+            network=network,
+            key=security.key,
+            environment_name=environment_name,
+            is_prod=is_prod,
         )
-        dead_letter = sqs.Queue(self, "IngestDeadLetter", retention_period=Duration.days(14))
-        queue = sqs.Queue(
+        platform = Platform(
+            environment_name=environment_name,
+            is_prod=is_prod,
+            vpc=network.vpc,
+            key=security.key,
+            documents=data.documents,
+            queue=data.queue,
+            dead_letter=data.dead_letter,
+            provider_secret=data.provider_secret,
+            cluster=data.cluster,
+            database_secret=data.database_secret,
+            proxy=data.proxy,
+            proxy_security_group=data.proxy_security_group,
+            user_pool=security.user_pool,
+            user_pool_client=security.user_pool_client,
+            alarm_topic=security.alarm_topic,
+            database_name=data.database_name,
+        )
+        if selected == "lambda":
+            compute = LambdaRuntime(self, "LambdaRuntime", platform=platform)
+            migration_arn = None
+            cluster_name = None
+            image_uri = None
+        else:
+            compute = FargateRuntime(self, "FargateRuntime", platform=platform)
+            migration_arn = compute.migration_task.task_definition_arn
+            cluster_name = compute.cluster.cluster_name
+            image_uri = compute.repository.repository_uri
+        max_capacity = 16 if is_prod else 2
+        Monitoring(
             self,
-            "IngestQueue",
-            visibility_timeout=Duration.seconds(180),
-            dead_letter_queue=sqs.DeadLetterQueue(max_receive_count=3, queue=dead_letter),
+            "Monitoring",
+            platform=platform,
+            http_api_id=compute.http_api.api_id,
+            error_metric=compute.error_metric,
+            latency_metric=compute.latency_metric,
+            unhealthy_metric=compute.unhealthy_metric,
+            latency_threshold=compute.latency_threshold,
+            max_capacity=max_capacity,
         )
-        secret = secrets.Secret(self, "ProviderSecrets", secret_name=f"forgearc-ai/{environment_name}")
-        code = lambda_.Code.from_asset("assets")
-        runtime_environment = {
-            "APP_NAME": "forgearc-ai",
-            "FORGEARC_AI_ENVIRONMENT": (
-                "prod" if environment_name == "prod" else "local"
-            ),
-            "FORGEARC_AI_CLOUD": "aws",
-            "FORGEARC_AI_BUCKET": documents.bucket_name,
-            "FORGEARC_AI_QUEUE_URL": queue.queue_url,
-            "FORGEARC_AI_SECRET_ID": secret.secret_name,
-        }
-        api_function = lambda_.Function(
-            self,
-            "ApiFunction",
-            runtime=lambda_.Runtime.PYTHON_3_12,
-            handler="handler.api_handler",
-            code=code,
-            timeout=Duration.seconds(30),
-            memory_size=512,
-            environment=runtime_environment,
-        )
-        worker = lambda_.Function(
-            self,
-            "IngestFunction",
-            runtime=lambda_.Runtime.PYTHON_3_12,
-            handler="handler.handler",
-            code=code,
-            timeout=Duration.seconds(120),
-            memory_size=1024,
-            environment=runtime_environment,
-        )
-        worker.add_event_source(sources.SqsEventSource(queue, batch_size=1, report_batch_item_failures=True))
-        self._grant(api_function, api_statements(documents.bucket_arn, queue.queue_arn, secret.secret_arn, region))
-        self._grant(worker, worker_statements(documents.bucket_arn, queue.queue_arn, secret.secret_arn, region))
-        apigw.LambdaRestApi(
-            self,
-            "HttpApi",
-            handler=api_function,
-            proxy=True,
-            deploy_options=apigw.StageOptions(stage_name=environment_name),
-        )
-        alarm = cloudwatch.Alarm(
-            self,
-            "DeadLetterAlarm",
-            metric=dead_letter.metric_approximate_number_of_messages_visible(),
-            threshold=1,
-            evaluation_periods=1,
-            alarm_description="ForgeArc AI ingestion jobs reached the dead-letter queue.",
-        )
-        topic = sns.Topic(self, "DeadLetterTopic")
-        alarm.add_alarm_action(actions.SnsAction(topic))
-
-    def _grant(self, function: lambda_.Function, statements: list[dict]) -> None:
-        for statement in statements:
-            function.add_to_role_policy(iam.PolicyStatement(actions=statement["actions"], resources=statement["resources"]))
+        CfnOutput(self, "Runtime", value=selected)
+        CfnOutput(self, "ApiUrl", value=compute.http_api.api_endpoint)
+        CfnOutput(self, "DocumentsBucket", value=data.documents.bucket_name)
+        CfnOutput(self, "QueueUrl", value=data.queue.queue_url)
+        CfnOutput(self, "DatabaseProxyEndpoint", value=data.proxy.endpoint)
+        CfnOutput(self, "UserPoolId", value=security.user_pool.user_pool_id)
+        CfnOutput(self, "UserPoolClientId", value=security.user_pool_client.user_pool_client_id)
+        if migration_arn:
+            CfnOutput(self, "MigrationTaskDefinitionArn", value=migration_arn)
+        if cluster_name:
+            CfnOutput(self, "ClusterName", value=cluster_name)
+        if image_uri:
+            CfnOutput(self, "ImageRepositoryUri", value=image_uri)
+            CfnOutput(self, "MigrationSecurityGroupId", value=compute.migration_security_group.security_group_id)

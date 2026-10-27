@@ -1,0 +1,23 @@
+[project]
+name = "forgearc-ai-image"
+version = "1.0.0"
+description = "Workspace metadata for the ForgeArc AI container image"
+requires-python = ">=3.12"
+dependencies = ["forgearc-ai-api"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+forgearc-ai-api = { workspace = true }
+forgearc-ai-core = { workspace = true }
+forgearc-ai-aws = { workspace = true }
+forgearc-ai-gcp = { workspace = true }
+
+[tool.uv.workspace]
+members = [
+  "apps/api",
+  "packages/core",
+  "packages/aws_adapter",
+  "packages/gcp_adapter",
+]

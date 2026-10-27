@@ -34,6 +34,7 @@ The Node kit uses Prisma for the database and Inversify for dependency injection
 ## Read next
 
 - [Request path](./request-path) — what happens between the HTTP call and the database
+- [Caching patterns](./caching) — TTL, invalidation, stampede mutex, and negative-cache defaults
 - [Modules](./modules) — platform, demo, files, and the current AI stub
 - [Deploy](./deploy) — manifest, OpenAPI, shared layer, CDK
 - [Security](./security) — what is enforced, and what you must set before production

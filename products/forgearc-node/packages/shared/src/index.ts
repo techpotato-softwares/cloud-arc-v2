@@ -13,6 +13,19 @@ export * from '@prisma/client';
 
 // Utility exports
 export * from './utils/logger';
+export {
+  CacheClient,
+  MemoryCacheStore,
+  createCache,
+  resolveCacheOptions,
+} from './utils/cache';
+export type {
+  CacheEntry,
+  CacheOptions,
+  CacheStore,
+  CacheValue,
+  ResolvedCacheOptions,
+} from './utils/cache';
 export { getDatabaseConfig, getDatabaseUrl, clearSecretsCache } from './utils/secrets';
 export type { DatabaseConfig } from './utils/secrets';
 

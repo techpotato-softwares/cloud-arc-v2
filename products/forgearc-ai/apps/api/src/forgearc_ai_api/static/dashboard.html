@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ForgeArc AI · Cost and approvals</title>
+<style>
+  :root { --bg: #16181b; --panel: #1f2226; --line: #2e3238; --text: #e9e6e1; --muted: #9a958d; --copper: #c8743c; --good: #6fb38a; --bad: #d8674f; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  main { max-width: 1120px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; } h2 { font-size: 17px; margin: 0 0 12px; }
+  p.muted, .muted { color: var(--muted); }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 20px 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .stat strong { display: block; font-size: 26px; color: var(--copper); }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 10px; }
+  .bar span { display: block; height: 100%; background: var(--copper); }
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 140px; }
+  .chart div { flex: 1; background: var(--copper); border-radius: 3px 3px 0 0; min-height: 2px; opacity: .85; }
+  table { width: 100%; border-collapse: collapse; } th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 13px; }
+  form, .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  input, select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; }
+  button { background: var(--copper); color: #16181b; border: 0; border-radius: 8px; padding: 9px 14px; font-weight: 600; cursor: pointer; }
+  button.alt { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  button.reject { background: var(--bad); }
+  .error { color: var(--bad); } .ok { color: var(--good); }
+  code { background: var(--bg); padding: 2px 6px; border-radius: 6px; white-space: pre-wrap; word-break: break-word; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cost and approvals</h1>
+  <p class="muted">Tenant spend from <code>/api/usage/dashboard</code> and pending tool calls from <code>/api/approvals</code>.</p>
+
+  <section id="signin" class="panel">
+    <h2>Sign in</h2>
+    <form id="login">
+      <input name="email" type="email" placeholder="Email" autocomplete="username" />
+      <input name="password" type="password" placeholder="Password" autocomplete="current-password" />
+      <button type="submit">Sign in</button>
+      <span class="muted">or paste a token</span>
+      <input name="token" placeholder="Bearer token" />
+    </form>
+    <p id="login-error" class="error"></p>
+  </section>
+
+  <section id="app" hidden>
+    <div class="row">
+      <label class="muted">Window
+        <select id="days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select>
+      </label>
+      <button class="alt" id="refresh" type="button">Refresh</button>
+      <button class="alt" id="signout" type="button">Sign out</button>
+      <span id="status" class="muted"></span>
+    </div>
+
+    <div class="grid">
+      <div class="panel stat"><span class="muted">Spent this month</span><strong id="spent">–</strong><div class="bar"><span id="budget-bar" style="width:0"></span></div><span class="muted" id="budget-copy"></span></div>
+      <div class="panel stat"><span class="muted">Projected month end</span><strong id="projected">–</strong><span class="muted">At the current daily rate</span></div>
+      <div class="panel stat"><span class="muted">Model calls in window</span><strong id="calls">–</strong><span class="muted" id="tokens"></span></div>
+      <div class="panel stat"><span class="muted">Agent runs</span><strong id="runs">–</strong><span class="muted" id="waiting"></span></div>
+    </div>
+
+    <div class="panel"><h2>Daily spend</h2><div class="chart" id="chart"></div></div>
+
+    <div class="grid">
+      <div class="panel"><h2>By model</h2><table><thead><tr><th>Model</th><th>Calls</th><th>Tokens</th><th>Cost</th></tr></thead><tbody id="by-model"></tbody></table></div>
+      <div class="panel"><h2>By feature</h2><table><thead><tr><th>Feature</th><th>Calls</th><th>Tokens</th><th>Cost</th></tr></thead><tbody id="by-feature"></tbody></table></div>
+    </div>
+
+    <div class="panel"><h2>Pending approvals</h2><table><thead><tr><th>Tool</th><th>Input</th><th>Requested by</th><th></th></tr></thead><tbody id="approvals"></tbody></table><p id="approval-status" class="muted"></p></div>
+  </section>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const usd = (value) => "$" + Number(value || 0).toFixed(value >= 1 ? 2 : 4);
+  let token = sessionStorage.getItem("forgearc-ai-token") || "";
+
+  async function api(path, options = {}) {
+    const response = await fetch(path, { ...options, headers: { "content-type": "application/json", authorization: "Bearer " + token, ...(options.headers || {}) } });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.message || body.detail || response.statusText);
+    return body;
+  }
+
+  function cell(row, text) { const td = document.createElement("td"); td.textContent = text; row.appendChild(td); return td; }
+
+  function fillTable(id, rows, key) {
+    const body = $(id); body.replaceChildren();
+    if (!rows.length) { const row = body.insertRow(); cell(row, "No usage yet").colSpan = 4; return; }
+    for (const item of rows) { const row = body.insertRow(); cell(row, item[key]); cell(row, item.calls); cell(row, (item.inputTokens + item.outputTokens).toLocaleString()); cell(row, usd(item.costUsd)); }
+  }
+
+  async function load() {
+    $("status").textContent = "Loading…";
+    try {
+      const data = await api("/api/usage/dashboard?days=" + $("days").value);
+      const budget = data.budget;
+      $("spent").textContent = usd(budget.spentUsd);
+      $("budget-bar").style.width = Math.min(100, budget.percentUsed) + "%";
+      $("budget-copy").textContent = budget.percentUsed + "% of " + usd(budget.monthlyUsd) + " budget";
+      $("projected").textContent = usd(budget.projectedUsd);
+      $("calls").textContent = data.totals.calls.toLocaleString();
+      $("tokens").textContent = (data.totals.inputTokens + data.totals.outputTokens).toLocaleString() + " tokens · " + usd(data.totals.costUsd);
+      $("runs").textContent = data.agents.runs;
+      $("waiting").textContent = data.agents.awaitingApproval + " waiting for approval";
+      const peak = Math.max(...data.byDay.map((day) => day.costUsd), 0.000001);
+      $("chart").replaceChildren(...data.byDay.map((day) => { const bar = document.createElement("div"); bar.style.height = (100 * day.costUsd / peak) + "%"; bar.title = day.date + " · " + usd(day.costUsd) + " · " + day.calls + " calls"; return bar; }));
+      fillTable("by-model", data.byModel, "model");
+      fillTable("by-feature", data.byFeature, "feature");
+      await loadApprovals();
+      $("status").textContent = "Updated " + new Date().toLocaleTimeString();
+    } catch (error) {
+      $("status").textContent = error.message;
+      if (/token|Bearer/i.test(error.message)) signOut();
+    }
+  }
+
+  async function loadApprovals() {
+    const { approvals } = await api("/api/approvals");
+    const body = $("approvals"); body.replaceChildren();
+    if (!approvals.length) { const row = body.insertRow(); cell(row, "Nothing is waiting").colSpan = 4; return; }
+    for (const item of approvals) {
+      const row = body.insertRow();
+      cell(row, item.tool);
+      const input = cell(row, ""); const code = document.createElement("code"); code.textContent = item.input; input.appendChild(code);
+      cell(row, item.requestedBy);
+      const actions = cell(row, "");
+      for (const decision of ["approve", "reject"]) {
+        const button = document.createElement("button");
+        button.textContent = decision === "approve" ? "Approve" : "Reject";
+        if (decision === "reject") button.className = "reject";
+        button.style.marginRight = "6px";
+        button.onclick = () => decide(item.approvalId, decision);
+        actions.appendChild(button);
+      }
+    }
+  }
+
+  async function decide(id, decision) {
+    try {
+      const result = await api("/api/approvals/" + encodeURIComponent(id), { method: "POST", body: JSON.stringify({ decision }) });
+      $("approval-status").textContent = "Run " + result.run.runId + " is now " + result.run.status + ".";
+      $("approval-status").className = "ok";
+      await load();
+    } catch (error) {
+      $("approval-status").textContent = error.message;
+      $("approval-status").className = "error";
+    }
+  }
+
+  function signIn(value) { token = value; sessionStorage.setItem("forgearc-ai-token", value); $("signin").hidden = true; $("app").hidden = false; load(); }
+  function signOut() { token = ""; sessionStorage.removeItem("forgearc-ai-token"); $("signin").hidden = false; $("app").hidden = true; }
+
+  $("login").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    const pasted = String(form.get("token") || "").replace(/^Bearer\s+/i, "").trim();
+    if (pasted) return signIn(pasted);
+    try {
+      const response = await fetch("/api/auth/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: form.get("email"), password: form.get("password") }) });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.message || "Sign in failed");
+      signIn(body.token);
+    } catch (error) { $("login-error").textContent = error.message; }
+  });
+  $("refresh").onclick = load;
+  $("days").onchange = load;
+  $("signout").onclick = signOut;
+  if (token) signIn(token);
+</script>
+</body>
+</html>

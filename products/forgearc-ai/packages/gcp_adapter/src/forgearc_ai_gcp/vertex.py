@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import json
-
 from forgearc_ai.errors import PolicyError, ProviderError
 from forgearc_ai.providers.fake import ModelResult
+from forgearc_ai.structured import parse_structured
 
 
 class VertexProvider:
@@ -29,7 +28,7 @@ class VertexProvider:
         self._check()
         response = self._client().generate(self.model, prompt)
         text = response["text"]
-        structured = json.loads(text) if response_schema else None
+        structured = parse_structured(text) if response_schema else None
         return ModelResult(
             text,
             int(response.get("input_tokens", 0)),

@@ -1,7 +1,9 @@
 {
   "app": "uv run --project . python app.py",
   "context": {
+    "runtime": "lambda",
     "@aws-cdk/aws-iam:minimizePolicies": true,
-    "@aws-cdk/core:checkSecretUsage": true
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/aws-ecs:arnFormatIncludesClusterName": true
   }
 }

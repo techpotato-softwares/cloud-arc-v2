@@ -8,14 +8,15 @@ const emit = defineEmits(["update:cloud"]);
 
 const diagrams = {
   aws: {
-    title: "AWS request path",
-    caption: "The same handlers run locally and behind API Gateway.",
+    title: "AWS production path",
+    caption: "Choose scale-to-zero Lambda or always-on Fargate; both use the same durable repository.",
     stages: [
-      { icon: "/icons/aws/api-gateway.svg", name: "API Gateway", note: "One route per manifest entry" },
-      { icon: "/icons/aws/lambda.svg", name: "Module Lambda", note: "Shared runtime layer" },
-      { icon: "/icons/aws/rds.svg", name: "PostgreSQL", note: "RDS on AWS, Docker locally" }
+      { icon: "/icons/aws/api-gateway.svg", name: "API Gateway", note: "HTTPS + Cognito JWT" },
+      { icon: "/icons/aws/lambda.svg", name: "Lambda or Fargate", note: "Serverless or always-on" },
+      { icon: "/icons/aws/rds.svg", name: "Aurora pgvector", note: "Durable runs and retrieval" }
     ],
     services: [
+      { mark: "ID", name: "Cognito" },
       { icon: "/icons/aws/s3.svg", name: "S3" },
       { icon: "/icons/aws/secrets-manager.svg", name: "Secrets Manager" },
       { icon: "/icons/aws/sqs.svg", name: "SQS" },
@@ -23,14 +24,15 @@ const diagrams = {
     ]
   },
   gcp: {
-    title: "GCP request path",
-    caption: "The same application interfaces, with Vertex AI, Cloud Run, and Terraform behind the adapter.",
+    title: "GCP production path",
+    caption: "Cloud Run can scale to zero or stay warm; AlloyDB keeps approvals safe across restarts.",
     stages: [
-      { icon: "/icons/gcp/cloud-run.svg", name: "Cloud Run", note: "API and ingestion worker" },
+      { icon: "/icons/gcp/cloud-run.svg", name: "Cloud Run", note: "Serverless or always-on" },
       { icon: "/icons/gcp/vertex-ai.svg", name: "Vertex AI", note: "Chat and embeddings" },
-      { icon: "/icons/gcp/alloydb.svg", name: "AlloyDB", note: "PostgreSQL with pgvector" }
+      { icon: "/icons/gcp/alloydb.svg", name: "AlloyDB pgvector", note: "Durable runs and retrieval" }
     ],
     services: [
+      { mark: "ID", name: "Identity Platform" },
       { icon: "/icons/gcp/cloud-storage.svg", name: "Cloud Storage" },
       { mark: "PS", name: "Pub/Sub" },
       { mark: "FS", name: "Firestore" },
@@ -49,10 +51,10 @@ function select(cloud) {
 <template>
   <figure class="diagram-card">
     <div class="diagram-head">
-      <figcaption>
+      <div class="diagram-caption">
         <strong>{{ diagram.title }}</strong>
         <span>{{ diagram.caption }}</span>
-      </figcaption>
+      </div>
       <div class="cloud-switch" role="tablist" aria-label="Cloud architecture">
         <button type="button" role="tab" :aria-selected="cloud === 'aws'" :class="{ active: cloud === 'aws' }" @click="select('aws')">AWS</button>
         <button type="button" role="tab" :aria-selected="cloud === 'gcp'" :class="{ active: cloud === 'gcp' }" @click="select('gcp')">GCP</button>

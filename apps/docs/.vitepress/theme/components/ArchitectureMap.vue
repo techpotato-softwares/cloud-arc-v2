@@ -16,13 +16,17 @@ const catalog: Record<string, NodeSpec> = {
   secrets: { id: "secrets", label: "Secrets Manager", group: "AWS", mark: "lock", note: "JWT and database", icon: "/icons/aws/secrets-manager.svg" },
   sqs: { id: "sqs", label: "SQS", group: "AWS", mark: "queue", note: "Ingestion jobs", icon: "/icons/aws/sqs.svg" },
   bedrock: { id: "bedrock", label: "Bedrock", group: "AWS", mark: "model", note: "Chat and embeddings", icon: "/icons/aws/bedrock.svg" },
-  worker: { id: "worker", label: "Worker Lambda", group: "AWS", mark: "lambda", note: "Chunk and embed", icon: "/icons/aws/lambda.svg" },
-  run: { id: "run", label: "Cloud Run", group: "GCP", mark: "run", note: "API and workers", icon: "/icons/gcp/cloud-run.svg" },
+  worker: { id: "worker", label: "Worker", group: "AWS", mark: "lambda", note: "Lambda or Fargate. Chunk and embed", icon: "/icons/aws/lambda.svg" },
+  aiapi: { id: "aiapi", label: "Lambda or Fargate", group: "AWS", mark: "api", note: "Scale to zero, or always on" },
+  aurora: { id: "aurora", label: "Aurora pgvector", group: "Data", mark: "db", note: "Serverless v2. Both runtimes", icon: "/icons/aws/rds.svg" },
+  cognito: { id: "cognito", label: "Cognito", group: "AWS", mark: "lock", note: "JWT authorizer on API Gateway" },
+  identity: { id: "identity", label: "Identity Platform", group: "GCP", mark: "lock", note: "OIDC checked on every request" },
+  run: { id: "run", label: "Cloud Run", group: "GCP", mark: "run", note: "Scale to zero or always on", icon: "/icons/gcp/cloud-run.svg" },
   gcs: { id: "gcs", label: "Cloud Storage", group: "GCP", mark: "bucket", note: "Source documents", icon: "/icons/gcp/cloud-storage.svg" },
   pubsub: { id: "pubsub", label: "Pub/Sub", group: "GCP", mark: "queue", note: "Ingestion jobs" },
   firestore: { id: "firestore", label: "Firestore", group: "GCP", mark: "db", note: "Job status" },
   secretmgr: { id: "secretmgr", label: "Secret Manager", group: "GCP", mark: "lock", note: "Provider credentials" },
-  alloydb: { id: "alloydb", label: "AlloyDB", group: "GCP", mark: "db", note: "pgvector retrieval", icon: "/icons/gcp/alloydb.svg" },
+  alloydb: { id: "alloydb", label: "AlloyDB", group: "GCP", mark: "db", note: "pgvector. Required in production", icon: "/icons/gcp/alloydb.svg" },
   vertex: { id: "vertex", label: "Vertex AI", group: "GCP", mark: "model", note: "Gemini and embeddings", icon: "/icons/gcp/vertex-ai.svg" }
 };
 
@@ -48,19 +52,21 @@ const layouts: Record<string, { caption: string; lanes: Lane[] }> = {
     ]
   },
   "ai-aws": {
-    caption: "Short chat stays on the API Lambda. Document work is queued.",
+    caption: "Lambda scales to zero. Fargate stays on. Both use Cognito and Aurora.",
     lanes: [
       { label: "Caller", nodes: ["client"] },
+      { label: "Identity", nodes: ["cognito"] },
       { label: "Edge", nodes: ["apigw"] },
-      { label: "API", nodes: ["lambda", "bedrock"] },
+      { label: "API", nodes: ["aiapi", "bedrock"] },
       { label: "Async", nodes: ["sqs", "worker"] },
-      { label: "State", nodes: ["s3", "rds"] }
+      { label: "State", nodes: ["s3", "aurora", "secrets"] }
     ]
   },
   "ai-gcp": {
-    caption: "The same application interfaces, with GCP products behind the adapter.",
+    caption: "Serverless scales to zero. Always-on keeps minimum instances. Both use AlloyDB.",
     lanes: [
       { label: "Caller", nodes: ["client"] },
+      { label: "Identity", nodes: ["identity"] },
       { label: "API", nodes: ["run", "vertex"] },
       { label: "Async", nodes: ["pubsub"] },
       { label: "State", nodes: ["gcs", "firestore", "alloydb", "secretmgr"] }
